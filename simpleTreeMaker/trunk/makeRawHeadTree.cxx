@@ -225,9 +225,12 @@ void makeHeadTree() {
     headTree->AutoSave();;
     theFile->Close();
 }
+#define C3PO_AVG 20
 
-
-void processHeader(int version) {	   
+void processHeader(int version) {
+  static UInt_t c3poNumArray[C3PO_AVG]={0};
+  static UInt_t ppsNumArray[C3PO_AVG]={0};
+  static UInt_t c3poCounter=0;
     static int doneInit=0;
     static UInt_t lastTriggerTime=0;
     static UInt_t ppsOffset=0;
@@ -281,6 +284,33 @@ void processHeader(int version) {
 	  break;
        }
     }
+    
+    if(c3poCounter==0) {
+      c3poNumArray[c3poCounter]=c3poNum;
+      ppsNumArray[c3poCounter]=ppsNum;
+      c3poCounter++;
+    }
+    else {
+      Int_t lastIndex=(c3poCounter-1)%C3PO_AVG;
+      Int_t thisIndex=(c3poCounter%C3PO_AVG);
+      //      std::cout << thisIndex << "\t" << lastIndex << "\t" << ppsNum << "\t" << ppsNumArray[lastIndex] << "\n";
+      if(ppsNum!=ppsNumArray[lastIndex]) {
+	c3poNumArray[thisIndex]=c3poNum;
+	ppsNumArray[thisIndex]=ppsNum;
+	c3poCounter++;
+      }
+      UInt_t numToAvg=C3PO_AVG;
+      if(c3poCounter<numToAvg) numToAvg=c3poCounter;
+      Long64_t c3poTemp=0;
+      for(UInt_t i=0;i<numToAvg;i++) {
+	c3poTemp+=c3poNumArray[i];
+      }
+      c3poTemp/=numToAvg;
+      c3poNum=c3poTemp;
+      theHeader.turfio.c3poNum=c3poNum; //<Here we are doing naughty things
+      //      std::cout << c3poTemp << "\t" << numToAvg << "\t" << c3poNum << "\n";
+    }
+
 
 
     if(ppsOffset==0 || ppsNum<lastPps) {
