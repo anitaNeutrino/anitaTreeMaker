@@ -22,6 +22,8 @@
 #include "AnitaGeomTool.h"
 #include "UsefulAnitaEvent.h"
 
+
+#define BASE_LOG_DIR "/home/rjn/anita/errorLogs"
 using namespace std;
 
 int getEventEntry();
@@ -178,7 +180,7 @@ void quickCheckForErrors() {
   char histname[180];
   char histtitle[180];
 
-  sprintf(filename,"/home/anita/errorLogs/errs_%d.txt",fCurrentRun);
+  sprintf(filename,"%s/errs_%d.txt",BASE_LOG_DIR,fCurrentRun);
   ofstream ferrs(filename);
 
   int mytriggerbits[4]={0};
@@ -730,7 +732,7 @@ void lookForWaveformFunniness() //look for the same waveforms repeated event to 
   //int issueBreakFlag=0;//for bailing from the points loop
 
   char filename[150];
-  sprintf(filename,"/home/anita/errorLogs/waveformFunniness_%d.txt",fCurrentRun);
+  sprintf(filename,"%s/waveformFunniness_%d.txt",BASE_LOG_DIR,fCurrentRun);
   ofstream ferrors(filename);
   // sprintf(filename,"waveformFunninessTimes_%d.txt",fCurrentRun);
   //ofstream ferrorsTimes(filename);
