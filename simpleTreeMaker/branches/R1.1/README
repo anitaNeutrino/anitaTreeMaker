@@ -1,0 +1,25 @@
+///////////////////////////////////////////////////////////////////////////////
+///// simpleTreeMaker -- converts raw ANITA data into ROOT data           /////
+/////                                                                     /////
+///// Ryan Nichol -- rjn@hep.ucl.ac.uk                                    /////
+///////////////////////////////////////////////////////////////////////////////
+
+Introduction
+============
+simpleTreeMaker is a set of programs and scripts to convert raw ANITA data into ROOT ANITA data. These programs rely on the eventReaderRoot library (libAnitaEv ent.so), and the latest version (svn revision 1213 or version anitaII/R4.1 or later). Follow the instructions in that package to install.
+
+
+Usage
+======
+The main script is the runTestFileMaker.sh script and you need to edit a couple of lines to point to your local directories
+LOCAL_RAW_DIR -- should point to the directory holding the raw data run dirs
+LOCAL_ROOT_DIR -- should point to the directory you want the root data run dirs to be created in
+
+Asssuming that libAnitaEvent.so is in your LD_LIBRARY_PATH and the ANITA_UTIL_INSTALL_DIR is set correctly (or the event reader root include files are in a system path). Usage should be as simple as:
+make
+./runTestFileMaker.sh <run no>
+
+
+Footer
+======
+As ever if there are any questions or comments...

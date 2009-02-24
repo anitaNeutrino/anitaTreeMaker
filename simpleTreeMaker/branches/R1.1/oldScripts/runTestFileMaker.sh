@@ -6,61 +6,57 @@ then
 fi
 
 RUN=$1
-BASE_DIR=/unix/anita3/flight0809
-RAW_RUN_DIR=${BASE_DIR}/neoraw/run${RUN}
-EVENT_BASE_DIR=${BASE_DIR}/neoroot
-ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
+RAW_BASE_DIR=/TBdata/anita/antarctica08/raw/run${RUN}
+EVENT_BASE_DIR=/TBdata/anita/antarctica08/root
+ROOT_BASE_DIR=${EVENT_BASE_DIR}/run${RUN}
 
-if [[ -d $ROOT_RUN_DIR ]]; then
+if [[ -d $ROOT_BASE_DIR ]]; then
     echo "Output dir exists"
-elif [[ -d $RAW_RUN_DIR  ]]; then
-    mkdir ${ROOT_RUN_DIR}
-else
-    echo "$RAW_BASE_DIR doesn't exist what are we suppposed to rootify?"
-    exit 0;
+elif [[ -d $RAW_BASE_DIR  ]]; then
+    mkdir ${ROOT_BASE_DIR}
 fi
 
-#ls ${RAW_RUN_DIR}
+#ls ${RAW_BASE_DIR}
 
 echo "Starting Header File"
 HEAD_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/event/*/ev??/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev??/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev???/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev???/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev????/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev????/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev?????/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev?????/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev??????/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev??????/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev???????/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev???????/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev????????/hd*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev????????/hd*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${HEAD_FILE_LIST}
@@ -69,7 +65,7 @@ done
 
 
 if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
-    HEAD_ROOT_FILE=${ROOT_RUN_DIR}/headFile${RUN}.root
+    HEAD_ROOT_FILE=${ROOT_BASE_DIR}/headFile${RUN}.root
     ./makeRawHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=true
@@ -83,43 +79,43 @@ fi
 echo "Starting Event File"
 
 EVENT_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/event/*/ev??/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev??/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev???/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev???/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev????/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev????/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev?????/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev?????/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev??????/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev??????/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev???????/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev???????/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
   fi
 done
-for file in ${RAW_RUN_DIR}/event/*/ev????????/psev*gz; 
+for file in ${RAW_BASE_DIR}/event/*/ev????????/psev*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${EVENT_FILE_LIST}
@@ -140,7 +136,7 @@ fi
 
 echo "Starting TURF Rate File"
 TURF_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/turfhk/*/*/t*gz; 
+for file in ${RAW_BASE_DIR}/house/turfhk/*/*/t*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${TURF_FILE_LIST}
@@ -148,7 +144,7 @@ for file in ${RAW_RUN_DIR}/house/turfhk/*/*/t*gz;
 done
 
 if  test `cat ${TURF_FILE_LIST} | wc -l` -gt 0 ; then
-    TURF_ROOT_FILE=${ROOT_RUN_DIR}/turfRateFile${RUN}.root
+    TURF_ROOT_FILE=${ROOT_BASE_DIR}/turfRateFile${RUN}.root
     ./makeTurfRateTree ${TURF_FILE_LIST} ${TURF_ROOT_FILE}
     rm ${TURF_FILE_LIST}
     echo "Done TURF Rate File"
@@ -159,7 +155,7 @@ fi
 
 echo "Starting SURF Hk File"
 SURF_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/surfhk/*/*/s*gz; 
+for file in ${RAW_BASE_DIR}/house/surfhk/*/*/s*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${SURF_FILE_LIST}
@@ -169,7 +165,7 @@ done
 #cat ${SURF_FILE_LIST}
 
 if  test `cat ${SURF_FILE_LIST} | wc -l` -gt 0 ; then
-    SURF_ROOT_FILE=${ROOT_RUN_DIR}/surfHkFile${RUN}.root
+    SURF_ROOT_FILE=${ROOT_BASE_DIR}/surfHkFile${RUN}.root
     ./makeSurfHkTree ${SURF_FILE_LIST} ${SURF_ROOT_FILE}
     rm ${SURF_FILE_LIST}
     echo "Done SURF Hk File"
@@ -181,7 +177,7 @@ fi
 
 echo "Starting Averaged SURF Hk File"
 AVGSURF_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/surfhk/*/*/a*gz; 
+for file in ${RAW_BASE_DIR}/house/surfhk/*/*/a*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${AVGSURF_FILE_LIST}
@@ -191,7 +187,7 @@ done
 #cat ${AVGSURF_FILE_LIST}
 
 if  test `cat ${AVGSURF_FILE_LIST} | wc -l` -gt 0 ; then
-    AVGSURF_ROOT_FILE=${ROOT_RUN_DIR}/avgSurfHkFile${RUN}.root
+    AVGSURF_ROOT_FILE=${ROOT_BASE_DIR}/avgSurfHkFile${RUN}.root
     ./makeAveragedSurfHkTree ${AVGSURF_FILE_LIST} ${AVGSURF_ROOT_FILE}
     rm ${AVGSURF_FILE_LIST}
     echo "Done Averaged SURF Hk File"
@@ -203,7 +199,7 @@ fi
 
 echo "Starting Summed TURF Rate File"
 SUMTURF_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/turfhk/*/*/s*gz; 
+for file in ${RAW_BASE_DIR}/house/turfhk/*/*/s*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${SUMTURF_FILE_LIST}
@@ -211,7 +207,7 @@ for file in ${RAW_RUN_DIR}/house/turfhk/*/*/s*gz;
 done
 
 if  test `cat ${SUMTURF_FILE_LIST} | wc -l` -gt 0 ; then
-    SUMTURF_ROOT_FILE=${ROOT_RUN_DIR}/sumTurfRateFile${RUN}.root
+    SUMTURF_ROOT_FILE=${ROOT_BASE_DIR}/sumTurfRateFile${RUN}.root
     ./makeSummedTurfRateTree ${SUMTURF_FILE_LIST} ${SUMTURF_ROOT_FILE}
     rm ${SUMTURF_FILE_LIST}
     echo "Done SUMTURF Rate File"
@@ -224,7 +220,7 @@ fi
 
 echo "Starting SURF Raw Scaler File"
 SCALER_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/surfhk/*/*/raw*gz; 
+for file in ${RAW_BASE_DIR}/house/surfhk/*/*/raw*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${SCALER_FILE_LIST}
@@ -234,7 +230,7 @@ done
 #cat ${SCALER_FILE_LIST}
 
 if  test `cat ${SCALER_FILE_LIST} | wc -l` -gt 0 ; then
-    SCALER_ROOT_FILE=${ROOT_RUN_DIR}/rawScalerFile${RUN}.root
+    SCALER_ROOT_FILE=${ROOT_BASE_DIR}/rawScalerFile${RUN}.root
     ./makeRawScalerTree ${SCALER_FILE_LIST} ${SCALER_ROOT_FILE}
     rm ${SCALER_FILE_LIST}
     echo "Done Raw Scaler File"
@@ -246,7 +242,7 @@ fi
 
 echo "Starting Monitor File"
 MONITOR_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/monitor/*/*/mon*gz; 
+for file in ${RAW_BASE_DIR}/house/monitor/*/*/mon*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${MONITOR_FILE_LIST}
@@ -254,7 +250,7 @@ for file in ${RAW_RUN_DIR}/house/monitor/*/*/mon*gz;
 done
 
 if  test `cat ${MONITOR_FILE_LIST} | wc -l` -gt 0 ; then
-    MONITOR_ROOT_FILE=${ROOT_RUN_DIR}/monitorFile${RUN}.root
+    MONITOR_ROOT_FILE=${ROOT_BASE_DIR}/monitorFile${RUN}.root
     ./makeMonitorTree ${MONITOR_FILE_LIST} ${MONITOR_ROOT_FILE}
     rm ${MONITOR_FILE_LIST}
     echo "Done Monitor Rate File"
@@ -265,7 +261,7 @@ fi
 
 echo "Starting Other File"
 OTHER_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/monitor/*/*/other*.dat; 
+for file in ${RAW_BASE_DIR}/house/monitor/*/*/other*gz; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${OTHER_FILE_LIST}
@@ -273,7 +269,7 @@ for file in ${RAW_RUN_DIR}/house/monitor/*/*/other*.dat;
 done
 
 if  test `cat ${OTHER_FILE_LIST} | wc -l` -gt 0 ; then
-    OTHER_ROOT_FILE=${ROOT_RUN_DIR}/monitorFile${RUN}.root
+    OTHER_ROOT_FILE=${ROOT_BASE_DIR}/monitorFile${RUN}.root
     ./makeOtherTree ${OTHER_FILE_LIST} ${OTHER_ROOT_FILE}
     rm ${OTHER_FILE_LIST}
     echo "Done Other Rate File"
@@ -285,7 +281,7 @@ fi
 
 echo "Starting Hk File"
 HKCAL_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/hk/cal/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${HKCAL_FILE_LIST}
@@ -293,21 +289,21 @@ do
 done
 
 HKRAW_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/hk/raw/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${HKRAW_FILE_LIST}
     fi
 done
 
-HK_ROOT_FILE=${ROOT_RUN_DIR}/hkFile${RUN}.root
+HK_ROOT_FILE=${ROOT_BASE_DIR}/hkFile${RUN}.root
 if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
     ./makeHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
     rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
 
     if [ "$HEAD_ROOT_FILE" ]; then
 	echo "Making pretty hk file (interpolated)"
-	PRETTYHK_ROOT_FILE=${ROOT_RUN_DIR}/prettyHkFile${RUN}.root
+	PRETTYHK_ROOT_FILE=${ROOT_BASE_DIR}/prettyHkFile${RUN}.root
 	./makePrettyHkTree  ${HK_ROOT_FILE} ${HEAD_ROOT_FILE} ${PRETTYHK_ROOT_FILE}
     fi
 else
@@ -320,7 +316,7 @@ echo "Done Hk File"
 
 echo "Starting GPS File"
 ADU5_PAT_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/adu5?/pat/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/gps/adu5?/pat/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${ADU5_PAT_FILE_LIST}
@@ -328,7 +324,7 @@ do
 done
 
 ADU5_SAT_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/adu5?/sat/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/gps/adu5?/sat/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${ADU5_SAT_FILE_LIST}
@@ -338,7 +334,7 @@ done
 cat ${ADU5_SAT_FILE_LIST}
 
 ADU5_VTG_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/adu5?/vtg/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/gps/adu5?/vtg/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${ADU5_VTG_FILE_LIST}
@@ -347,7 +343,7 @@ done
 
 
 G12_POS_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/g12/pos/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/gps/g12/pos/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${G12_POS_FILE_LIST}
@@ -355,7 +351,7 @@ do
 done
 
 G12_SAT_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/g12/sat/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/gps/g12/sat/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${G12_SAT_FILE_LIST}
@@ -363,14 +359,14 @@ do
 done
 
 GPS_GGA_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/*/gga/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/gps/*/gga/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${GPS_GGA_FILE_LIST}
     fi
 done
 
-GPS_ROOT_FILE=${ROOT_RUN_DIR}/gpsFile${RUN}.root
+GPS_ROOT_FILE=${ROOT_BASE_DIR}/gpsFile${RUN}.root
 ./makeGpsTree ${ADU5_PAT_FILE_LIST} ${ADU5_SAT_FILE_LIST} ${ADU5_VTG_FILE_LIST} ${G12_POS_FILE_LIST} ${G12_SAT_FILE_LIST} ${GPS_GGA_FILE_LIST} ${GPS_ROOT_FILE}
 rm ${ADU5_PAT_FILE_LIST} ${ADU5_SAT_FILE_LIST} ${ADU5_VTG_FILE_LIST} ${G12_POS_FILE_LIST} ${G12_SAT_FILE_LIST} ${GPS_GGA_FILE_LIST}
 echo "Done GPS File"
@@ -379,7 +375,7 @@ echo "Done GPS File"
 
 echo "Starting Auxiliary File"
 ACQD_START_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/start/a*; 
+for file in ${RAW_BASE_DIR}/start/a*; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${ACQD_START_FILE_LIST}
@@ -387,7 +383,7 @@ do
 done
 
 GPSD_START_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/start/g*; 
+for file in ${RAW_BASE_DIR}/start/g*; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${GPSD_START_FILE_LIST}
@@ -395,7 +391,7 @@ do
 done
 
 LOGWATCHD_START_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/start/l*; 
+for file in ${RAW_BASE_DIR}/start/l*; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${LOGWATCHD_START_FILE_LIST}
@@ -404,14 +400,14 @@ done
 
 
 CMD_ECHO_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/cmd/*/*/*gz; 
+for file in ${RAW_BASE_DIR}/house/cmd/*/*/*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${CMD_ECHO_FILE_LIST}
     fi
 done
 
-AUX_ROOT_FILE=${ROOT_RUN_DIR}/auxFile${RUN}.root
+AUX_ROOT_FILE=${ROOT_BASE_DIR}/auxFile${RUN}.root
 ./makeAuxiliaryTree ${ACQD_START_FILE_LIST} ${GPSD_START_FILE_LIST} ${LOGWATCHD_START_FILE_LIST} ${CMD_ECHO_FILE_LIST} ${AUX_ROOT_FILE}
 rm ${ACQD_START_FILE_LIST} ${GPSD_START_FILE_LIST} ${LOGWATCHD_START_FILE_LIST} ${CMD_ECHO_FILE_LIST}
 echo "Done Auxiliary File"
