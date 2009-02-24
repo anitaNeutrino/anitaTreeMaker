@@ -23,7 +23,7 @@
 #include "UsefulAnitaEvent.h"
 
 
-#define BASE_LOG_DIR "/home/rjn/anita/errorLogs"
+#define BASE_LOG_DIR "/home/rjn/anita/errorLogs/neo"
 using namespace std;
 
 int getEventEntry();

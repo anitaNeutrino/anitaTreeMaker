@@ -7,8 +7,8 @@ fi
 
 RUN=$1
 BASE_DIR=/unix/anita3/flight0809
-RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
-EVENT_BASE_DIR=${BASE_DIR}/root
+RAW_RUN_DIR=${BASE_DIR}/neoraw/run${RUN}
+EVENT_BASE_DIR=${BASE_DIR}/neoroot
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
 
 if [[ -d $ROOT_RUN_DIR ]]; then
