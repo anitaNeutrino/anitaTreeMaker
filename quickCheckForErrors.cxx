@@ -808,6 +808,7 @@ void lookForWaveformFunniness() //look for the same waveforms repeated event to 
 		   <<(fRawEventPtr->eventNumber)-(prev_number+1)
 		   <<"\n"
 		   <<"First Surf Number: "<<surfctr+1
+		   <<"\t number of repeated values: " << sameflag[prev_number]
 		   <<"\n";
 	    ferrors <<"10 most recent deltaTrigTimes: ";
 	    for (int prev_ctr=0;prev_ctr<10;prev_ctr++){
