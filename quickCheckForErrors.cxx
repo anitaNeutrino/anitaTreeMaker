@@ -23,7 +23,7 @@
 #include "UsefulAnitaEvent.h"
 
 
-#define BASE_LOG_DIR "/home/rjn/anita/errorLogs/neo"
+#define BASE_LOG_DIR "/home/rjn/anita/errorLogs/faked"
 using namespace std;
 
 int getEventEntry();
@@ -117,7 +117,7 @@ void loadEventTree()
 {       
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
-  sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  sprintf(eventName,"%s/run%d/calEventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   fEventTree = new TChain("eventTree");
   fEventTree->Add(eventName);
