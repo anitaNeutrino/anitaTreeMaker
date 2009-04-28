@@ -40,7 +40,7 @@ void smoothing(vector<double> inBranch, int sIndex, vector<double> &sBranch){
   //int max = inBranch->GetEntries()-min;
   int max = inBranch.size()-min-1;
   //  for(int i = min; i<max; i++){
-  for(int i = 0; i<inBranch.size(); i++){
+  for(int i = 0; i<inBranch.size()-1; i++){
     sValue = 0.; 
     if(i>=min && i<max){
       for (int j = 0; j<=sIndex; j++){
@@ -60,7 +60,7 @@ void makeAdu5PatTree(int doingRun) {
   //First up open header file
   char headName[FILENAME_MAX];
   //ANITA II has a different format than ANITA I, and the root files are already made
-  sprintf(headName,"/unix/anita1/flight0809/root/run%d/headFile%d.root",doingRun,doingRun); 
+  sprintf(headName,"/raid2/grashorn/anita/data/anita2/flightData/run%d/headFile%d.root",doingRun,doingRun); 
   TFile *fHead= new TFile(headName,"OLD");
   TTree *headTree = (TTree*) fHead->Get("headTree");
   
@@ -70,8 +70,8 @@ void makeAdu5PatTree(int doingRun) {
   //ANITA II has a different format than ANITA I, and the 
   //gps files are already made
   char gpsName[FILENAME_MAX]; 
-  sprintf(gpsName,"/unix/anita1/flight0809/root/run%d/gpsFile%d.root",doingRun,doingRun); 
-  TFile *fGps = new TFile(gpsName,"OLD");
+  sprintf(gpsName,"/raid2/grashorn/anita/data/anita2/flightData/run%d/gpsFile%d.root",doingRun,doingRun); 
+  TFile *fGps = new TFile(gpsName,"OLD");//"/raid2/grashorn/anita/data/anita2/fixedTimeFiles/gpsFile.root");    
   
   TTree *adu5PatTree = (TTree*)fGps->Get("adu5PatTree");
 
@@ -128,7 +128,8 @@ void makeAdu5PatTree(int doingRun) {
 
 
    char outName[FILENAME_MAX];
-   sprintf(outName,"/unix/anita1/flight0809/root/run%d/gpsEvent%d.root",doingRun,doingRun);  
+   //sprintf(outName,"/raid2/grashorn/anita/data/anita2/flightData/run%d/gpsEvent%d.root",doingRun,doingRun);  
+   sprintf(outName,"/raid2/grashorn/anita/runTreeMaker/gpsEvent%d.root",doingRun);  
    TFile *newFp= new TFile(outName,"RECREATE"); 
    
    TTree *newTree= new TTree("adu5PatTree","Tree of Interpolated ADU5 Positions and Attitude");;
@@ -161,11 +162,15 @@ void makeAdu5PatTree(int doingRun) {
    smoothing(pitchVec, 5, sPitchVec);
    smoothing(sPitchVec, 5, ssPitchVec);
 
+   Int_t finterpolationFlag=0;
+   Int_t sinterpolationFlag=0;
+
    Long64_t nbytes = 0;
    Long64_t starEvery=nentries/20;
    if(starEvery==0) starEvery=1;
    for (Long64_t i=0; i<nentries;i++) {
      if(i%starEvery==0) cerr << "*";
+
      nbytes += headTree->GetEntry(i);
       Long64_t bestEntry=adu5PatTree->GetEntryNumberWithBestIndex(theHeader->triggerTime,theHeader->triggerTimeNs/1000);
      
@@ -228,7 +233,6 @@ void makeAdu5PatTree(int doingRun) {
 	saltitude=adu5PatPtr->altitude;
 	sheading=adu5PatPtr->heading;
 	//spitch=adu5PatPtr->pitch;
-	//	std::cout << bestEntry << "\t" << ssPitchVec.size() << "\t" << hkEntries << "\n";
 	spitch=ssPitchVec.at(bestEntry);//fpitch;
 	//sroll=adu5PatPtr->roll;
 	sroll=ssRollVec.at(bestEntry);//froll;
@@ -241,10 +245,10 @@ void makeAdu5PatTree(int doingRun) {
 	payloadTimeUs=theHeader->triggerTimeNs/1000;
 	payloadTime=(fpayloadTime-frealTime)+realTime;
 	readTime=(freadTime-freadTime)+realTime;
-
-	Int_t finterpolationFlag=(Int_t)TMath::Abs(double(frealTime-1)-double(theHeader->triggerTime));
-	Int_t sinterpolationFlag=(Int_t)TMath::Abs(double(srealTime)-double(theHeader->triggerTime));
-
+	//finterpolationFlag=(Int_t)TMath::Abs(double(frealTime)-double(theHeader->triggerTime));
+	finterpolationFlag=(Int_t)TMath::Abs(double(frealTime-1)-double(theHeader->triggerTime));
+	sinterpolationFlag=(Int_t)TMath::Abs(double(srealTime)-double(theHeader->triggerTime));
+	
 	interpolationFlag=finterpolationFlag;
 	if(sinterpolationFlag<interpolationFlag) interpolationFlag=sinterpolationFlag;
 
@@ -275,7 +279,7 @@ void makeAdu5PatTree(int doingRun) {
 	  mrms=smrms;
 	  brms=sbrms;
 	  attFlag=sattFlag;
-	
+	  cout<<"Ever? "<<theHeader->eventNumber<<endl;	
 	  
 	}
 	else {
@@ -291,19 +295,20 @@ void makeAdu5PatTree(int doingRun) {
 	    latitude=flatitude + timeFactor*(slatitude-flatitude);
 	    longitude=flongitude + timeFactor*(slongitude-flongitude);
 	    altitude=faltitude + timeFactor*(saltitude-faltitude);
-	    if(TMath::Abs(360+sheading-fheading)<TMath::Abs(sheading-fheading)) {
-	      sheading+=360;
-	    }
-	    if(TMath::Abs(sheading-(fheading+360))<TMath::Abs(sheading-fheading)) {
-	      fheading+=360;
-	    }
+// 	    if(TMath::Abs(360+sheading-fheading)<TMath::Abs(sheading-fheading)) {
+// 	      sheading+=360;
+// 	    }
+// 	    if(TMath::Abs(sheading-(fheading+360))<TMath::Abs(sheading-fheading)) {
+// 	      fheading+=360;
+// 	    }
 	    
-	    heading=fheading + timeFactor*(sheading-fheading);
-	    if(heading>=360) {
-	      heading-=360;
-	    }
-	      
+// 	    heading=fheading + timeFactor*(sheading-fheading);
+// 	    if(heading>=360) {
+// 	      heading-=360;
+// 	    } 
 
+
+	    heading=fheading + timeFactor*(sheading-fheading);
 	    pitch=fpitch + timeFactor*(spitch-fpitch);
 	    roll=froll + timeFactor*(sroll-froll);
 	    mrms=fmrms + timeFactor*(smrms-fmrms);
@@ -343,7 +348,39 @@ void makeAdu5PatTree(int doingRun) {
 	}
       }
 
-
+      if(
+	 theHeader->eventNumber==107690600//||theHeader->eventNumber==1198819
+	 //||
+	 //theHeader->eventNumber>1076806&&theHeader->eventNumber<1076905
+	 //finterpolationFlag!=1||sinterpolationFlag!=1
+	 ){
+	cout<<theHeader->eventNumber<<" "<<theHeader->run
+	    <<" "<<endl
+	  //<<" "<<interpolationFlag<<" "<<finterpolationFlag<<" "<<sinterpolationFlag<<endl
+	  //<<" "<<timeOfDay-ftimeOfDay<<" "<<stimeOfDay-timeOfDay<<endl
+	  //  <<" "<<ftimeOfDay<<" "<<timeOfDay<<" "<<stimeOfDay<<endl
+	    <<" "<<theHeader->triggerTime<<" "<<1e-9*Double_t(theHeader->triggerTimeNs)<<endl
+	    <<" "<<frealTime<<" "<<ftimeOfDay<<" "<<timeOfDay<<" "<<endl
+	  //  <<" "<<payloadTime<<" "<<realTime<<endl
+	  //  <<" "<<ftimeOfDay<<" "<<timeOfDay<<" "<<stimeOfDay<<endl
+	  //  <<" "<<fpitch<<" "<<pitch<<" "<<spitch<<endl
+	  //  <<" "<<froll<<" "<<roll<<" "<<sroll<<endl
+	  //  <<" "<<fheading<<" "<<heading<<" "<<sheading<<endl
+	  //  <<" "<<flatitude<<" "<<latitude<<" "<<slatitude<<endl
+	  //  <<" "<<flongitude<<" "<<longitude<<" "<<slongitude<<endl
+	  //  <<" "<<faltitude<<" "<<altitude<<" "<<saltitude<<endl
+	    <<" "<<flatitude<<" "<<latitude<<" "<<slatitude<<" "<<endl
+	    <<" "<<flongitude<<" "<<longitude<<" "<<slongitude<<" "<<endl
+	    <<" "<<faltitude<<" "<<altitude<<" "<<saltitude<<" "<<endl
+	    <<" "<<fheading<<" "<<heading<<" "<<sheading<<" "<<endl
+	    <<" "<<fpitch<<" "<<pitch<<" "<<spitch<<" "<<endl
+	    <<" "<<froll<<" "<<roll<<" "<<sroll<<" "<<endl
+	    <<" "<<fmrms<<" "<<mrms<<" "<<smrms<<" "<<endl
+	    <<" "<<fbrms<<" "<<brms<<" "<<sbrms<<" "<<endl
+	    <<" "<<fattFlag<<" "<<attFlag<<" "<<sattFlag<<endl
+	    <<endl;
+      }
+      
       //Now need to create Adu5Pat object and fill tree
       interpAdu5Pat->run = doingRun;
       interpAdu5Pat->realTime = realTime;
@@ -355,17 +392,48 @@ void makeAdu5PatTree(int doingRun) {
       interpAdu5Pat->longitude = longitude;
       interpAdu5Pat->altitude = altitude;
       interpAdu5Pat->heading = heading; 
-      interpAdu5Pat->pitch = pitch;
-
+      //interpAdu5Pat->pitch = pitch;      
+      
       if(bestEntry!=bestEntryLast){
-	interpAdu5Pat->roll = froll;
-	interpAdu5Pat->pitch = fpitch;
+ 	interpAdu5Pat->roll = froll;
+ 	interpAdu5Pat->pitch = fpitch;
+	
+      } else {
+	interpAdu5Pat->pitch = pitch;
+	interpAdu5Pat->roll = roll;
+      }      
 
-      }
+
       interpAdu5Pat->mrms = mrms;
       interpAdu5Pat->brms = brms;
       interpAdu5Pat->attFlag = attFlag;
       interpAdu5Pat->intFlag = interpolationFlag;
+
+      if(
+	 theHeader->eventNumber==1076906||theHeader->eventNumber==1198819
+	 ||
+	 theHeader->eventNumber>1076806&&theHeader->eventNumber<1076905
+	 //finterpolationFlag!=1||sinterpolationFlag!=1
+	 ){
+	cout<<endl<<bestEntry<<" "<<bestEntryLast<<" "<<theHeader->eventNumber<<" "<<theHeader->run<<endl
+	    <<" "<<-frealTime+theHeader->triggerTime<<" -"<<srealTime-theHeader->triggerTime<<" "<<1e-9*Double_t(theHeader->triggerTimeNs)<<endl
+	    <<" "<<finterpolationFlag<<" "<<interpAdu5Pat->intFlag<<" "<<sinterpolationFlag<<" "<<endl
+	    <<" "<<-fpitch+interpAdu5Pat->pitch<<" "<<interpAdu5Pat->pitch-spitch<<" "<<endl
+	    <<" "<<-froll+interpAdu5Pat->roll<<" "<<interpAdu5Pat->roll-sroll<<" "<<endl
+	    <<" "<<-flatitude+interpAdu5Pat->latitude<<" "<<interpAdu5Pat->latitude-slatitude<<" "<<endl
+	    <<" "<<-flongitude+interpAdu5Pat->longitude<<" "<<interpAdu5Pat->longitude-slongitude<<" "<<endl
+	    <<" "<<-faltitude+interpAdu5Pat->altitude<<" "<<interpAdu5Pat->altitude-saltitude<<" "<<endl
+	    <<" "<<-fheading+interpAdu5Pat->heading<<" "<<interpAdu5Pat->heading-sheading<<" "<<endl
+	    <<" "<<-fpitch+interpAdu5Pat->pitch<<" "<<interpAdu5Pat->pitch-spitch<<" "<<endl
+	    <<" "<<-froll+interpAdu5Pat->roll<<" "<<interpAdu5Pat->roll-sroll<<" "<<endl
+	    <<" "<<-fmrms+interpAdu5Pat->mrms<<" "<<interpAdu5Pat->mrms-smrms<<" "<<endl
+	    <<" "<<-fbrms+interpAdu5Pat->brms<<" "<<interpAdu5Pat->brms-sbrms<<" "<<endl
+	    <<" "<<fattFlag<<" "<<interpAdu5Pat->attFlag<<" "<<sattFlag<<endl
+	    <<" "<<-ftimeOfDay+interpAdu5Pat->timeOfDay<<" -"<<-interpAdu5Pat->timeOfDay+stimeOfDay<<" "<<endl
+	    <<endl;
+      }
+
+
       bestEntryLast = bestEntry;
 
       newTree->Fill();      
