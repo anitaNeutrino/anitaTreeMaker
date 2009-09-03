@@ -1,10 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <math.h>
 #include <stdio.h>
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TTimeStamp.h"
 
 #include "Adu5Pat.h"
 #include "RawAnitaHeader.h"
@@ -40,7 +42,7 @@ void smoothing(vector<double> inBranch, int sIndex, vector<double> &sBranch){
   //int max = inBranch->GetEntries()-min;
   int max = inBranch.size()-min-1;
   //  for(int i = min; i<max; i++){
-  for(int i = 0; i<inBranch.size()-1; i++){
+  for(int i = 0; i<inBranch.size(); i++){
     sValue = 0.; 
     if(i>=min && i<max){
       for (int j = 0; j<=sIndex; j++){
@@ -60,7 +62,7 @@ void makeAdu5PatTree(int doingRun) {
   //First up open header file
   char headName[FILENAME_MAX];
   //ANITA II has a different format than ANITA I, and the root files are already made
-  sprintf(headName,"/raid2/grashorn/anita/data/anita2/flightData/run%d/headFile%d.root",doingRun,doingRun); 
+  sprintf(headName,"/unix/anita1/flight0809/root/run%d/headFile%d.root",doingRun,doingRun); 
   TFile *fHead= new TFile(headName,"OLD");
   TTree *headTree = (TTree*) fHead->Get("headTree");
   
@@ -70,7 +72,7 @@ void makeAdu5PatTree(int doingRun) {
   //ANITA II has a different format than ANITA I, and the 
   //gps files are already made
   char gpsName[FILENAME_MAX]; 
-  sprintf(gpsName,"/raid2/grashorn/anita/data/anita2/flightData/run%d/gpsFile%d.root",doingRun,doingRun); 
+  sprintf(gpsName,"/unix/anita1/flight0809/root/run%d/gpsFile%d.root",doingRun,doingRun); 
   TFile *fGps = new TFile(gpsName,"OLD");//"/raid2/grashorn/anita/data/anita2/fixedTimeFiles/gpsFile.root");    
   
   TTree *adu5PatTree = (TTree*)fGps->Get("adu5PatTree");
@@ -128,14 +130,20 @@ void makeAdu5PatTree(int doingRun) {
 
 
    char outName[FILENAME_MAX];
-   //sprintf(outName,"/raid2/grashorn/anita/data/anita2/flightData/run%d/gpsEvent%d.root",doingRun,doingRun);  
-   sprintf(outName,"/raid2/grashorn/anita/runTreeMaker/gpsEvent%d.root",doingRun);  
+   sprintf(outName,"/unix/anita1/flight0809/root/run%d/gpsEvent%d.root",doingRun,doingRun);  
+   //sprintf(outName,"/raid2/grashorn/anita/runTreeMaker/gpsEvent%d.root",doingRun);  
    TFile *newFp= new TFile(outName,"RECREATE"); 
    
    TTree *newTree= new TTree("adu5PatTree","Tree of Interpolated ADU5 Positions and Attitude");;
    Adu5Pat *interpAdu5Pat = new Adu5Pat();
    newTree->Branch("pat","Adu5Pat",&interpAdu5Pat);
    int bestEntryLast=0;
+   
+   //create a log file in case something goes wrong.  If nothing goes wrong, delete empty log file
+   char filename[FILENAME_MAX];
+   sprintf(filename,"log/log_gpsEvent%d.txt",doingRun,doingRun);
+   ofstream fileout;
+   fileout.open(filename);
    
    //added 02.13.09 EW Grashorn, so that we're compatible w/ new version of Adu5Pat.cxx
    Int_t interpolationFlag=-1;
@@ -148,10 +156,20 @@ void makeAdu5PatTree(int doingRun) {
    vector<double> sRollVec;
    vector<double> ssRollVec;
    vector<double> ssPitchVec;
+   vector<double> headingVec;
 
+
+   double lastHeading=0;
    //fill pitch and roll vectors
    for(int i = 0; i < hkEntries; i++){
      adu5PatTree->GetEntry(i);
+     if(adu5PatPtr->heading>=0 && adu5PatPtr->heading<=360) {
+	headingVec.push_back(adu5PatPtr->heading);
+	lastHeading=adu5PatPtr->heading;
+     }
+     else {
+	headingVec.push_back(lastHeading);
+     }
      pitchVec.push_back(adu5PatPtr->pitch);
      rollVec.push_back(adu5PatPtr->roll);
    }
@@ -161,68 +179,124 @@ void makeAdu5PatTree(int doingRun) {
    smoothing(sRollVec, 5, ssRollVec);
    smoothing(pitchVec, 5, sPitchVec);
    smoothing(sPitchVec, 5, ssPitchVec);
-
+  
    Int_t finterpolationFlag=0;
    Int_t sinterpolationFlag=0;
 
+   //Crossing from longitude 180 to -180 poses a problem for the interpolator.
+   //So, lets identify these situations and do long+=360 if long<0 for these
+   //situations, do the interpolation, then subtract the long-=360    
+   int boundaryCrossing = 0;
+   adu5PatTree->GetEntry(0);
+   double firstLong = adu5PatPtr->longitude;
+   cout<<adu5PatPtr->timeOfDay<<endl;
+   adu5PatTree->GetEntry(hkEntries-1);
+   double lastLong = adu5PatPtr->longitude;
+   if(lastLong/firstLong<0) boundaryCrossing=1;
+   
+   int fbad = 0;
+   int sbad = 0;
    Long64_t nbytes = 0;
    Long64_t starEvery=nentries/20;
+   int timeDiffOk = 120;
+   int timeDiff = 0;
    if(starEvery==0) starEvery=1;
+    
    for (Long64_t i=0; i<nentries;i++) {
-     if(i%starEvery==0) cerr << "*";
-
-     nbytes += headTree->GetEntry(i);
-      Long64_t bestEntry=adu5PatTree->GetEntryNumberWithBestIndex(theHeader->triggerTime,theHeader->triggerTimeNs/1000);
      
-      if(bestEntry<0) {
-	cerr << "Something bad happened: " << i << bestEntry <<endl;
-	timeOfDay=-9999;
-	latitude=-9999; 
-	longitude=-9999;
-	altitude=-9999; 
-	heading=-9999;  
-	pitch=-9999;    
-	roll=-9999;     
-	mrms=-9999;     
-	brms=-9999;     
-	attFlag=-9999;    
+     fbad = 0;
+     sbad = 0;
+     
+     if(i%starEvery==0) cerr << "*";
+     
+     nbytes += headTree->GetEntry(i);
+     Long64_t bestEntry=adu5PatTree->GetEntryNumberWithBestIndex(theHeader->triggerTime,theHeader->triggerTimeNs/1000);
 
-	//continue;
-	//exit(0);
-      }
-      else {
-	if(bestEntry>=(hkEntries-1) && bestEntry>0) {
-	  bestEntry--;
+     //this check is hopefully unnecessary.  I'd swear i saw it happen once, though, so i'm keeping it just to be safe.
+     if(bestEntry==hkEntries) {
+       bestEntry--;
+       adu5PatTree->GetEntry(bestEntry);
+
+       if((theHeader->triggerTime-adu5PatPtr->payloadTime)>timeDiffOk) {
+	 bestEntry=-1; 
+	 fileout<<"last GPS packet "<<theHeader->triggerTime-adu5PatPtr->payloadTime<<" older than event.  Skipping. ";
+       }
+     }
+
+     
+     //if bestEntry has a value of -1, this means that the event time is 
+     //earlier than the first time in the GPS data.  Within a certain range,
+     //this is still acceptable.  The timeDiffOk variable is set above.
+     adu5PatTree->GetEntry(bestEntry);
+     if(bestEntry<0) adu5PatTree->GetEntry(0);
+     timeDiff = (double)theHeader->triggerTime-(double)adu5PatPtr->payloadTime;
+     if(bestEntry<0&&fabs(timeDiff)<timeDiffOk) bestEntry = 0;
+
+     if(bestEntry<0) {
+       fileout<< "Something bad happened in entry: " << i 
+	      << " bestEntry value: "<<bestEntry;
+       fileout<<";  HeaderTimestamp:"
+	      <<TTimeStamp(theHeader->triggerTime).AsString("s")
+	      <<" GPS Timestamp:"
+	      <<TTimeStamp(adu5PatPtr->payloadTime).AsString("s")<<timeDiff<<endl;
+
+       timeOfDay=-9999;
+       latitude=-9999; 
+       longitude=-9999;
+       altitude=-9999; 
+       heading=-9999;  
+       pitch=-9999;    
+       roll=-9999;     
+       mrms=-9999;     
+       brms=-9999;     
+       attFlag=-9999;    
+       
+       //continue;
+       //exit(0);
+     }
+     else {
+      
+       adu5PatTree->GetEntry(bestEntry);
+       
+       //Copy to temporary variables
+       frealTime=adu5PatPtr->realTime;
+       fpayloadTime=adu5PatPtr->payloadTime;
+       freadTime=adu5PatPtr->payloadTime;
+       ftimeOfDay=adu5PatPtr->timeOfDay;
+       flatitude=adu5PatPtr->latitude;
+       flongitude=adu5PatPtr->longitude;
+
+	if(boundaryCrossing==1&&flongitude<0)flongitude+=360;
+	if(flongitude==0) {
+	  fileout<<"There's a bad value here: "<<theHeader->eventNumber
+		 <<" flongitude=="<<flongitude<<endl;
+	  fbad=1;
 	}
-	adu5PatTree->GetEntry(bestEntry);
 	
-	while(adu5PatPtr->realTime<theHeader->triggerTime){
-	  bestEntry++;
-	  adu5PatTree->GetEntry(bestEntry);
-	}
-	while(adu5PatPtr->realTime>theHeader->triggerTime){
-	  bestEntry--;
-	  adu5PatTree->GetEntry(bestEntry);
-	} 
-	
-	//Copy to temporary variables
-	frealTime=adu5PatPtr->realTime;
-	fpayloadTime=adu5PatPtr->payloadTime;
-	freadTime=adu5PatPtr->payloadTime;
-	ftimeOfDay=adu5PatPtr->timeOfDay;
-	flatitude=adu5PatPtr->latitude;
-	flongitude=adu5PatPtr->longitude;
 	faltitude=adu5PatPtr->altitude;
-	fheading=adu5PatPtr->heading;
-	fpitch=ssPitchVec.at(bestEntry);
+	fheading=headingVec.at(bestEntry);
 	//fpitch=adu5PatPtr->pitch;
-	froll=ssRollVec.at(bestEntry);
+	if(bestEntry<ssPitchVec.size()) fpitch=ssPitchVec.at(bestEntry);
+	else { 
+	  fpitch=adu5PatPtr->pitch;
+	  fileout<<"bestEntry ("<<bestEntry<< ") exceeds size of ssPitchVec ("
+		 <<ssPitchVec.size()<<"); fpitch not smoothed"<<endl;
+	}
+	if(bestEntry<ssRollVec.size()) froll=ssRollVec.at(bestEntry);
+	else { 
+	  froll=adu5PatPtr->roll;
+	  fileout<<"bestEntry ("<<bestEntry<< ") exceeds size of ssRollVec ("
+		 <<ssRollVec.size()<<"); froll not smoothed"<<endl;
+	}
 	//froll=adu5PatPtr->roll;
 	fmrms=adu5PatPtr->mrms;
 	fbrms=adu5PatPtr->brms;
 	fattFlag=adu5PatPtr->attFlag;
-
-	bestEntry++;
+	//bestEntry++;
+	if(bestEntry<hkEntries-1) bestEntry++;
+	else fileout<<"event index "<<i<<", GPS index "<<bestEntry
+		    <<", GPSSize " <<hkEntries
+		    <<" last data point in GPS file; cannot interpolate"<<endl;
 	adu5PatTree->GetEntry(bestEntry);
 	
 	//Copy to temporary variables
@@ -230,12 +304,33 @@ void makeAdu5PatTree(int doingRun) {
 	stimeOfDay=adu5PatPtr->timeOfDay;
 	slatitude=adu5PatPtr->latitude;
 	slongitude=adu5PatPtr->longitude;
+
+	if(boundaryCrossing==1&&slongitude<0)slongitude+=360;
+	if(slongitude==0) {
+	  fileout<<" There's a bad value here: "<<theHeader->eventNumber
+		 <<" slongitude=="<<slongitude<<endl;
+	  sbad=1;
+	}
+
 	saltitude=adu5PatPtr->altitude;
-	sheading=adu5PatPtr->heading;
+	//	sheading=adu5PatPtr->heading;
+	sheading=headingVec.at(bestEntry);
 	//spitch=adu5PatPtr->pitch;
-	spitch=ssPitchVec.at(bestEntry);//fpitch;
-	//sroll=adu5PatPtr->roll;
-	sroll=ssRollVec.at(bestEntry);//froll;
+	if(bestEntry<ssPitchVec.size()) spitch=ssPitchVec.at(bestEntry);
+	else { 
+	  spitch=adu5PatPtr->pitch;
+	  fileout<<"at event "<<i<<", bestEntry ("<<bestEntry
+		 << ") exceeds size of ssPitchVec ("
+		 <<ssPitchVec.size()<<"); spitch not smoothed"<<endl;
+	}
+	if(bestEntry<ssRollVec.size()) sroll=ssRollVec.at(bestEntry);
+	else { 
+	  sroll=adu5PatPtr->roll;
+	  fileout<<"at event "<<i<<", bestEntry ("<<bestEntry
+		 << ") exceeds size of ssRollVec ("
+		 <<ssRollVec.size()<<"); sroll not smoothed"<<endl;
+	
+	}
 	smrms=adu5PatPtr->mrms;
 	sbrms=adu5PatPtr->brms;
 	sattFlag=adu5PatPtr->attFlag;
@@ -252,7 +347,7 @@ void makeAdu5PatTree(int doingRun) {
 	interpolationFlag=finterpolationFlag;
 	if(sinterpolationFlag<interpolationFlag) interpolationFlag=sinterpolationFlag;
 
-	if(finterpolationFlag*60<sinterpolationFlag) {
+	if(finterpolationFlag*60<sinterpolationFlag||sbad==1) {
 	  //Just use first numbers;
 	  timeOfDay=ftimeOfDay;
 	  latitude=flatitude;
@@ -267,7 +362,7 @@ void makeAdu5PatTree(int doingRun) {
 	  
 
 	}
-	else if(sinterpolationFlag*60<finterpolationFlag) {
+	else if(sinterpolationFlag*60<finterpolationFlag||fbad==1) {
 	  //Just use second numbers
 	  timeOfDay=stimeOfDay;
 	  latitude=slatitude;
@@ -279,8 +374,6 @@ void makeAdu5PatTree(int doingRun) {
 	  mrms=smrms;
 	  brms=sbrms;
 	  attFlag=sattFlag;
-	  cout<<"Ever? "<<theHeader->eventNumber<<endl;	
-	  
 	}
 	else {
 	  //Need to interpolate
@@ -295,20 +388,20 @@ void makeAdu5PatTree(int doingRun) {
 	    latitude=flatitude + timeFactor*(slatitude-flatitude);
 	    longitude=flongitude + timeFactor*(slongitude-flongitude);
 	    altitude=faltitude + timeFactor*(saltitude-faltitude);
-// 	    if(TMath::Abs(360+sheading-fheading)<TMath::Abs(sheading-fheading)) {
-// 	      sheading+=360;
-// 	    }
-// 	    if(TMath::Abs(sheading-(fheading+360))<TMath::Abs(sheading-fheading)) {
-// 	      fheading+=360;
-// 	    }
+	    if(TMath::Abs(360+sheading-fheading)<TMath::Abs(sheading-fheading)) {
+	      sheading+=360;
+	    }
+	    if(TMath::Abs(sheading-(fheading+360))<TMath::Abs(sheading-fheading)) {
+	      fheading+=360;
+	    }
 	    
-// 	    heading=fheading + timeFactor*(sheading-fheading);
-// 	    if(heading>=360) {
-// 	      heading-=360;
-// 	    } 
-
-
 	    heading=fheading + timeFactor*(sheading-fheading);
+	    if(heading>=360) {
+	      heading-=360;
+	    } 
+
+
+	    //	    heading=fheading + timeFactor*(sheading-fheading);
 	    pitch=fpitch + timeFactor*(spitch-fpitch);
 	    roll=froll + timeFactor*(sroll-froll);
 	    mrms=fmrms + timeFactor*(smrms-fmrms);
@@ -348,39 +441,10 @@ void makeAdu5PatTree(int doingRun) {
 	}
       }
 
-      if(
-	 theHeader->eventNumber==107690600//||theHeader->eventNumber==1198819
-	 //||
-	 //theHeader->eventNumber>1076806&&theHeader->eventNumber<1076905
-	 //finterpolationFlag!=1||sinterpolationFlag!=1
-	 ){
-	cout<<theHeader->eventNumber<<" "<<theHeader->run
-	    <<" "<<endl
-	  //<<" "<<interpolationFlag<<" "<<finterpolationFlag<<" "<<sinterpolationFlag<<endl
-	  //<<" "<<timeOfDay-ftimeOfDay<<" "<<stimeOfDay-timeOfDay<<endl
-	  //  <<" "<<ftimeOfDay<<" "<<timeOfDay<<" "<<stimeOfDay<<endl
-	    <<" "<<theHeader->triggerTime<<" "<<1e-9*Double_t(theHeader->triggerTimeNs)<<endl
-	    <<" "<<frealTime<<" "<<ftimeOfDay<<" "<<timeOfDay<<" "<<endl
-	  //  <<" "<<payloadTime<<" "<<realTime<<endl
-	  //  <<" "<<ftimeOfDay<<" "<<timeOfDay<<" "<<stimeOfDay<<endl
-	  //  <<" "<<fpitch<<" "<<pitch<<" "<<spitch<<endl
-	  //  <<" "<<froll<<" "<<roll<<" "<<sroll<<endl
-	  //  <<" "<<fheading<<" "<<heading<<" "<<sheading<<endl
-	  //  <<" "<<flatitude<<" "<<latitude<<" "<<slatitude<<endl
-	  //  <<" "<<flongitude<<" "<<longitude<<" "<<slongitude<<endl
-	  //  <<" "<<faltitude<<" "<<altitude<<" "<<saltitude<<endl
-	    <<" "<<flatitude<<" "<<latitude<<" "<<slatitude<<" "<<endl
-	    <<" "<<flongitude<<" "<<longitude<<" "<<slongitude<<" "<<endl
-	    <<" "<<faltitude<<" "<<altitude<<" "<<saltitude<<" "<<endl
-	    <<" "<<fheading<<" "<<heading<<" "<<sheading<<" "<<endl
-	    <<" "<<fpitch<<" "<<pitch<<" "<<spitch<<" "<<endl
-	    <<" "<<froll<<" "<<roll<<" "<<sroll<<" "<<endl
-	    <<" "<<fmrms<<" "<<mrms<<" "<<smrms<<" "<<endl
-	    <<" "<<fbrms<<" "<<brms<<" "<<sbrms<<" "<<endl
-	    <<" "<<fattFlag<<" "<<attFlag<<" "<<sattFlag<<endl
-	    <<endl;
-      }
-      
+    
+     //set boundary crossing values correctly
+     if(boundaryCrossing==1&&longitude>180.)longitude-=360;
+     
       //Now need to create Adu5Pat object and fill tree
       interpAdu5Pat->run = doingRun;
       interpAdu5Pat->realTime = realTime;
@@ -393,47 +457,22 @@ void makeAdu5PatTree(int doingRun) {
       interpAdu5Pat->altitude = altitude;
       interpAdu5Pat->heading = heading; 
       //interpAdu5Pat->pitch = pitch;      
-      
       if(bestEntry!=bestEntryLast){
- 	interpAdu5Pat->roll = froll;
- 	interpAdu5Pat->pitch = fpitch;
+	interpAdu5Pat->roll = froll;
+	interpAdu5Pat->pitch = fpitch;
 	
       } else {
 	interpAdu5Pat->pitch = pitch;
 	interpAdu5Pat->roll = roll;
       }      
-
-
+      //if(i<200)cout<<i<<" "<<pitch<<" "<<fpitch<<" "<<roll<<" "<<froll<<endl;      
+      
       interpAdu5Pat->mrms = mrms;
       interpAdu5Pat->brms = brms;
       interpAdu5Pat->attFlag = attFlag;
       interpAdu5Pat->intFlag = interpolationFlag;
-
-      if(
-	 theHeader->eventNumber==1076906||theHeader->eventNumber==1198819
-	 ||
-	 theHeader->eventNumber>1076806&&theHeader->eventNumber<1076905
-	 //finterpolationFlag!=1||sinterpolationFlag!=1
-	 ){
-	cout<<endl<<bestEntry<<" "<<bestEntryLast<<" "<<theHeader->eventNumber<<" "<<theHeader->run<<endl
-	    <<" "<<-frealTime+theHeader->triggerTime<<" -"<<srealTime-theHeader->triggerTime<<" "<<1e-9*Double_t(theHeader->triggerTimeNs)<<endl
-	    <<" "<<finterpolationFlag<<" "<<interpAdu5Pat->intFlag<<" "<<sinterpolationFlag<<" "<<endl
-	    <<" "<<-fpitch+interpAdu5Pat->pitch<<" "<<interpAdu5Pat->pitch-spitch<<" "<<endl
-	    <<" "<<-froll+interpAdu5Pat->roll<<" "<<interpAdu5Pat->roll-sroll<<" "<<endl
-	    <<" "<<-flatitude+interpAdu5Pat->latitude<<" "<<interpAdu5Pat->latitude-slatitude<<" "<<endl
-	    <<" "<<-flongitude+interpAdu5Pat->longitude<<" "<<interpAdu5Pat->longitude-slongitude<<" "<<endl
-	    <<" "<<-faltitude+interpAdu5Pat->altitude<<" "<<interpAdu5Pat->altitude-saltitude<<" "<<endl
-	    <<" "<<-fheading+interpAdu5Pat->heading<<" "<<interpAdu5Pat->heading-sheading<<" "<<endl
-	    <<" "<<-fpitch+interpAdu5Pat->pitch<<" "<<interpAdu5Pat->pitch-spitch<<" "<<endl
-	    <<" "<<-froll+interpAdu5Pat->roll<<" "<<interpAdu5Pat->roll-sroll<<" "<<endl
-	    <<" "<<-fmrms+interpAdu5Pat->mrms<<" "<<interpAdu5Pat->mrms-smrms<<" "<<endl
-	    <<" "<<-fbrms+interpAdu5Pat->brms<<" "<<interpAdu5Pat->brms-sbrms<<" "<<endl
-	    <<" "<<fattFlag<<" "<<interpAdu5Pat->attFlag<<" "<<sattFlag<<endl
-	    <<" "<<-ftimeOfDay+interpAdu5Pat->timeOfDay<<" -"<<-interpAdu5Pat->timeOfDay+stimeOfDay<<" "<<endl
-	    <<endl;
-      }
-
-
+      
+      
       bestEntryLast = bestEntry;
 
       newTree->Fill();      
