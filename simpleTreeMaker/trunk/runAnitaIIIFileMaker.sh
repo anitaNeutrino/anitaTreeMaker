@@ -6,9 +6,9 @@ then
 fi
 
 RUN=$1
-BASE_DIR=/unix/anita3/flight0809
-RAW_RUN_DIR=${BASE_DIR}/neoraw/run${RUN}
-EVENT_BASE_DIR=${BASE_DIR}/neoroot
+BASE_DIR=/storage/palestine14
+RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
+EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
 
 if [[ -d $ROOT_RUN_DIR ]]; then
@@ -16,14 +16,21 @@ if [[ -d $ROOT_RUN_DIR ]]; then
 elif [[ -d $RAW_RUN_DIR  ]]; then
     mkdir ${ROOT_RUN_DIR}
 else
-    echo "$RAW_BASE_DIR doesn't exist what are we suppposed to rootify?"
+    echo "$RAW_RUN_DIR doesn't exist what are we suppposed to rootify?"
     exit 0;
 fi
 
-#ls ${RAW_RUN_DIR}
+echo "Using $RAW_RUN_DIR"
+ls ${RAW_RUN_DIR}
 
 echo "Starting Header File"
 HEAD_FILE_LIST=`mktemp`
+for file in ${RAW_RUN_DIR}/event/*/ev?/hd*gz; 
+  do
+  if [[ -f $file ]]; then
+      echo $file >> ${HEAD_FILE_LIST}
+  fi
+done
 for file in ${RAW_RUN_DIR}/event/*/ev??/hd*gz; 
   do
   if [[ -f $file ]]; then
@@ -67,6 +74,7 @@ for file in ${RAW_RUN_DIR}/event/*/ev????????/hd*gz;
   fi
 done
 
+cat ${HEAD_FILE_LIST}
 
 if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     HEAD_ROOT_FILE=${ROOT_RUN_DIR}/headFile${RUN}.root
@@ -83,6 +91,12 @@ fi
 echo "Starting Event File"
 
 EVENT_FILE_LIST=`mktemp`
+for file in ${RAW_RUN_DIR}/event/*/ev?/psev*gz; 
+  do
+  if [[ -f $file ]]; then
+      echo $file >> ${EVENT_FILE_LIST}
+  fi
+done
 for file in ${RAW_RUN_DIR}/event/*/ev??/psev*gz; 
   do
   if [[ -f $file ]]; then
@@ -285,7 +299,7 @@ fi
 
 echo "Starting Hk File"
 HKCAL_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/*gz; 
+for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/hk*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${HKCAL_FILE_LIST}
@@ -293,7 +307,7 @@ do
 done
 
 HKRAW_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/*gz; 
+for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/hk*gz; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${HKRAW_FILE_LIST}
