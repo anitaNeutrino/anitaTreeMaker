@@ -6,7 +6,7 @@ then
 fi
 
 RUN=$1
-BASE_DIR=/storage/palestine14
+BASE_DIR=/anitaStorage/palestine14
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
