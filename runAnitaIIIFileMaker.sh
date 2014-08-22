@@ -6,7 +6,7 @@ then
 fi
 
 RUN=$1
-BASE_DIR=/anitaStorage/palestine14
+BASE_DIR=/unix/anita2/palestine14/
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
@@ -324,6 +324,36 @@ if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
 	PRETTYHK_ROOT_FILE=${ROOT_RUN_DIR}/prettyHkFile${RUN}.root
 	./makePrettyHkTree  ${HK_ROOT_FILE} ${HEAD_ROOT_FILE} ${PRETTYHK_ROOT_FILE}
     fi
+else
+    rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
+    echo "No Hk Files"
+fi
+echo "Done Hk File"
+
+
+echo "Starting SSHk File"
+HKCAL_FILE_LIST=`mktemp`
+for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/sshk*; 
+do
+    if [[ -f $file ]]; then
+	echo $file >> ${HKCAL_FILE_LIST}
+    fi
+done
+
+HKRAW_FILE_LIST=`mktemp`
+for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/sshk*; 
+do
+    if [[ -f $file ]]; then
+	echo $file >> ${HKRAW_FILE_LIST}
+    fi
+done
+
+HK_ROOT_FILE=${ROOT_RUN_DIR}/sshkFile${RUN}.root
+if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
+    ./makeSSHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
+    rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
+
+   
 else
     rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
     echo "No Hk Files"

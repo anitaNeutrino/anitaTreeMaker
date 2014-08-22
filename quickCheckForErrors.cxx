@@ -389,7 +389,7 @@ void quickCheckForErrors() {
 
 	    //hdchip_eventtoevent->Fill(chipdiff);
 
-	    if (ppsNum_this<7 && ppsNum_previous>=7 && ppsNum_previous!=pow(2,16)) {
+	    if (ppsNum_this<7 && ppsNum_previous>=7 && ppsNum_previous!=TMath::Power(2,16)) {
 	      resetppsnum=i;
 	      errflag++;
 	    }
@@ -400,7 +400,7 @@ void quickCheckForErrors() {
 
 	    } // if the lab chip number is not sequential
 
-	    if (trigNum_this<trigNum_previous && trigNum_previous!=pow(2,16)) {
+	    if (trigNum_this<trigNum_previous && trigNum_previous!=TMath::Power(2,16)) {
 	      resettrignum=i;
 	      if (trigNum_previous!=65535) errflag++;
 	    }
@@ -418,7 +418,7 @@ void quickCheckForErrors() {
 
 	    //hdreservedlab->Fill(reserved_this-pow(2,labchip_this));
 
-	    if (reserved_this-pow(2,labchip_this)!=0) {
+	    if (reserved_this-TMath::Power(2,labchip_this)!=0) {
 	      errflag++;
 	      chipreservederr=i;
 	      
