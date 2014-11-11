@@ -64,9 +64,9 @@ void makeBodyTree(char *inputName, char *outDir) {
     //	cout << justRun << endl;
     sscanf(justRun,"run%d",&runNumber);
     
-    gzFile infile = gzopen (fileName, "rb");    
-    for(int i=0;i<100;i++) {	
-      //      cout << i << endl;
+    gzFile infile = gzopen (fileName, "rb"); 
+    for(int i=0;i<100;i++) {
+
       numBytes=gzread(infile,&theBody,sizeof(PedSubbedEventBody_t));
       if(numBytes!=sizeof(PedSubbedEventBody_t)) {
 	if(numBytes>0) {
@@ -76,7 +76,19 @@ void makeBodyTree(char *inputName, char *outDir) {
 	error=1;
 	break;
       }
-      //      cout << "Event: " << theBody.eventNumber << endl;
+
+      //RJN hack for now
+      if(runNumber>=10000 && runNumber<=10057) {
+	if(counter>1 && i==1) {
+	  if(theBody.eventNumber!=lastEventNumber+1) {
+	    gzrewind(infile);
+	    numBytes=gzread(infile,&theBody,sizeof(PedSubbedEventBody_t));
+	    gzread(infile,&theBody,616);
+	    numBytes=gzread(infile,&theBody,sizeof(PedSubbedEventBody_t));
+	  }
+	}
+      }
+      //      cout << "Event: " << i << "\t" << theBody.eventNumber << endl;
       processBody();
       lastEventNumber=theBody.eventNumber;
     }

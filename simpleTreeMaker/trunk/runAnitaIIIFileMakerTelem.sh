@@ -7,8 +7,8 @@ fi
 
 RUN=$1
 BASE_DIR=/anitaStorage/antarctica14
-RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
-EVENT_BASE_DIR=${BASE_DIR}/root
+RAW_RUN_DIR=${BASE_DIR}/telem/raw/run${RUN}
+EVENT_BASE_DIR=${BASE_DIR}/telem/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
 
 if [[ -d $ROOT_RUN_DIR ]]; then
