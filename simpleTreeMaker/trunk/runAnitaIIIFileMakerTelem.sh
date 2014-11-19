@@ -23,9 +23,10 @@ fi
 echo "Using $RAW_RUN_DIR"
 ls ${RAW_RUN_DIR}
 
+cd $ANITA_TREE_MAKER_DIR
 
 ./runTelemHeaderMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemEventMaker.s $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+./runTelemEventMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 ./runTelemTurfRateMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 ./runTelemSurfHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 ./runTelemSumTurfRateMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR

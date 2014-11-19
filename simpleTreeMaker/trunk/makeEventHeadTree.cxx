@@ -189,7 +189,6 @@ void makeRunHeadTree(char *inName, char *outName) {
 
 void processHeader(int version) {
   static int doneInit=0;
-  static UInt_t ppsOffset=0;
   if(!doneInit) {
     //    char name[128];
     //    char def[128];
@@ -201,13 +200,10 @@ void processHeader(int version) {
   }
   if(theHead) delete theHead;
   
-  UInt_t ppsNum=theHeader.turfio.ppsNum;
-  UInt_t unixTime=theHeader.unixTime;
-  UInt_t trigTime=theHeader.turfio.trigTime;
-  UInt_t c3poNum=theHeader.turfio.c3poNum;
   
 
-
+  //This is wrong, but good enough for telemetry
+  UInt_t trigTime=theHeader.turfio.trigTime;
   UInt_t triggerTime=theHeader.unixTime;
   UInt_t triggerTimeNs=1e9*(trigTime/250e6);
   Int_t goodTimeFlag=1;
