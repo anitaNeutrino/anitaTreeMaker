@@ -67,7 +67,7 @@ void makeRunHeadTree(char *inName, char *outName) {
     std::cout << sizeof(AnitaEventHeader_t) << std::endl;
     //    return;
     while(SillyFile >> fileName) {
-      if(counter%100==0) 
+      //if(counter%100==0) 
 	std::cout << fileName << std::endl;
 	counter++;
 	
