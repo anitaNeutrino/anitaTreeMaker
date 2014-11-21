@@ -23,7 +23,7 @@ cd $ANITA_TREE_MAKER_DIR
 
 echo "Starting Other File"
 OTHER_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/monitor/*/*/other*.dat; 
+for file in ${RAW_RUN_DIR}/house/monitor/*/*/other*.dat*; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${OTHER_FILE_LIST}
