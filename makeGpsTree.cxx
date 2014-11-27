@@ -86,6 +86,8 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
     char fileName[180];
     int error=0;
     int counter=0;
+    static int firstAdu5APat=1;
+    static int firstAdu5BPat=1;
     while(GpsFile >> fileName) {
       const char *subDir = gSystem->DirName(fileName);
       const char *subSubDir = gSystem->DirName(subDir);
@@ -110,11 +112,18 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
 	}
 	if(adu5PatPtr) delete adu5PatPtr;
 	adu5PatPtr = new Adu5Pat(runNumber,rawAdu5Pat.unixTime,
-				 &rawAdu5Pat);
-	if(rawAdu5Pat.gHdr.code&PACKET_FROM_ADU5B)
-	  adu5bPatTree->Fill();
-	else 
-	  adu5PatTree->Fill();
+				 &rawAdu5Pat);       
+	if(rawAdu5Pat.gHdr.code&PACKET_FROM_ADU5B) {
+	  if(!firstAdu5BPat)
+	    adu5bPatTree->Fill();
+	  firstAdu5BPat=0;
+	}
+	else {
+	  if(!firstAdu5APat) {
+	    adu5PatTree->Fill();
+	  }
+	  firstAdu5APat=0;
+	}
       }
       gzclose(infile);
       //	if(error) break;
