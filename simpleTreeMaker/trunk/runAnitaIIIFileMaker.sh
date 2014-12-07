@@ -277,6 +277,26 @@ else
     echo "No Monitor Rate Files"
 fi
 
+
+echo "Starting Gpu File"
+GPU_FILE_LIST=`mktemp`
+for file in ${RAW_RUN_DIR}/house/gpu/*/*/gpu*gz; 
+  do
+  if [[ -f $file ]]; then
+      echo $file >> ${GPU_FILE_LIST}
+  fi
+done
+
+if  test `cat ${GPU_FILE_LIST} | wc -l` -gt 0 ; then
+    GPU_ROOT_FILE=${ROOT_RUN_DIR}/gpuFile${RUN}.root
+    ./makeGpuTree ${GPU_FILE_LIST} ${GPU_ROOT_FILE}
+    rm ${GPU_FILE_LIST}
+    echo "Done Gpu File"
+else
+    rm ${GPU_FILE_LIST}
+    echo "No Gpu Files"
+fi
+
 echo "Starting Other File"
 OTHER_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/house/monitor/*/*/other*.dat; 
