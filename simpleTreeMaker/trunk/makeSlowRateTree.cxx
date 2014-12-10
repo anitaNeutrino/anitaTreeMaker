@@ -23,7 +23,7 @@ void makeSlowRateTree(char *inName, char *outName);
 SlowRate *theMonHkPtr;
 SlowRateFull_t theSlowRate;
 TFile *theFile;
-TTree *monitorTree;
+TTree *slowTree;
 char rootFileName[FILENAME_MAX];
 int doneInit=0;
 int runNumber;
@@ -51,8 +51,8 @@ void makeSlowRateTree(char *inName, char *outName) {
     while(PosFile >> fileName) {
 	const char *subDir = gSystem->DirName(fileName);
 	const char *subSubDir = gSystem->DirName(subDir);
-	const char *monitorDir= gSystem->DirName(subSubDir);
-	const char *houseDir = gSystem->DirName(monitorDir);
+	const char *slowDir= gSystem->DirName(subSubDir);
+	const char *houseDir = gSystem->DirName(slowDir);
 	const char *runDir = gSystem->DirName(houseDir);
 	const char *justRun = gSystem->BaseName(runDir);
 //	std::cout << justRun << std::endl;
@@ -75,7 +75,7 @@ void makeSlowRateTree(char *inName, char *outName) {
 //	if(error) break;
     }
     
-    monitorTree->AutoSave();
+    slowTree->AutoSave();
     theFile->Close();
     doneInit=0;
 }
@@ -84,13 +84,13 @@ void processSlowRate() {
     if(!doneInit) {
 	theFile = new TFile(rootFileName,"RECREATE");
 
-	monitorTree = new TTree("monitorTree","Tree of Anita CPU SlowRate Stuff");
-	monitorTree->Branch("mon","SlowRate",&theMonHkPtr);
+	slowTree = new TTree("slowTree","Tree of Anita CPU SlowRate Stuff");
+	slowTree->Branch("mon","SlowRate",&theMonHkPtr);
 	doneInit=1;
     }
     if(theMonHkPtr) delete theMonHkPtr;
     theMonHkPtr = new SlowRate(runNumber,theSlowRate.unixTime,&theSlowRate);
-    monitorTree->Fill();                
+    slowTree->Fill();                
 }
 
 
