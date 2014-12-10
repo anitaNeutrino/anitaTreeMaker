@@ -5,7 +5,7 @@
 #include <zlib.h>
 #include <libgen.h>
 #include <errno.h>
-#include <map>
+   
 
 #include "TTree.h"
 #include "TFile.h"
@@ -20,7 +20,6 @@ using namespace std;
 
 void processHeader(int version);
 void makeRunHeadTree(char *inName, char *outName);
-void fillEventNumberMap(char *rootName);
 int eventInMap(UInt_t eventNumber);
 
 
@@ -41,6 +40,7 @@ char rootFileName[FILENAME_MAX];
 
 
 
+
 int eventInMap(UInt_t eventNumber) {
   if(eventNumber==0) return 1; //Bug arggh fixed around run 18
   std::map<UInt_t,UInt_t>::iterator it=eventNumberMap.find(eventNumber);
@@ -51,7 +51,6 @@ int eventInMap(UInt_t eventNumber) {
   return 1;
 
 }
-
 
 int main(int argc, char **argv) {
   if(argc<3) {
@@ -195,16 +194,11 @@ void makeRunHeadTree(char *inName, char *outName) {
 		break;
 	      }
 	      else break;
-	    }
+	    } 
 	    if(eventInMap(theHeader.eventNumber)) {
 	      //	std::cout << "Got event: " << theBody.eventNumber << "\n";
 	      continue;
 	    }
-	    else {
-	      //	std::cout << "Not got event: " << theBody.eventNumber << "\n";
-	    }
-	
-	    //	    std::cout << theHeader.eventNumber << "\n";
 	    processHeader(version);
 	}
 	gzclose(infile);
@@ -213,22 +207,71 @@ void makeRunHeadTree(char *inName, char *outName) {
     theFile->Write();
 }
 
+void makeHeadTree() {
+//    std::cout << sizeof(AnitaEventHeader_t) << std::endl;
+    ifstream SillyFile("sillyFileOfFilenames.txt");
+    sprintf(rootFileName,"/unix/anita1/tempTrees/bufferHeadFile.root");
+    int numBytes=0;
+    char fileName[180];
+    int error=0;
+//    int headerNumber=1;
+    int counter=0;
+    while(SillyFile >> fileName) {
+	if(counter%100==0) 
+	    std::cout << fileName << std::endl;
+	counter++;
+	
+	const char *subDir = gSystem->DirName(fileName);
+	const char *subSubDir = gSystem->DirName(subDir);
+	const char *eventDir = gSystem->DirName(subSubDir);
+	const char *runDir = gSystem->DirName(eventDir);
+	const char *justRun = gSystem->BaseName(runDir);
+//	std::cout << justRun << std::endl;
+	sscanf(justRun,"run%d",&runNumber);
+
+
+
+	gzFile infile = gzopen (fileName, "rb");    
+	for(int i=0;i<100;i++) {	
+//	    std::cout << i << std::endl;
+	    numBytes=gzread(infile,&theHeader,sizeof(AnitaEventHeader_t));
+	    cout << i << "\t" << numBytes << endl;
+	    if(numBytes!=sizeof(AnitaEventHeader_t)) {
+		error=1;
+		break;
+	    }
+	    processHeader(VER_EVENT_HEADER);
+	}
+	gzclose(infile);
+//	if(error) break;
+    }
+    headTree->AutoSave();;
+    theFile->Close();
+}
 #define C3PO_AVG 20
 
 void processHeader(int version) {
+  static UInt_t c3poNumArray[C3PO_AVG]={0};
+  static UInt_t ppsNumArray[C3PO_AVG]={0};
+  static UInt_t c3poCounter=0;
   static int doneInit=0;
+  static UInt_t lastTriggerTime=0;
+  static UInt_t ppsOffset=0;
+  static UInt_t lastPps=0;
   if(!doneInit) {
     //    char name[128];
     //    char def[128];
     theFile = new TFile(rootFileName,"RECREATE");
     
     headTree = new TTree("headTree","Tree of Anita Event Headers");
-    headTree->Branch("header","RawAnitaHeader",&theHead);    
+    headTree->Branch("header","RawAnitaHeader",&theHead);
+    
+    
     doneInit=1;
   }
   if(theHead) delete theHead;
   
-  
+
 
   //This is wrong, but good enough for telemetry
   UInt_t trigTime=theHeader.turfio.trigTime;
@@ -240,6 +283,6 @@ void processHeader(int version) {
   if(version==VER_EVENT_HEADER) {
     theHead = new RawAnitaHeader(&theHeader,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
   }
-
+  
   headTree->Fill();                
 }

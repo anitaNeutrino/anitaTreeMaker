@@ -20,15 +20,14 @@ using namespace std;
 void processBody();
 void makeBodyTree(char *inputName, char *outDir);
 int checkFileTimeAgainstRootTime(char *fileName);
-void fillEventNumberMap(char *rootName);
 int eventInMap(UInt_t eventNumber);
 
 
 std::map<UInt_t,UInt_t> eventNumberMap;
 
 PedSubbedEventBody_t theBody;
-TFile *theFile;
-TTree *eventTree;
+TFile *theFile=NULL;
+TTree *eventTree=NULL;
 RawAnitaEvent *theEvent=0;
 char outDirName[FILENAME_MAX];
 UInt_t realTime;
@@ -47,18 +46,24 @@ int main(int argc, char **argv) {
 
 void fillEventNumberMap(char *rootName) {
 
-  theFile = new TFile(rootName,"OLD");
-  eventTree = new TTree("eventTree","Tree of Anita Events");
-  eventTree->Branch("run",&runNumber,"run/I");
-  eventTree->Branch("event","RawAnitaEvent",&theEvent);
+  TFile testFile(rootName,"OLD");
+  TTree *eventTree = (TTree*) testFile.Get("eventTree");
+
+  RawAnitaEvent *theEvent2=0;
+  if(!eventTree) {  
+    return;
+  }
+  else {
+    eventTree->SetBranchAddress("run",&runNumber);
+    eventTree->SetBranchAddress("event",&theEvent2);
+  }
 
   for(int i=0;i<eventTree->GetEntries();i++) {
     eventTree->GetEntry(i);
-    eventNumberMap.insert(std::pair<UInt_t,UInt_t>(theEvent.eventNumber,theEvent.eventNumber));
+    eventNumberMap.insert(std::pair<UInt_t,UInt_t>(theEvent2->eventNumber,theEvent2->eventNumber));
   }
-  delete theFile;
-  theFile=0;
-  eventTree=0;
+  testFile.Close();
+
 }
 
 
@@ -84,7 +89,8 @@ int checkFileTimeAgainstRootTime(char *fileName) {
 
   
   struct stat bufRawFile;
-  int retVal2=stat(rootName,&bufRawFile);  
+  int retVal2=stat(fileName,&bufRawFile);  
+  //  std::cout << fileName << "\t" << bufRawFile.st_mtime << "\t" << bufRootFile.st_mtime << "\n";
   if(retVal2==0) { 
     if(bufRawFile.st_mtime>bufRootFile.st_mtime)
       return 1;
@@ -94,7 +100,7 @@ int checkFileTimeAgainstRootTime(char *fileName) {
 }
 
 int eventInMap(UInt_t eventNumber) {
-  std::map::iterator it=eventNumberMap.find(eventNumber);
+  std::map<UInt_t,UInt_t>::iterator it=eventNumberMap.find(eventNumber);
   if(it==eventNumberMap.end()) {
     eventNumberMap.insert(std::pair<UInt_t,UInt_t>(eventNumber,eventNumber));
     return 0;
@@ -132,7 +138,7 @@ void makeBodyTree(char *inputName, char *outDir) {
     //	cout << justRun << endl;
     sscanf(justRun,"run%d",&runNumber);
     
-    if(checkFileTimeAgainstRootTime(fileName)) {
+    if(!checkFileTimeAgainstRootTime(fileName)) {
       std::cout << "File too old\n";
       continue;
     }
@@ -150,26 +156,26 @@ void makeBodyTree(char *inputName, char *outDir) {
 	break;
       }
 
-      //RJN hack for now
-      if(runNumber>=10000 && runNumber<=10057) {
-	if(counter>1 && i==1) {
-	  if(theBody.eventNumber!=lastEventNumber+1) {
-	    gzrewind(infile);
-	    numBytes=gzread(infile,&theBody,sizeof(PedSubbedEventBody_t));
-	    gzread(infile,&theBody,616);
-	    numBytes=gzread(infile,&theBody,sizeof(PedSubbedEventBody_t));
-	  }
-	}
-      }
       //      cout << "Event: " << i << "\t" << theBody.eventNumber << endl;
-      if(eventInMap(theBody.eventNumber)) continue;
+      if(eventInMap(theBody.eventNumber)) {
+	//	std::cout << "Got event: " << theBody.eventNumber << "\n";
+	continue;
+      }
+      else {
+	//	std::cout << "Not got event: " << theBody.eventNumber << "\n";
+      }
+	
       processBody();
       lastEventNumber=theBody.eventNumber;
     }
     gzclose(infile);
     //	if(error) break;
   }
-  eventTree->AutoSave();
+  if(eventTree) {
+    std::cerr << "About to Save\n";
+    eventTree->AutoSave();
+    std::cerr << "Saved\n";
+  }
   //    theFile->Close();
 }
 
@@ -185,10 +191,18 @@ void processBody() {
     gSystem->mkdir(dirName,kTRUE);
     sprintf(fileName,"%s/eventFile%d.root",dirName,runNumber);
     cout << "Creating File: " << fileName << endl;
-    theFile = new TFile(fileName,"RECREATE");
-    eventTree = new TTree("eventTree","Tree of Anita Events");
-    eventTree->Branch("run",&runNumber,"run/I");
-    eventTree->Branch("event","RawAnitaEvent",&theEvent);
+    theFile = new TFile(fileName,"UPDATE");
+
+    eventTree = (TTree*) theFile->Get("eventTree");
+    if(!eventTree) {
+      eventTree = new TTree("eventTree","Tree of Anita Events");
+      eventTree->Branch("run",&runNumber,"run/I");
+      eventTree->Branch("event","RawAnitaEvent",&theEvent);
+    }
+    else {
+      eventTree->SetBranchAddress("run",&runNumber);
+      eventTree->SetBranchAddress("event",&theEvent);
+    }
     
     doneInit=1;
   }  
