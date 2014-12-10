@@ -43,7 +43,7 @@ echo "Starting Event File"
 EVENT_FILE_LIST=`mktemp`
 find ${RAW_RUN_DIR}/event -name "psev*.gz" | sort -n> ${EVENT_FILE_LIST}
 if  test `cat ${EVENT_FILE_LIST} | wc -l` -gt 0 ; then
-    ./makeEventRunTree ${EVENT_FILE_LIST} ${EVENT_BASE_DIR}
+    ./updateEventRunTree ${EVENT_FILE_LIST} ${EVENT_BASE_DIR}
     rm ${EVENT_FILE_LIST}
     echo "Done Event File"
 else

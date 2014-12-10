@@ -20,6 +20,10 @@ using namespace std;
 
 void processHeader(int version);
 void makeRunHeadTree(char *inName, char *outName);
+int eventInMap(UInt_t eventNumber);
+
+
+std::map<UInt_t,UInt_t> eventNumberMap;
 
 AnitaEventHeader_t theHeader;
 AnitaEventHeaderVer13_t theHeader13;
@@ -33,6 +37,20 @@ TTree *headTree;
 UInt_t realTime;
 Int_t runNumber;
 char rootFileName[FILENAME_MAX];
+
+
+
+
+int eventInMap(UInt_t eventNumber) {
+  if(eventNumber==0) return 1; //Bug arggh fixed around run 18
+  std::map<UInt_t,UInt_t>::iterator it=eventNumberMap.find(eventNumber);
+  if(it==eventNumberMap.end()) {
+    eventNumberMap.insert(std::pair<UInt_t,UInt_t>(eventNumber,eventNumber));
+    return 0;
+  }
+  return 1;
+
+}
 
 int main(int argc, char **argv) {
   if(argc<3) {
@@ -176,6 +194,10 @@ void makeRunHeadTree(char *inName, char *outName) {
 		break;
 	      }
 	      else break;
+	    } 
+	    if(eventInMap(theHeader.eventNumber)) {
+	      //	std::cout << "Got event: " << theBody.eventNumber << "\n";
+	      continue;
 	    }
 	    processHeader(version);
 	}
