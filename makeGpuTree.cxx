@@ -89,7 +89,7 @@ void processGpu() {
 	doneInit=1;
     }
     if(theGpuPtr) delete theGpuPtr;
-    theGpuPtr = new GpuPowerSpectra(runNumber,theGpu.unixTime,&theGpu);
+    theGpuPtr = new GpuPowerSpectra(runNumber,theGpu.unixTimeFirstEvent,&theGpu);
     gpuTree->Fill();                
 }
 

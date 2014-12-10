@@ -24,7 +24,7 @@ cd $ANITA_TREE_MAKER_DIR
 
 echo "Starting Monitor File"
 SLOW_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/slow/*;  #Need to update 
+for file in ${RAW_RUN_DIR}/house/slow/*/*/slow*;  #Need to update 
   do
   if [[ -f $file ]]; then
       echo $file >> ${SLOW_FILE_LIST}

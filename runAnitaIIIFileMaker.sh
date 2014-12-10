@@ -280,7 +280,7 @@ fi
 
 echo "Starting Gpu File"
 GPU_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gpu/*/*/gpu*gz; 
+for file in ${RAW_RUN_DIR}/house/gpu/*/*/gpu*.da*; 
   do
   if [[ -f $file ]]; then
       echo $file >> ${GPU_FILE_LIST}
