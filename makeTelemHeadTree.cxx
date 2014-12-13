@@ -278,7 +278,7 @@ void processHeader(int version) {
   UInt_t triggerTime=theHeader.unixTime;
   UInt_t triggerTimeNs=1e9*(trigTime/250e6);
   Int_t goodTimeFlag=1;
-    
+  realTime=theHeader.unixTime;
    
   if(version==VER_EVENT_HEADER) {
     theHead = new RawAnitaHeader(&theHeader,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
