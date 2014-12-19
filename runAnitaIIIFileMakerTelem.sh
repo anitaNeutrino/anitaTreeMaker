@@ -1,4 +1,4 @@
-#/bin/bash
+1#/bin/bash
 if [ "$1" = "" ]
 then
    echo "usage: `basename $0` <run no>" 1>&2
@@ -13,6 +13,7 @@ fi
 
 
 RUN=$1
+BASE_DIR=$ANITA_TELEM_DATA_DIR
 RAW_RUN_DIR=${ANITA_TELEM_DATA_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${ANITA_TELEM_DATA_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
