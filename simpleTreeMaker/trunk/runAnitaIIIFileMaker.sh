@@ -319,7 +319,7 @@ fi
 
 echo "Starting Hk File"
 HKCAL_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/hk*gz; 
+for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/hk*; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${HKCAL_FILE_LIST}
@@ -327,7 +327,7 @@ do
 done
 
 HKRAW_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/hk*gz; 
+for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/hk*; 
 do
     if [[ -f $file ]]; then
 	echo $file >> ${HKRAW_FILE_LIST}
@@ -352,30 +352,30 @@ echo "Done Hk File"
 
 
 echo "Starting SSHk File"
-HKCAL_FILE_LIST=`mktemp`
+SSHKCAL_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/house/hk/cal/*/*/sshk*; 
 do
     if [[ -f $file ]]; then
-	echo $file >> ${HKCAL_FILE_LIST}
+	echo $file >> ${SSHKCAL_FILE_LIST}
     fi
 done
 
-HKRAW_FILE_LIST=`mktemp`
+SSHKRAW_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/sshk*; 
 do
     if [[ -f $file ]]; then
-	echo $file >> ${HKRAW_FILE_LIST}
+	echo $file >> ${SSHKRAW_FILE_LIST}
     fi
 done
 
-HK_ROOT_FILE=${ROOT_RUN_DIR}/sshkFile${RUN}.root
-if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
-    ./makeSSHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
-    rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
+SSHK_ROOT_FILE=${ROOT_RUN_DIR}/sshkFile${RUN}.root
+if  test `cat ${SSHKRAW_FILE_LIST} | wc -l` -gt 0 ; then
+    ./makeSSHkTree ${SSHKCAL_FILE_LIST} ${SSHKRAW_FILE_LIST} ${SSHK_ROOT_FILE}
+    rm ${SSHKRAW_FILE_LIST} ${SSHKCAL_FILE_LIST}
 
    
 else
-    rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
+    rm ${SSHKRAW_FILE_LIST} ${SSHKCAL_FILE_LIST}
     echo "No Hk Files"
 fi
 echo "Done Hk File"
