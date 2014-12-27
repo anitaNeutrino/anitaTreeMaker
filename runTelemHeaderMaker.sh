@@ -25,6 +25,8 @@ echo "Starting Header File"
 HEAD_FILE_LIST=`mktemp`
 find ${RAW_RUN_DIR}/event -name "hd*.gz" | sort -n > ${HEAD_FILE_LIST}
 
+#cat ${HEAD_FILE_LIST}
+
 if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     HEAD_ROOT_FILE=${ROOT_RUN_DIR}/headFile${RUN}.root
     ./makeTelemHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
