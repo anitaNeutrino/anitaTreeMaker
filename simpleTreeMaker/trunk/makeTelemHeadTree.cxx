@@ -99,58 +99,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 
 	gzFile infile = gzopen (fileName, "rb");   
 
-	if(firstTime) {
-	   //Need to work out which version this is
-	   numBytes=gzread(infile,&gHdr,sizeof(GenericHeader_t));
-	   if(numBytes!=sizeof(GenericHeader_t)) {
-	      std::cerr << "Error reading GenericHeader_t to determine version\n";
-	      exit(0);
-	   }
-	   gzrewind(infile);
-	   if(gHdr.code != PACKET_HD) {
-	      std::cerr << "not an AnitaEventHeader_t\n";
-	      exit(0);
-	   }
-
-	 if(gHdr.verId != VER_EVENT_HEADER) {
-	    std::cout << "Old version of AnitaEventHeader_t -- " << (int)gHdr.verId
-		 << std::endl;
-	    switch(gHdr.verId) {
-	    case 13:
-	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer13_t)) {
-		  std::cout << "Size matches will proceed\n";
-		  version=13;
-	       }
-	       break;
-	    case 12:
-	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer12_t)) {
-		  std::cout << "Size matches will proceed\n";
-		  version=12;
-	       }
-	       break;
-	    case 11:
-	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer11_t)) {
-		  std::cout << "Size matches will proceed\n";
-		  version=11;
-	       }
-	       break;	       
-	    case 10:
-	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer10_t)) {
-		  std::cout << "Size matches will proceed\n";
-		  version=10;
-	       }
-	       break;
-	    default:
-	       std::cerr << "This version is not currently supported someone needs, to update me\n";
-	       exit(0);
-	    }
-	 }	 
-	   std::cout << "Got version:\t" << int(gHdr.verId) << " current " 
-		     << VER_EVENT_HEADER << "\n";
-	   firstTime=0;
-	}
-
-
+	version=VER_EVENT_HEADER;
  
 	//	cout << infile << " " << fileName << endl;
 	for(int i=0;i<100;i++) {	
