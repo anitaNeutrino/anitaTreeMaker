@@ -90,7 +90,7 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
       intFlag=headPtr->triggerTime-patPtr->realTime;
 
       if(thePat) delete thePat;
-      thePat = new Adu5Pat(patPtr);
+      thePat = new Adu5Pat(*patPtr);
       thePat.intFlag=intFlag;
       adu5PatTreeInt->Fill();
 
