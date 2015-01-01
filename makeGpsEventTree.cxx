@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     std::cout << "Usage: " << basename(argv[0]) << " <inhkfile> <inheadfile> <outhkfile>" << std::endl;
     return -1;
   }
-  makePrettyHkTree(argv[1],argv[2],argv[3]);
+  makeGpsEventTree(argv[1],argv[2],argv[3]);
   return 0;
 }
 
@@ -39,12 +39,12 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
       return;
    }  
    TTree *adu5PatTree = (TTree*) fpIn->Get("adu5PatTree");
-   if(!hkTree) {
+   if(!adu5PatTree) {
       std::cerr << "Couldn't get hkTree from " << inName << "\n";
       return;
    }      
    TTree *adu5bPatTree = (TTree*) fpIn->Get("adu5bPatTree");
-   if(!hkTree) {
+   if(!adu5bPatTree) {
       std::cerr << "Couldn't get hkTree from " << inName << "\n";
       return;
    }      
@@ -66,7 +66,7 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
    TFile *fpOut = new TFile(outName,"RECREATE");
    TTree *adu5PatTreeInt = new TTree("adu5PatTree","Tree of ADU5 PAT");
    Adu5Pat *thePat = new Adu5Pat();
-   adu5PatTreeInt->Branch("hk","Adu5Pat",&thePat);
+   adu5PatTreeInt->Branch("pat","Adu5Pat",&thePat);
 
    Long64_t headEntries = headTree->GetEntries();
    Long64_t nentries = adu5PatTree->GetEntries();
@@ -90,7 +90,8 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
       intFlag=headPtr->triggerTime-patPtr->realTime;
 
       if(thePat) delete thePat;
-      thePat = new Adu5Pat(patPtr,intFlag);
+      thePat = new Adu5Pat(patPtr);
+      thePat.intFlag=intFlag;
       adu5PatTreeInt->Fill();
 
    }
