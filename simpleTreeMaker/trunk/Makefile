@@ -32,7 +32,7 @@ LIBS          = $(ROOTLIBS)  -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -lA
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 
-TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree makeHkTree makePrettyHkTree makeTurfRateTree makeSurfHkTree makeEventRunTree makeRawScalerTree makeSummedTurfRateTree makeAveragedSurfHkTree makeGpsTree makeAuxiliaryTree quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree updateEventRunTree makeTelemHeadTree
+TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree makeHkTree makePrettyHkTree makeTurfRateTree makeSurfHkTree makeEventRunTree makeRawScalerTree makeSummedTurfRateTree makeAveragedSurfHkTree makeGpsTree makeAuxiliaryTree quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree updateEventRunTree makeTelemHeadTree makeGpsEventTree
 
 
 all : $(TREE_MAKER)
