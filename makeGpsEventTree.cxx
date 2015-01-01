@@ -91,7 +91,7 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
 
       if(thePat) delete thePat;
       thePat = new Adu5Pat(*patPtr);
-      thePat.intFlag=intFlag;
+      thePat->intFlag=intFlag;
       adu5PatTreeInt->Fill();
 
    }
