@@ -77,27 +77,30 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
    Long64_t nbytes = 0, nb = 0;
    Int_t intFlag;
 
-   std::map<UInt_t,Int_t> adu5PatEntryMap;
+   std::map<Long64_t,Int_t> adu5PatEntryMap;
    for(int entry=0;entry<nentries;entry++) {
      adu5PatTree->GetEntry(entry);
      if(patPtr->attFlag==0) {
-       adu5PatEntryMap.insert(std::pair<UInt_t,Int_t>(patPtr->realTime , entry)  );
+       Long64_t fakeTime=patPtr->realTime;
+       adu5PatEntryMap.insert(std::pair<Long64_t,Int_t>(fakeTime , entry)  );
      }
    }
    
    std::cout << "adu5PatEntryMap.size(): "<< adu5PatEntryMap.size() << "\n";
 
-   std::map<UInt_t,Int_t>::iterator patLowIt; 
-   std::map<UInt_t,Int_t>::iterator patUpIt; 
+   std::map<Long64_t,Int_t>::iterator patLowIt; 
+   std::map<Long64_t,Int_t>::iterator patUpIt; 
 
    for (Long64_t jentry=0; jentry<headEntries;jentry++) {
       if(jentry%10000==0) cerr << "*";
       nb = headTree->GetEntry(jentry);   nbytes += nb;
      
-      patLowIt=adu5PatEntryMap.lower_bound(headPtr->triggerTime);
-      patUpIt=adu5PatEntryMap.upper_bound(headPtr->triggerTime);
+
+      Long64_t triggerTime=headPtr->triggerTime;
+      patLowIt=adu5PatEntryMap.lower_bound(triggerTime);
+      patUpIt=adu5PatEntryMap.upper_bound(triggerTime);
  
-      std::cout << headPtr->triggerTime << "\t" << patLowIt->first << "\t" << patUpIt->first << "\t" 
+      std::cout << triggerTime << "\t" << patLowIt->first << "\t" << patUpIt->first << "\t" 
 		<< patLowIt->second << "\t" << patUpIt->second << "\n";       
       adu5PatTree->GetEntry(patLowIt->second);
 
