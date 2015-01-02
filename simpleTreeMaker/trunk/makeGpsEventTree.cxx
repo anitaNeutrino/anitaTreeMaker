@@ -98,14 +98,42 @@ void makeGpsEventTree(char *rootDir, int runNum) {
  
       std::cout << triggerTime << "\t" << downIndex << "\t" << upIndex << "\n";
       adu5PatTree->GetEntry(downIndex);
-      std:: cout << "\t" << patPtr->realTime << "\t";
+      Double_t lowTime=patPtr->realTime;
+      Double_t lowLat=patPtr->latitude;
+      Double_t lowLong=patPtr->longitude;
+      Double_t lowAlt=patPtr->altitude;
+      Double_t lowHeading=patPtr->heading;
 
-
+      //      std:: cout << "\t" << patPtr->realTime << "\t";
       adu5PatTree->GetEntry(upIndex);
-      std:: cout << patPtr->realTime << "\n";
 
+      //      std:: cout << patPtr->realTime << "\n";
+      Double_t upTime=patPtr->realTime;
+      Double_t upLat=patPtr->latitude;
+      Double_t upLong=patPtr->longitude;
+      Double_t upAlt=patPtr->altitude;
+      Double_t upHeading=patPtr->heading;
 
-      intFlag=headPtr->triggerTime-patPtr->realTime;
+      
+      Double_t diffTime=TMath::Abs(upTime-headPtr->triggerTime);
+      Double_t diffTime2=TMath::Abs(lowTime-headPtr->triggerTime);
+      if(diffTime2<diffTime) diffTime=diffTime2;
+
+      Double_t timeRat=(headPtr->triggerTime-lowTime)/(upTime-lowTime);
+      Double_t bestLat=lowLat+timeRat*(upLat-lowLat);
+      if((upLong-lowLong)>180) upLong-=360;
+      if((upLong-lowLong)<-180) upLong+=360;
+      Double_t bestLong=lowLong+timeRat*(upLong-lowLong); 
+      Double_t bestAlt=lowAlt+timeRat*(upAlt-lowAlt); 
+      if((upHeading-lowHeading)>180) upHeading-=360;
+      if((upHeading-lowHeading)<-180) upHeading+=360;
+      Double_t bestHeading=lowHeading+timeRat*(upHeading-lowHeading); 
+      patPtr->realTime=headPtr->triggerTime;
+      patPtr->latitude=bestLat;
+      patPtr->longitude=bestLong;
+      patPtr->altitude=bestAlt;
+      patPtr->heading=bestAlt;     
+      intFlag=Int_t(diffTime);
 
       if(thePat) delete thePat;
       thePat = new Adu5Pat(*patPtr);
