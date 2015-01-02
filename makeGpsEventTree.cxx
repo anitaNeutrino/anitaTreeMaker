@@ -103,7 +103,7 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
       if(upIndex>0) downIndex=upIndex-1;
  
       std::cout << triggerTime << "\t" << downIndex << "\t" << upIndex << "\n";
-      adu5PatTree->GetEntry(patLowIt->second);
+      adu5PatTree->GetEntry(upIndex);
 
 
       intFlag=headPtr->triggerTime-patPtr->realTime;
