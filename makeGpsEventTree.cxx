@@ -41,8 +41,8 @@ void makeGpsEventTree(char *rootDir, int runNum) {
   sprintf(outName,"%s/run%d/gpsEvent%d.root",rootDir,runNum,runNum);
 
   TChain *adu5PatTree = new TChain("adu5PatTree");
-  for(int testRun=runNum-1;testRun<runNum+2;runNum++) {
-    sprintf(inName,"%s/run%d/gpsFile%d.root",rootDir,runNum,runNum);
+  for(int testRun=runNum-1;testRun<runNum+2;testRun++) {
+    sprintf(inName,"%s/run%d/gpsFile%d.root",rootDir,testRun,testRun);
     adu5PatTree->AddFile(inName);
   }
    adu5PatTree->SetBranchAddress("pat",&patPtr);   
