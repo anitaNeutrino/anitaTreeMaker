@@ -132,7 +132,7 @@ void makeGpsEventTree(char *rootDir, int runNum) {
       patPtr->latitude=bestLat;
       patPtr->longitude=bestLong;
       patPtr->altitude=bestAlt;
-      patPtr->heading=bestAlt;     
+      patPtr->heading=bestHeading;     
       intFlag=Int_t(diffTime);
 
       if(thePat) delete thePat;
