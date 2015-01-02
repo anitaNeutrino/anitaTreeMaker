@@ -22,36 +22,28 @@ void makeGpsEventTree(char *inName, char *headName, char *outName);
 
 int main(int argc, char **argv) {
   if(argc<3) {
-    std::cout << "Usage: " << basename(argv[0]) << " <inhkfile> <inheadfile> <outhkfile>" << std::endl;
+    std::cout << "Usage: " << basename(argv[0]) << " <root dir> <run num> <outhkfile>" << std::endl;
     return -1;
   }
-  makeGpsEventTree(argv[1],argv[2],argv[3]);
+  makeGpsEventTree(argv[1],atoi(argv[2]),argv[3]);
   return 0;
 }
 
 
-void makeGpsEventTree(char *inName,char *headName, char *outName) {
+void makeGpsEventTree(char *rootDir, int runNum, char *outName) {
 
   Adu5Pat *patPtr=0;
   RawAnitaHeader *headPtr=0;
+  char inName[FILENAME_MAX];
+  char headName[FILENAME_MAX];
+  sprintf(headName,"%s/run%d/headFile%d.root",rootDir,runNum,runNum);
 
-   TFile *fpIn = new TFile(inName);
-   if(!fpIn) {
-      std::cerr << "Couldn't open " << inName << "\n";
-      return;
-   }  
-   TTree *adu5PatTree = (TTree*) fpIn->Get("adu5PatTree");
-   if(!adu5PatTree) {
-      std::cerr << "Couldn't get hkTree from " << inName << "\n";
-      return;
-   }      
-   TTree *adu5bPatTree = (TTree*) fpIn->Get("adu5bPatTree");
-   if(!adu5bPatTree) {
-      std::cerr << "Couldn't get hkTree from " << inName << "\n";
-      return;
-   }      
+  TChain *adu5PatTree = new TChain("adu5PatTree");
+  for(int testRun=runNum-1;testRun<runNum+2;runNum++) {
+    sprintf(inName,"%s/run%d/gpsFile%d.root",rootDir,runNum,runNum);
+    adu5PatTree->AddFile(inName);
+  }
    adu5PatTree->SetBranchAddress("pat",&patPtr);   
-   adu5bPatTree->SetBranchAddress("pat",&patPtr);   
    TFile *fpHead = new TFile(headName);
    if(!fpHead) {
       std::cerr << "Couldn't open " << headName << "\n";
