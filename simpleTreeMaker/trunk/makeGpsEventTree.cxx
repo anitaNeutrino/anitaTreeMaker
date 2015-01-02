@@ -80,8 +80,9 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
    std::map<UInt_t,Int_t> adu5PatEntryMap;
    for(int entry=0;entry<nentries;entry++) {
      adu5PatTree->GetEntry(entry);
-     if(patPtr->attFlag==0)
-       adu5PatEntryMap.insert(std::pair<patPtr->realTime,entry>);
+     if(patPtr->attFlag==0) {
+       adu5PatEntryMap.insert(std::pair<UInt_t,Int_t>(patPtr->realTime , entry)  );
+     }
    }
    
    std::cout << "adu5PatEntryMap.size(): "<< adu5PatEntryMap.size() << "\n";
@@ -93,10 +94,10 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
       if(jentry%10000==0) cerr << "*";
       nb = headTree->GetEntry(jentry);   nbytes += nb;
      
-      patLowIt=adu5PatEntryMap.lower_bound(headTree->triggerTime);
-      patUpIt=adu5PatEntryMap.upper_bound(headTree->triggerTime);
+      patLowIt=adu5PatEntryMap.lower_bound(headPtr->triggerTime);
+      patUpIt=adu5PatEntryMap.upper_bound(headPtr->triggerTime);
  
-      std::cout << triggerTime-patLowIt->first << "\t" << triggerTime-patUpIt->first << "\t" 
+      std::cout << headPtr->triggerTime-patLowIt->first << "\t" << headPtr->triggerTime-patUpIt->first << "\t" 
 		<< patLowIt->second << "\t" << patUpIt->second << "\n";       
       adu5PatTree->GetEntry(patLowIt->second);
 
