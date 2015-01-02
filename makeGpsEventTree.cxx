@@ -5,6 +5,7 @@
 #include <libgen.h>      
 
 #include "TTree.h"
+#include "TChain.h"
 #include "TFile.h"
 #include "TSystem.h"
 #include "TTreeIndex.h"
@@ -17,8 +18,7 @@
 
 using namespace std;
 
-void makeGpsEventTree(char *inName, char *headName, char *outName);
-
+void makeGpsEventTree(char *rootDir, int runNum, char *outName);
 
 int main(int argc, char **argv) {
   if(argc<3) {
