@@ -18,25 +18,27 @@
 
 using namespace std;
 
-void makeGpsEventTree(char *rootDir, int runNum, char *outName);
+void makeGpsEventTree(char *rootDir, int runNum);
 
 int main(int argc, char **argv) {
-  if(argc<3) {
-    std::cout << "Usage: " << basename(argv[0]) << " <root dir> <run num> <outhkfile>" << std::endl;
+  if(argc<2) {
+    std::cout << "Usage: " << basename(argv[0]) << " <root dir> <run num> " << std::endl;
     return -1;
   }
-  makeGpsEventTree(argv[1],atoi(argv[2]),argv[3]);
+  makeGpsEventTree(argv[1],atoi(argv[2]));
   return 0;
 }
 
 
-void makeGpsEventTree(char *rootDir, int runNum, char *outName) {
+void makeGpsEventTree(char *rootDir, int runNum) {
 
   Adu5Pat *patPtr=0;
   RawAnitaHeader *headPtr=0;
   char inName[FILENAME_MAX];
+  char outName[FILENAME_MAX];
   char headName[FILENAME_MAX];
   sprintf(headName,"%s/run%d/headFile%d.root",rootDir,runNum,runNum);
+  sprintf(outName,"%s/run%d/gpsEvent%d.root",rootDir,runNum,runNum);
 
   TChain *adu5PatTree = new TChain("adu5PatTree");
   for(int testRun=runNum-1;testRun<runNum+2;runNum++) {
