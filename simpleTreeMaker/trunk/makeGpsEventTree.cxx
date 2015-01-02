@@ -97,11 +97,12 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
      
 
       Long64_t triggerTime=headPtr->triggerTime;
-      patLowIt=adu5PatEntryMap.lower_bound(triggerTime);
       patUpIt=adu5PatEntryMap.upper_bound(triggerTime);
+      Int_t upIndex=patUpIt->second;
+      Int_t downIndex=0;
+      if(upIndex>0) downIndex=upIndex-1;
  
-      std::cout << triggerTime << "\t" << patLowIt->first << "\t" << patUpIt->first << "\t" 
-		<< patLowIt->second << "\t" << patUpIt->second << "\n";       
+      std::cout << triggerTime << "\t" << downIndex << "\t" << upIndex << "\n";
       adu5PatTree->GetEntry(patLowIt->second);
 
 
