@@ -13,6 +13,8 @@
 #include "Adu5Pat.h"
 #include "RawAnitaHeader.h"
 
+#include <map>
+
 using namespace std;
 
 void makeGpsEventTree(char *inName, char *headName, char *outName);
@@ -74,19 +76,31 @@ void makeGpsEventTree(char *inName,char *headName, char *outName) {
 
    Long64_t nbytes = 0, nb = 0;
    Int_t intFlag;
+
+   std::map<UInt_t,Int_t> adu5PatEntryMap;
+   for(int entry=0;entry<nentries;entry++) {
+     adu5PatTree->GetEntry(entry);
+     if(patPtr->attFlag==0)
+       adu5PatEntryMap.insert(std::pair<patPtr->realTime,entry>);
+   }
+   
+   std::cout << "adu5PatEntryMap.size(): "<< adu5PatEntryMap.size() << "\n";
+
+   std::map<UInt_t,Int_t>::iterator patLowIt; 
+   std::map<UInt_t,Int_t>::iterator patUpIt; 
+
    for (Long64_t jentry=0; jentry<headEntries;jentry++) {
       if(jentry%10000==0) cerr << "*";
       nb = headTree->GetEntry(jentry);   nbytes += nb;
-      
-      Long64_t adu5aEntry=adu5PatTree->GetEntryNumberWithBestIndex(headPtr->triggerTime,
-							   headPtr->triggerTimeNs/1000);
-      if(adu5aEntry>=0 && adu5aEntry<nentries) {
-	 adu5PatTree->GetEntry(adu5aEntry);
-      }
-      else {
-	 std::cerr << "Invalid entry " << adu5aEntry << "\t" << headPtr->triggerTime << "\t" << headPtr->triggerTimeNs << "\n";
-	 continue;
-      }
+     
+      patLowIt=adu5PatEntryMap.lower_bound(headTree->triggerTime);
+      patUpIt=adu5PatEntryMap.upper_bound(headTree->triggerTime);
+ 
+      std::cout << triggerTime-patLowIt->first << "\t" << triggerTime-patUpIt->first << "\t" 
+		<< patLowIt->second << "\t" << patUpIt->second << "\n";       
+      adu5PatTree->GetEntry(patLowIt->second);
+
+
       intFlag=headPtr->triggerTime-patPtr->realTime;
 
       if(thePat) delete thePat;
