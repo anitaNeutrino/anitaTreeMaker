@@ -93,6 +93,7 @@ void makeGpsEventTree(char *rootDir, int runNum) {
       Long64_t triggerTime=headPtr->triggerTime;
       patUpIt=adu5PatEntryMap.upper_bound(triggerTime);
       Int_t upIndex=patUpIt->second;
+      Int_t downIndex=upIndex;
       patLowIt=patUpIt;
       if(patLowIt!=adu5PatEntryMap.begin()) {
 	patLowIt--;
