@@ -203,6 +203,7 @@ void makeTurfRateTree(char *inName, char *outName) {
 }
 
 void processTurfRate(int version) {
+  static Int_t lastPpsNum=-1;
    if(!doneInit) {
       theFile = new TFile(rootFileName,"RECREATE");
 
@@ -210,8 +211,10 @@ void processTurfRate(int version) {
       turfRateTree->Branch("turf","TurfRate",&theTurfRateClass);       	
 
       doneInit=1;
+      lastPpsNum=-1;
    }
-
+   if(theTurfRate.ppsNum==lastPpsNum) return;
+   lastPpsNum=theTurfRate.ppsNum;
    //    std::cout << theTurfRate.unixTime << "\t" 
    ///	      << theTurfRate.ppsNum << "\t"
    //	      << theTurfRate.gHdr.code << "\n";
