@@ -62,8 +62,10 @@ void makeAdu5PatTree(int doingRun) {
 
   //First up open header file
   char headName[FILENAME_MAX];
+  //Now updating for ANITA-3
   //ANITA II has a different format than ANITA I, and the root files are already made
-  sprintf(headName,"/unix/anita1/flight0809/root/run%d/headFile%d.root",doingRun,doingRun); 
+  sprintf(headName,"/unix/anita3/flight1415/root/run%d/headFile%d.root",doingRun,doingRun); 
+  //  sprintf(headName,"/unix/anita1/flight0809/root/run%d/headFile%d.root",doingRun,doingRun); 
   TFile *fHead= new TFile(headName,"OLD");
   TTree *headTree = (TTree*) fHead->Get("headTree");
   
@@ -73,7 +75,8 @@ void makeAdu5PatTree(int doingRun) {
   //ANITA II has a different format than ANITA I, and the 
   //gps files are already made
   char gpsName[FILENAME_MAX]; 
-  sprintf(gpsName,"/unix/anita1/flight0809/root/run%d/gpsFile%d.root",doingRun,doingRun); 
+  sprintf(gpsName,"/unix/anita3/flight1415/root/run%d/gpsFile%d.root",doingRun,doingRun); 
+  //  sprintf(gpsName,"/unix/anita1/flight0809/root/run%d/gpsFile%d.root",doingRun,doingRun); 
   TFile *fGps = new TFile(gpsName,"OLD");//"/raid2/grashorn/anita/data/anita2/fixedTimeFiles/gpsFile.root");    
   
   TTree *adu5PatTree = (TTree*)fGps->Get("adu5PatTree");
@@ -131,7 +134,8 @@ void makeAdu5PatTree(int doingRun) {
 
 
    char outName[FILENAME_MAX];
-   sprintf(outName,"/unix/anita1/flight0809/root/run%d/gpsEvent%d.root",doingRun,doingRun);  
+   sprintf(outName,"/unix/anita3/flight1415/root/run%d/gpsEvent%d.root",doingRun,doingRun);  
+   //   sprintf(outName,"/unix/anita1/flight0809/root/run%d/gpsEvent%d.root",doingRun,doingRun);  
    //sprintf(outName,"/raid2/grashorn/anita/runTreeMaker/gpsEvent%d.root",doingRun);  
    TFile *newFp= new TFile(outName,"RECREATE"); 
    
