@@ -25,14 +25,21 @@ endif
 
 
 #Generic and Site Specific Flags
-CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL)
+CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL) -Wall
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
 LIBS          = $(ROOTLIBS)  -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -lAnitaEvent
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 
-TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree makeHkTree makePrettyHkTree makeTurfRateTree makeSurfHkTree makeEventRunTree makeRawScalerTree makeSummedTurfRateTree makeAveragedSurfHkTree makeGpsTree makeAuxiliaryTree quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree makeTelemHeadTree makeGpsEventTree
+TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree \
+						makeHkTree makePrettyHkTree makeTurfRateTree makeSurfHkTree\
+						makeEventRunTree makeRawScalerTree makeSummedTurfRateTree \
+						makeAveragedSurfHkTree makeGpsTree makeAuxiliaryTree \
+						quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees \
+						checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles \
+						makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree\
+					 	makeTelemHeadTree makeGpsEventTree  makeGpsEventTreeBothAdu5s 
 
 
 all : $(TREE_MAKER)
