@@ -1,7 +1,7 @@
 static TCanvas * static_canvas = 0;  
 static int current_run = 0; 
 
-void makePlot(TTree * tree, const char * draw, const char * cut, bool same )
+TGraph * makePlot(TTree * tree, const char * draw, const char * cut, bool same )
 {
   int n = tree->Draw(draw,cut,"goff"); 
   TGraph *g = new TGraph(n, tree->GetV2(), tree->GetV1()); 
@@ -10,6 +10,7 @@ void makePlot(TTree * tree, const char * draw, const char * cut, bool same )
   g->SetMarkerColor(tree->GetMarkerColor()); 
   FFTtools::unwrap(g->GetN(), g->GetX(), 24); 
   g->Draw( same ? "psame" : "ap"); 
+  return g; 
 }
 
 TCanvas * sanityCheckAdu5Pat(int run = 342, const char * outputdir = 0, int w=2000, int h = 1000, TCanvas * c = 0, const char * format = "png" )
@@ -50,16 +51,18 @@ TCanvas * sanityCheckAdu5Pat(int run = 342, const char * outputdir = 0, int w=20
 
   last_canvas = c; 
   current_run = run; 
+  TCanvas * c2 = new TCanvas("dhead","dhead", 1000,500); 
 
   c->Divide(3,2); 
+  c2->Divide(2,1); 
 
   c->cd(1); 
   const char * heading_cutstr = "(heading >0)  && (heading < 360) && (abs(pitch) < 3) && (abs(roll) < 3 ) &&  !(heading == 0 && pitch == 0 && roll == 0)"; 
   const char * other_cutstr = "(heading >0)  && (heading < 360) && (abs(pitch) < 3) && (abs(roll) < 3 ) &&  !(pitch == 0 && roll == 0)"; 
 
-  makePlot(adu5I, "heading:timeOfDay/3600000","", false) ; 
-  makePlot(adu5A, "heading:timeOfDay/3600000","attFlag==0",true); 
-  makePlot(adu5B, "heading:timeOfDay/3600000","attFlag==0",true); 
+  TGraph * gI = makePlot(adu5I, "heading:timeOfDay/3600000","", false) ; 
+  TGraph * gA = makePlot(adu5A, "heading:timeOfDay/3600000","attFlag==0",true); 
+  TGraph * gB = makePlot(adu5B, "heading:timeOfDay/3600000","attFlag==0",true); 
   adu5A->SetMarkerStyle(1); 
   adu5B->SetMarkerStyle(1); 
   makePlot(adu5A, "heading:timeOfDay/3600000",heading_cutstr,true); 
@@ -68,6 +71,54 @@ TCanvas * sanityCheckAdu5Pat(int run = 342, const char * outputdir = 0, int w=20
 
   adu5A->SetMarkerStyle(7); 
   adu5B->SetMarkerStyle(7); 
+
+  TGraph * dA = new TGraph(gA->GetN(), gA->GetX(), gA->GetY()); 
+  TGraph * dB = new TGraph(gB->GetN(), gB->GetX(), gB->GetY()); 
+
+  double x0 = gI->GetX()[0]; 
+  double x1 = gI->GetX()[gI->GetN()-1]; 
+  for (int i = 0; i < dA->GetN(); i++) 
+  {
+    double Ax = dA->GetX()[i]; 
+    if (Ax <= x1) 
+    {
+      dA->GetY()[i] -= gI->Eval(Ax); 
+      FFTtools::wrap(dA->GetY()[i]); 
+    }
+    else
+    {
+
+      dA->Set(i); 
+      break; 
+
+    }
+
+  }
+  for (int i = 0; i < dB->GetN(); i++) 
+  {
+    double Bx = dB->GetX()[i]; 
+    if (Bx <= x1) 
+    {
+      dB->GetY()[i] -= gI->Eval(Bx); 
+      FFTtools::wrap(dB->GetY()[i]); 
+    }
+    else 
+    {
+      dB->Set(i); 
+      break; 
+    }
+    
+  }
+  c2->cd(1); 
+  dA->SetLineColor(2); 
+  dA->SetMarkerColor(2); 
+  dA->Draw("alp"); 
+  c2->cd(2); 
+  dB->SetLineColor(3); 
+  dB->SetMarkerColor(3); 
+  dB->Draw("alp"); 
+  
+
 
   c->cd(2); 
   makePlot(adu5I,"pitch:timeOfDay/3600000","",false); 
