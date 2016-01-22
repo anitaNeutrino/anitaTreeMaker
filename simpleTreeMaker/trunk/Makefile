@@ -24,11 +24,22 @@ endif
 endif
 
 
+#Toggles the FFT functions on and off
+USE_FFT_TOOLS=1
+
+ifdef USE_FFT_TOOLS
+FFTLIBS = -lRootFftwWrapper -lfftw3
+FFTFLAG = -DUSE_FFT_TOOLS
+else
+FFTLIBS =
+FFTFLAG =
+endif
+
 #Generic and Site Specific Flags
 CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL) -Wall
 LDFLAGS      += -g $(ROOTLDFLAGS) 
 
-LIBS          = $(ROOTLIBS)  -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -lAnitaEvent
+LIBS          = -lz $(ROOTLIBS)  -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -lAnitaEvent
 GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
 
 
@@ -39,7 +50,7 @@ TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree \
 						quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees \
 						checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles \
 						makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree\
-					 	makeTelemHeadTree makeGpsEventTree  makeGpsEventTreeBothAdu5s 
+					 	makeTelemHeadTree makeGpsEventTree  makeGpsEventTreeBothAdu5s makeGpsTttTree 
 
 
 all : $(TREE_MAKER)
