@@ -50,7 +50,7 @@ TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree \
 						quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees \
 						checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles \
 						makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree\
-					 	makeTelemHeadTree makeGpsEventTree  makeGpsEventTreeBothAdu5s makeGpsTttTree 
+					 	makeTelemHeadTree makeGpsEventTree  makeGpsEventTreeBothAdu5s makeGpsTttTree fixTriggerTimeAnita3
 
 
 all : $(TREE_MAKER)
