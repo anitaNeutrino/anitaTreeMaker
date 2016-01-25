@@ -28,23 +28,8 @@ ls ${RAW_RUN_DIR}
 
 
 
-echo "Starting TTT  File"
-TTT_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/gps/all/ttt/*/*/ttt*.gz
-  do
-  if [[ -f $file ]]; then
-      echo $file >> ${TTT_FILE_LIST}
-  fi
-done
-
-if  test `cat ${TTT_FILE_LIST} | wc -l` -gt 0 ; then
-    TTT_ROOT_FILE=${ROOT_RUN_DIR}/tttFile${RUN}.root
-    ./makeGpsTttTree ${TTT_FILE_LIST} ${TTT_ROOT_FILE}
-    rm ${TTT_FILE_LIST}
-    echo "Done TTT  File"
-else
-    rm ${TTT_FILE_LIST}
-    echo "No TTT  Files"
-fi
-
+HEAD_ROOT_FILE=${ROOT_RUN_DIR}/headFile${RUN}.root
+NEW_HEAD_ROOT_FILE=${ROOT_RUN_DIR}/timedHeadFile${RUN}.root
+EPOCH_FILE=/unix/anita3/flight1415/epochFiles/newEpochTree${RUN}.root
+./fixTriggerTimeAnita3 $HEAD_ROOT_FILE $EPOCH_FILE $NEW_HEAD_ROOT_FILE
 

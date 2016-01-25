@@ -70,7 +70,7 @@ void makeGpsTttTree(char *tttInName)
       sscanf(justRun,"run%d",&runNumber);
       
       if(counter%100==0)
-	std::cout << fileName << std::endl;
+	std::cout << fileName << "\t" << runNumber << std::endl;
       counter++;
       gzFile infile = gzopen (fileName, "rb");    
       for(int i=0;i<1000;i++) {	
@@ -79,7 +79,7 @@ void makeGpsTttTree(char *tttInName)
 	  error=1;
 	  break;
 	}
-	
+	tttTree->Fill();
       }
       gzclose(infile);
       //	if(error) break;
@@ -95,7 +95,7 @@ void setupOutTree()
 {
   theFile = new TFile(rootFileName,"RECREATE");
   tttTree = new TTree("tttTree","Tree of GPS Sub Time Files");
-  tttTree->Branch("unixTimeGps",&rawSubTime.unixTime,"unixTimeGps/I");
-  tttTree->Branch("subTimeGps",&rawSubTime.subTime,"subTimeGps/I");
-  tttTree->Branch("fromAdu5",&rawSubTime.fromAdu5,"fromAdu5/i");
+  tttTree->Branch("unixTimeGps",&rawSubTime.unixTime,"unixTimeGps/i");
+  tttTree->Branch("subTimeGps",&rawSubTime.subTime,"subTimeGps/i");
+  tttTree->Branch("fromAdu5",&rawSubTime.fromAdu5,"fromAdu5/I");
 }
