@@ -33,7 +33,6 @@ RawAnitaHeader *fHeadPtr=0;
 RawAnitaEvent *fRawEventPtr=0;
 CalibratedAnitaEvent *fCalEventPtr=0;
 
-
 char fBaseDir[FILENAME_MAX];
 char fOutBaseDir[FILENAME_MAX]; // Added fOutBaseDir because I don't have write permission at the moment
 void loadEventTree(int fCurrentRun, Long64_t numPriorEventsToUse);
@@ -51,12 +50,15 @@ int main(int argc, char **argv) {
   char outEventName[FILENAME_MAX];
   sprintf(outEventName,"%s/run%d/calEventFile%d.root",fOutBaseDir,run,run);
 
- 
+  // const Int_t numPriorEvents = 500000; 
   const Int_t numPriorEvents = 5000;
   loadEventTree(run, numPriorEvents);
   if(fInputEventChain->GetEntries()==0 || fInputEventChain->GetEntries()==0) {
     std::cout << "No data for run " << run << "\n";
     return -1;
+  }
+  else{
+    std::cout << fInputEventChain->GetEntries() << " events to process." << std::endl;
   }
   
   TFile *outEventFile = new TFile(outEventName,"RECREATE");
@@ -76,13 +78,31 @@ int main(int argc, char **argv) {
   for(Long64_t eventEntry=0;eventEntry<numEvents;eventEntry++) {
     if(eventEntry%starEvery == 0) 
       std::cerr << "*";
-      fInputHeadChain->GetEntry(eventEntry);
-      fInputEventChain->GetEntry(eventEntry);
-      UsefulAnitaEvent realEvent(fRawEventPtr,WaveCalType::kDefault,fHeadPtr);
-      if(fCalEventPtr)
-	delete fCalEventPtr;
-      fCalEventPtr = new CalibratedAnitaEvent(&realEvent);
-      outEventTree->Fill();
+
+    fInputHeadChain->GetEntry(eventEntry);
+
+    // debugging
+    // if(fHeadPtr->eventNumber < 31455791){
+    //   continue;
+    // }
+
+    // // debugging
+    // if(fHeadPtr->eventNumber < 10512380 ) continue;
+
+    fInputEventChain->GetEntry(eventEntry);
+    // UsefulAnitaEvent realEvent(fRawEventPtr,WaveCalType::kDefault,fHeadPtr);
+    // UsefulAnitaEvent realEvent(fRawEventPtr,WaveCalType::kNoTriggerJitterNoZeroMean,fHeadPtr);
+
+    UsefulAnitaEvent realEvent(fRawEventPtr,WaveCalType::kDefault,fHeadPtr);    
+    if(fCalEventPtr){
+      delete fCalEventPtr;
+      fCalEventPtr = NULL;
+    }      
+    
+    fCalEventPtr = new CalibratedAnitaEvent(&realEvent);
+    // std::cout << realEvent.eventNumber << "\t" << fCalEventPtr->eventNumber << std::endl;
+
+    outEventTree->Fill();
   }
   outEventTree->AutoSave();
   outEventFile->Close();
