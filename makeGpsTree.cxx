@@ -81,7 +81,7 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
   setupOutTree();
   {
     std::cout << "Starting ADU5 PAT" << endl;
-    ifstream GpsFile(adu5PatInName);      
+    std::ifstream GpsFile(adu5PatInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -134,7 +134,7 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
 
   {
     cout << "Starting ADU5 SAT" << endl;
-    ifstream GpsFile(adu5SatInName);      
+    std::ifstream GpsFile(adu5SatInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -177,7 +177,7 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
   }
   {
     cout << "Starting ADU5 VTG" << endl;
-    ifstream GpsFile(adu5VtgInName);      
+    std::ifstream GpsFile(adu5VtgInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -219,7 +219,7 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
     adu5bVtgTree->AutoSave();
   }
   {
-    ifstream GpsFile(g12PosInName);      
+    std::ifstream GpsFile(g12PosInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -258,7 +258,7 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
   }
   {
     cout << "Starting G12 SAT" << endl;
-    ifstream GpsFile(g12SatInName);      
+    std::ifstream GpsFile(g12SatInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -297,7 +297,7 @@ void makeGpsTree(char *adu5PatInName, char *adu5SatInName, char *adu5VtgInName,
   }
   {
     cout << "Starting GPS GGA" << endl;
-    ifstream GpsFile(gpsGgaInName);      
+    std::ifstream GpsFile(gpsGgaInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;

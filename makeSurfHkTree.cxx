@@ -50,7 +50,7 @@ void makeSurfHkTree(char *inName, char *outName) {
 
    strncpy(rootFileName,outName,FILENAME_MAX);
    //   std::cout << sizeof(FullSurfHkStruct_t) << std::endl;
-   ifstream PosFile(inName);
+   std::ifstream PosFile(inName);
 
    int numBytes=0;
    char fileName[180];

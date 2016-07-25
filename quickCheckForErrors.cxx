@@ -23,7 +23,8 @@
 #include "UsefulAnitaEvent.h"
 
 
-#define BASE_LOG_DIR "/home/rjn/anita/errorLogs/faked"
+#define BASE_LOG_DIR "/data/palestine2016/errorLogs"
+
 using namespace std;
 
 int getEventEntry();
@@ -83,7 +84,7 @@ void loadAcqdTree()
   
   if(!fAcqTree) {
     cout << "Couldn't get AcqdTree from " << acqname << endl;
-   return;
+    return;
   }
   
   fAcqTree->SetBranchAddress("acqd",&fAcqPtr);
@@ -93,21 +94,21 @@ void loadAcqdTree()
 
 void loadSurfTree()
 {
- char surfName[FILENAME_MAX];
- sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
-	 fCurrentRun,fCurrentRun);
- fSurfHkFile = new TFile(surfName);
- if(!fSurfHkFile) {
-   cout << "Couldn't open: " << surfName << "\n";
-   return;
-      }
- fSurfHkTree = (TTree*) fSurfHkFile->Get("surfHkTree");
- if(!fSurfHkTree) {
-   cout << "Couldn't get surfHkTree from " << surfName << endl;
-   return;
- }
- fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
- fSurfHkEntry=0;
+  char surfName[FILENAME_MAX];
+  sprintf(surfName,"%s/run%d/surfHkFile%d.root",fCurrentBaseDir,
+	  fCurrentRun,fCurrentRun);
+  fSurfHkFile = new TFile(surfName);
+  if(!fSurfHkFile) {
+    cout << "Couldn't open: " << surfName << "\n";
+    return;
+  }
+  fSurfHkTree = (TTree*) fSurfHkFile->Get("surfHkTree");
+  if(!fSurfHkTree) {
+    cout << "Couldn't get surfHkTree from " << surfName << endl;
+    return;
+  }
+  fSurfHkTree->SetBranchAddress("surf",&fSurfPtr);
+  fSurfHkEntry=0;
 
 
 }
@@ -117,7 +118,8 @@ void loadEventTree()
 {       
   char eventName[FILENAME_MAX];
   char headerName[FILENAME_MAX];
-  sprintf(eventName,"%s/run%d/calEventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  //  sprintf(eventName,"%s/run%d/calEventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
+  sprintf(eventName,"%s/run%d/eventFile%d*.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   sprintf(headerName,"%s/run%d/headFile%d.root",fCurrentBaseDir,fCurrentRun,fCurrentRun);
   fEventTree = new TChain("eventTree");
   fEventTree->Add(eventName);
@@ -147,38 +149,34 @@ int getEventEntry()
 {
 
   if(!fEventTree) loadEventTree(); 
-   if(fEventEntry<fEventTree->GetEntries())
-      fEventTree->GetEntry(fEventEntry);
-   else {
-      std::cout << "No more entries in event tree" << endl;
-      return -1;
-   }
+  if(fEventEntry<fEventTree->GetEntries())
+    fEventTree->GetEntry(fEventEntry);
+  else {
+    std::cout << "No more entries in event tree" << endl;
+    return -1;
+  }
             
-   if(fEventEntry<fHeadTree->GetEntries())
-      fHeadTree->GetEntry(fEventEntry);
-   else {
-      std::cout << "No more entries in header tree" << endl;
-      return -1;
-   }
-   if(fUsefulEventPtr)
-     delete fUsefulEventPtr;
-   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kVoltageTime);  
-   //fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kNoCalib); 
-   //Need to make configurable at some point
-   //This will also need to be modifed to make realEvent accessible outside here
-   return 0;
+  if(fEventEntry<fHeadTree->GetEntries())
+    fHeadTree->GetEntry(fEventEntry);
+  else {
+    std::cout << "No more entries in header tree" << endl;
+    return -1;
+  }
+  if(fUsefulEventPtr)
+    delete fUsefulEventPtr;
+  //   fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kVoltageTime);  
+  fUsefulEventPtr = new UsefulAnitaEvent(fRawEventPtr,WaveCalType::kNoCalib); 
+  //Need to make configurable at some point
+  //This will also need to be modifed to make realEvent accessible outside here
+  return 0;
 }
 
  
 void quickCheckForErrors() {
 
-  loadEventTree();
-  loadSurfTree();
-  loadAcqdTree();
-
   char filename[150];
-  char histname[180];
-  char histtitle[180];
+  char histname[120];
+  char histtitle[200];
 
   sprintf(filename,"%s/errs_%d.txt",BASE_LOG_DIR,fCurrentRun);
   ofstream ferrs(filename);
@@ -197,10 +195,14 @@ void quickCheckForErrors() {
     htriggerTimeNsRF_priority[ctr]->SetYTitle("Number of Events"); 
   }
 
+  loadEventTree();
+  loadSurfTree();
+  loadAcqdTree();
+
+
+  
   //c3po's that are not good
   int badC3poCount=0;
-
-
 
   int chipdiff; //difference between this and previous
   int labchip_previous; //lab chip id for previous event
@@ -274,8 +276,8 @@ void quickCheckForErrors() {
 
   //get maximum and minimum to set histogram boundaries.
 
-  
   for (int i=startevent;i<endevent;i++) {
+    
     if ((i-startevent)%print_every==0)
       cout << "Processed " << (i-startevent)/print_every*10. << " percent of the events.\n";
     errflag=0;
@@ -325,27 +327,30 @@ void quickCheckForErrors() {
     
     if (i!=startevent) {
       tTdiff=tT_this-tT_previous;
-      
+    
       if (tTdiff<0)
-	tTdiff+=1000000000;//add a second if the previous event happened at the end of a second
+     	tTdiff+=1000000000;//add a second if the previous event happened at the end of a second
   
       /* //reserveddiff is actually reserved quotient. which should = 2.  
-      if (reserved_this==1) //accounts for wrap-around case (8->1)
-	reserveddiff=16*reserved_this/reserved_previous;
-      else
-	reserveddiff=reserved_this/reserved_previous;
-            
-      hdreserved_eventtoevent->Fill(reserveddiff);
+	 if (reserved_this==1) //accounts for wrap-around case (8->1)
+	 reserveddiff=16*reserved_this/reserved_previous;
+	 else
+	 reserveddiff=reserved_this/reserved_previous;
+          
+	 hdreserved_eventtoevent->Fill(reserveddiff);
       */
-      
+    
       /* hdtriggerTimeNs->Fill(log10(tTdiff));
-      if (log10(tTdiff)<4.){//close events (for peter)
-	hdtriggerTimeNs_close->Fill(tTdiff);
-	hdtriggerTimeNs_close_zoom->Fill(tTdiff);
-      }
+	 if (log10(tTdiff)<4.){//close events (for peter)
+	 hdtriggerTimeNs_close->Fill(tTdiff);
+	 hdtriggerTimeNs_close_zoom->Fill(tTdiff);
+	 }
       */
-      
+    
     } // end if it's not the first event
+    
+
+
 
     for (int surf=0;surf<ACTIVE_SURFS;surf++) {
       // hsurfiddiff[surf]->Fill(fRawEventPtr->surfEventId[(surf+1)%ACTIVE_SURFS]-fRawEventPtr->surfEventId[surf]);
@@ -408,12 +413,12 @@ void quickCheckForErrors() {
 	   
 
 
-// 	    // this was redundant
-// 	    if (reserveddiff!=2) {
-// 	      ferrs << "reserved[0] from event to event is not sequential.  Event = " << fRawEventPtr->eventNumber << " run= " << fCurrentRun << "(" << i << "th entry in the Header tree)\n";
-// 	      ferrs << "reserved[0] for event " << fRawEventPtr->eventNumber << " is " << reserved_this << "\n";
-// 	      ferrs << "reserved[0] for event " << eventNumber_previous << " is " << reserved_previous << "\n";
-// 	    } // if the lab chip number is not sequential
+	    // 	    // this was redundant
+	    // 	    if (reserveddiff!=2) {
+	    // 	      ferrs << "reserved[0] from event to event is not sequential.  Event = " << fRawEventPtr->eventNumber << " run= " << fCurrentRun << "(" << i << "th entry in the Header tree)\n";
+	    // 	      ferrs << "reserved[0] for event " << fRawEventPtr->eventNumber << " is " << reserved_this << "\n";
+	    // 	      ferrs << "reserved[0] for event " << eventNumber_previous << " is " << reserved_previous << "\n";
+	    // 	    } // if the lab chip number is not sequential
 
 
 	    //hdreservedlab->Fill(reserved_this-pow(2,labchip_this));
@@ -430,13 +435,16 @@ void quickCheckForErrors() {
 	} // only do this for the first channel because otherwise the information is redundant
       } // end loop over channels
 
- 
+
 
 
     } // end loop over surfs
 
+
+
+
     for (int trigtype=0;trigtype<4;trigtype++) {
-      
+   
 
       //htriggerbits[trigtype]->Fill(fHeadPtr->trigType&(1<<trigtype));
       if (fHeadPtr->trigType&(1<<trigtype)){//<< moves the 1 over trigtype bits, then you and it with trigType
@@ -446,33 +454,33 @@ void quickCheckForErrors() {
 	
 	//fill histograms for each priority
 	//if (trigtype==0) htriggerTimeNsRF_priority[priority_this-1]->Fill(fHeadPtr->triggerTimeNs);
-// 	if (trigtype==0){//for RF triggers, check if it is the ground pulser by time -- look at 650 ms
+	// 	if (trigtype==0){//for RF triggers, check if it is the ground pulser by time -- look at 650 ms
 	  
-// 	  if ((fHeadPtr->triggerTimeNs)<(groundPulserTime+groundPulserWindow)//count ground pulsers with given priority 
-// 	      && (fHeadPtr->triggerTimeNs)>(groundPulserTime-groundPulserWindow)) {
-// 	    n_ground_pulser[priority_this-1]++;  
-// 	  }
-// 	  //do an efficiency check for the double pulse
-// 	  if (doublePulseFlag==1){//flag manually set if double pulse was going
-// 	    if (last_event_was_ground_pulser==1){//was the last event a ground pulser?
-// 	      if ((fHeadPtr->triggerTimeNs)<(groundPulserTime+groundPulserWindow) //then look for next event if it is in window
-// 		  && (fHeadPtr->triggerTimeNs)>(groundPulserTime-groundPulserWindow)) {
-// 		efficiency_numerator++;
-// 		if (tTdiff<1000000){ 
-// 		  average_doublePulse_triggerdiff+=tTdiff;
-// 		  avg_ctr++;
-// 		}
-// 		//hgroundDoublePulse->Fill(tTdiff);
-// 	      }
-// 	      efficiency_denominator++;
-// 	      last_event_was_ground_pulser=0;
-// 	    }
-// 	    else if ((fHeadPtr->triggerTimeNs)<(groundPulserTime+groundPulserWindow) 
-// 		     && (fHeadPtr->triggerTimeNs)>(groundPulserTime-groundPulserWindow)){
-// 	      last_event_was_ground_pulser=1;
-// 	    }
-// 	  }//end double pulse loop
-// 	}//end rf triggers loop
+	// 	  if ((fHeadPtr->triggerTimeNs)<(groundPulserTime+groundPulserWindow)//count ground pulsers with given priority 
+	// 	      && (fHeadPtr->triggerTimeNs)>(groundPulserTime-groundPulserWindow)) {
+	// 	    n_ground_pulser[priority_this-1]++;  
+	// 	  }
+	// 	  //do an efficiency check for the double pulse
+	// 	  if (doublePulseFlag==1){//flag manually set if double pulse was going
+	// 	    if (last_event_was_ground_pulser==1){//was the last event a ground pulser?
+	// 	      if ((fHeadPtr->triggerTimeNs)<(groundPulserTime+groundPulserWindow) //then look for next event if it is in window
+	// 		  && (fHeadPtr->triggerTimeNs)>(groundPulserTime-groundPulserWindow)) {
+	// 		efficiency_numerator++;
+	// 		if (tTdiff<1000000){ 
+	// 		  average_doublePulse_triggerdiff+=tTdiff;
+	// 		  avg_ctr++;
+	// 		}
+	// 		//hgroundDoublePulse->Fill(tTdiff);
+	// 	      }
+	// 	      efficiency_denominator++;
+	// 	      last_event_was_ground_pulser=0;
+	// 	    }
+	// 	    else if ((fHeadPtr->triggerTimeNs)<(groundPulserTime+groundPulserWindow) 
+	// 		     && (fHeadPtr->triggerTimeNs)>(groundPulserTime-groundPulserWindow)){
+	// 	      last_event_was_ground_pulser=1;
+	// 	    }
+	// 	  }//end double pulse loop
+	// 	}//end rf triggers loop
 	
       }//end trigtype loop
       if ((fHeadPtr->trigType&(1<<trigtype))!=0 && trigtype!=0) {
@@ -504,78 +512,74 @@ void quickCheckForErrors() {
 					fRawEventPtr->surfEventId[4]==0 || fRawEventPtr->surfEventId[5]==0 ||
 					fRawEventPtr->surfEventId[6]==0 || fRawEventPtr->surfEventId[7]==0 ||
 					fRawEventPtr->surfEventId[8]==0 || fRawEventPtr->surfEventId[9]==0 
-					)) sync_slips_surf_to_turf_0_surf_num++;
+					)) sync_slips_surf_to_turf_0_surf_num++;    
 
-    
-
-
-    if (errflag) {
+    if (errflag) { 
       ferrs << "\n\n**************************************************\n";
       ferrs << "Run: " << fCurrentRun << "\t Event: " << fRawEventPtr->eventNumber << "\t Entry: " << i << "\n";
       ferrs << errflag << " errors.\n";
-            
+         
       for (int surf=0;surf<ACTIVE_SURFS;surf++) {
-      if (surfidmismatch[surf]!=-1) {
-	ferrs << "surfEventId's are not the same among surfs.\n";
-	ferrs << "EventID for surf " << surf << " is " << fRawEventPtr->surfEventId[surf] << "\n";
-	ferrs << "EventID for surf " << (surf+1)%ACTIVE_SURFS << " is " << fRawEventPtr->surfEventId[(surf+1)%ACTIVE_SURFS] << "\n\n";
-      }
-      if (surfturfidmismatch[surf]!=-1) {
-	ferrs << "surfEventId's are not the same between surfs and the turf.\n";
-	ferrs << "EventID for surf " << surf << " is " << fRawEventPtr->surfEventId[surf] << "\n";
-	ferrs << "EventID for turf is " << fHeadPtr->turfEventId << "\n";
-	ferrs << "High nybble of reserved[0] is " << ((fHeadPtr->reserved[0]&0xF0)>>4) << "\n\n";
-      }
-      
-      for (int chan=0;chan<NUM_CHAN;chan++) {
-	if (labchipmismatch[surf][chan]!=-1) {
-	  ferrs << "Lab chips between neighboring channels not the same.\n";
-	  int chanIndex=AnitaGeomTool::getChanIndex(surf,chan);
-	  int chanIndex1=(chanIndex+1)%(ACTIVE_SURFS*NUM_CHAN);
-	  int chanIndex2=chanIndex;
-	  ferrs << "Lab chip for channel " << chanIndex1 << " is " << fRawEventPtr->getLabChip(chanIndex1) << "\n";
-	  ferrs << "Lab chip for channel " << chanIndex2 << " is " << fRawEventPtr->getLabChip(chanIndex2) << "\n\n";
-	  
+	if (surfidmismatch[surf]!=-1) {
+	  ferrs << "surfEventId's are not the same among surfs.\n";
+	  ferrs << "EventID for surf " << surf << " is " << fRawEventPtr->surfEventId[surf] << "\n";
+	  ferrs << "EventID for surf " << (surf+1)%ACTIVE_SURFS << " is " << fRawEventPtr->surfEventId[(surf+1)%ACTIVE_SURFS] << "\n\n";
 	}
+	if (surfturfidmismatch[surf]!=-1) {
+	  ferrs << "surfEventId's are not the same between surfs and the turf.\n";
+	  ferrs << "EventID for surf " << surf << " is " << fRawEventPtr->surfEventId[surf] << "\n";
+	  ferrs << "EventID for turf is " << fHeadPtr->turfEventId << "\n";
+	  ferrs << "High nybble of reserved[0] is " << ((fHeadPtr->reserved[0]&0xF0)>>4) << "\n\n";
+	}
+    
+	for (int chan=0;chan<NUM_CHAN;chan++) {
+	  if (labchipmismatch[surf][chan]!=-1) {
+	    ferrs << "Lab chips between neighboring channels not the same.\n";
+	    int chanIndex=AnitaGeomTool::getChanIndex(surf,chan);
+	    int chanIndex1=(chanIndex+1)%(ACTIVE_SURFS*NUM_CHAN);
+	    int chanIndex2=chanIndex;
+	    ferrs << "Lab chip for channel " << chanIndex1 << " is " << fRawEventPtr->getLabChip(chanIndex1) << "\n";
+	    ferrs << "Lab chip for channel " << chanIndex2 << " is " << fRawEventPtr->getLabChip(chanIndex2) << "\n\n";
+    	  
+	  }
 
-      } // loop over channels
-    }
+	} // loop over channels
+      }
 
-    if (chipsequenceerr!=-1 && resetppsnum==-1) {
-      ferrs << "Chip number from event to event is not sequential, and there was no ppsNum reset.\n";
-      ferrs << "Lab chip for event " << fRawEventPtr->eventNumber << " is " << labchip_this << "\n";
-      ferrs << "Lab chip for event " << eventNumber_previous << " is " << labchip_previous << "\n";
-      ferrs << "ppsNum for event " << fRawEventPtr->eventNumber << " is " << ppsNum_this << "\n";
-      ferrs << "ppsNum for event " << eventNumber_previous << " is " << ppsNum_previous << "\n";
-      ferrs << "Surf0 Event Num for event " << fRawEventPtr->eventNumber << " is " << surf0evnum_this << "\n";
-      ferrs << "Surf1 Event Num for event " << eventNumber_previous << " is " << surf1evnum_previous << "\n";
-      
-    } // if the lab chip number is not sequential
-    if (chipreservederr!=-1) {
-      ferrs << "reserved[0] does not line up with labchip number.\n";
-      ferrs << "reserved[0] is " << reserved_this << " and chip number is " << labchip_this << "\n";
-      
-    } // if reserved does not line up with labchip number
+      if (chipsequenceerr!=-1 && resetppsnum==-1) {
+	ferrs << "Chip number from event to event is not sequential, and there was no ppsNum reset.\n";
+	ferrs << "Lab chip for event " << fRawEventPtr->eventNumber << " is " << labchip_this << "\n";
+	ferrs << "Lab chip for event " << eventNumber_previous << " is " << labchip_previous << "\n";
+	ferrs << "ppsNum for event " << fRawEventPtr->eventNumber << " is " << ppsNum_this << "\n";
+	ferrs << "ppsNum for event " << eventNumber_previous << " is " << ppsNum_previous << "\n";
+	ferrs << "Surf0 Event Num for event " << fRawEventPtr->eventNumber << " is " << surf0evnum_this << "\n";
+	ferrs << "Surf1 Event Num for event " << eventNumber_previous << " is " << surf1evnum_previous << "\n";
+    
+      } // if the lab chip number is not sequential
+      if (chipreservederr!=-1) {
+	ferrs << "reserved[0] does not line up with labchip number.\n";
+	ferrs << "reserved[0] is " << reserved_this << " and chip number is " << labchip_this << "\n";
+    
+      } // if reserved does not line up with labchip number
 
-    if (resetppsnum!=-1) {
-      ferrs << "PPSNUM RESET OCCURRED.\n";
-    }
-    if (resettrignum!=-1 && trigNum_previous!=65535) {
-      ferrs << "TRIGNUM RESET OCCURRED.\n";
-      ferrs << "trigNum for event " << fRawEventPtr->eventNumber << " is " << trigNum_this << "\n";
-      ferrs << "trigNum for event " << eventNumber_previous << " is " << trigNum_previous << "\n";
-    }
-    if (sequential_event_numbers!=-1){
-      ferrs << "Non-sequential event Numbers!\n";
-      ferrs << "Event 1" << fRawEventPtr->eventNumber << "\n";
-      ferrs << "Event 2" << eventNumber_previous << "\n";
-    }
+      if (resetppsnum!=-1) {
+	ferrs << "PPSNUM RESET OCCURRED.\n";
+      }
+      if (resettrignum!=-1 && trigNum_previous!=65535) {
+	ferrs << "TRIGNUM RESET OCCURRED.\n";
+	ferrs << "trigNum for event " << fRawEventPtr->eventNumber << " is " << trigNum_this << "\n";
+	ferrs << "trigNum for event " << eventNumber_previous << " is " << trigNum_previous << "\n";
+      }
+      if (sequential_event_numbers!=-1){
+	ferrs << "Non-sequential event Numbers!\n";
+	ferrs << "Event 1" << fRawEventPtr->eventNumber << "\n";
+	ferrs << "Event 2" << eventNumber_previous << "\n";
+      }
 
 
-    ferrs << "**************************************************\n";
-    ferrs << "\n\n\n";
+      ferrs << "**************************************************\n";
+      ferrs << "\n\n\n";
     } // end if there are any errors this event
-
 
     eventNumber_previous=fRawEventPtr->eventNumber;
     labchip_previous=labchip_this;
@@ -585,14 +589,14 @@ void quickCheckForErrors() {
     trigNum_previous=trigNum_this;
     surf0evnum_previous=surf0evnum_this;
     surf1evnum_previous=surf1evnum_this;
-
+    
 
   } // end loop over events
 
   cout << "Done looping over Event Tree.\n";
 
   cout << "About to write general errors.\n";
-    ferrs << "**************************************************\n";
+  ferrs << "**************************************************\n";
   ferrs << "Information about Run " << fCurrentRun << ":\n\n";
   
   if (mismatched_tree_sizes!=-1) {
@@ -616,38 +620,38 @@ void quickCheckForErrors() {
     ferrs << "surfHkFile" << fCurrentRun << ".root does not exist.\n";
   
   /*  if (fSurfHkTree) {
-    for (int surf=0;surf<ACTIVE_SURFS;surf++) {
+      for (int surf=0;surf<ACTIVE_SURFS;surf++) {
       for (int scaler=0;scaler<SCALERS_PER_SURF;scaler++) {
-	if (overflows[surf][scaler]!=-1) {
-	  ferrs << "Surf " << surf << "\tScaler " << scaler << ":\t " << overflows[surf][scaler]*100. << " percent of the scalers are higher than " << scalerlimit[scaler] << "\n";
-	}
+      if (overflows[surf][scaler]!=-1) {
+      ferrs << "Surf " << surf << "\tScaler " << scaler << ":\t " << overflows[surf][scaler]*100. << " percent of the scalers are higher than " << scalerlimit[scaler] << "\n";
+      }
       }  
-    }
+      }
   
     
     
-    ferrs << "Surf\tScaler\tMean \tRMS\n";
-    for (int surf=0;surf<ACTIVE_SURFS;surf++) {
+      ferrs << "Surf\tScaler\tMean \tRMS\n";
+      for (int surf=0;surf<ACTIVE_SURFS;surf++) {
       for (int scaler=0;scaler<SCALERS_PER_SURF;scaler++) {
 	
 	
 	
 	
-	hscalermean->Fill(log10(hscalers[surf][scaler]->GetMean()));
-	hscalerrms->Fill(hscalers[surf][scaler]->GetRMS()/hscalers[surf][scaler]->GetMean());
+      hscalermean->Fill(log10(hscalers[surf][scaler]->GetMean()));
+      hscalerrms->Fill(hscalers[surf][scaler]->GetRMS()/hscalers[surf][scaler]->GetMean());
 	
-	if (hscalers[surf][scaler]->GetRMS()==0) 
-	  ferrs << surf << "\t" << scaler << "\t" << hscalers[surf][scaler]->GetMean() << "\t" << hscalers[surf][scaler]->GetRMS() << "\n";
-	else if (rms_last10sec[surf][scaler]==0.)
-	  ferrs << surf << "\t" << scaler << "\tRMS Scalers during last 10 seconds is " << rms_last10sec[surf][scaler] << "\n";
+      if (hscalers[surf][scaler]->GetRMS()==0) 
+      ferrs << surf << "\t" << scaler << "\t" << hscalers[surf][scaler]->GetMean() << "\t" << hscalers[surf][scaler]->GetRMS() << "\n";
+      else if (rms_last10sec[surf][scaler]==0.)
+      ferrs << surf << "\t" << scaler << "\tRMS Scalers during last 10 seconds is " << rms_last10sec[surf][scaler] << "\n";
 	
 	
 	
 	
 	
       }
-    } // end loop over surfs
-  } // end if surfhk exists
+      } // end loop over surfs
+      } // end if surfhk exists
   */
 
   if (triggerTypeFunny!=-1) {
@@ -659,27 +663,34 @@ void quickCheckForErrors() {
   }
   
 
+  if (badC3poCount>100){
+    ferrs.close();
+    ferrs.open(filename, std::fstream::out | std::fstream::trunc);
+    ferrs << "This run has a lot of c3poNum errors, and to save space I deleted all the dumps before now\n";
+  }
+  
   if(badC3poCount>0) {
     ferrs << "\nERROR:\t " << badC3poCount << " events have bad c3poNum\n";
   }
 
-//   long int n_ground_pulser_total=0;
-//   for (int ctr=0;ctr<9;ctr++){
-//     n_ground_pulser_total+=n_ground_pulser[ctr];
-//   }
+  //   long int n_ground_pulser_total=0;
+  //   for (int ctr=0;ctr<9;ctr++){
+  //     n_ground_pulser_total+=n_ground_pulser[ctr];
+  //   }
 
-//   //print out ground pulser priorities
-//   ferrs<<"\n Check of Ground Pulser Event Priorities:\n"
-//        <<"650 ms pulse: total number = "<<n_ground_pulser_total<<"\n";
-//   for (int ctr=0;ctr<9;ctr++){
-//     ferrs  <<"priority number "<<ctr+1<<": "<<n_ground_pulser[ctr]
-// 	   <<"\t fraction of total: "
-// 	   <<(double)n_ground_pulser[ctr]/(double)n_ground_pulser_total<<"\n";
-//   }
-//   ferrs <<"fraction with priority 1, 2, 3, or 4: "
-// 	<<((double)n_ground_pulser[0]+(double)n_ground_pulser[1]
-// 	   +(double)n_ground_pulser[2]+(double)n_ground_pulser[3])
-//     /(double)n_ground_pulser_total<<"\n";
+  //   //print out ground pulser priorities
+  //   ferrs<<"\n Check of Ground Pulser Event Priorities:\n"
+  //        <<"650 ms pulse: total number = "<<n_ground_pulser_total<<"\n";
+  //   for (int ctr=0;ctr<9;ctr++){
+  //     ferrs  <<"priority number "<<ctr+1<<": "<<n_ground_pulser[ctr]
+  // 	   <<"\t fraction of total: "
+  // 	   <<(double)n_ground_pulser[ctr]/(double)n_ground_pulser_total<<"\n";
+  //   }
+  //   ferrs <<"fraction with priority 1, 2, 3, or 4: "
+  // 	<<((double)n_ground_pulser[0]+(double)n_ground_pulser[1]
+  // 	   +(double)n_ground_pulser[2]+(double)n_ground_pulser[3])
+  //     /(double)n_ground_pulser_total<<"\n";
+
   
   ferrs<<"\n SUMMARY of run "<< fCurrentRun <<": "<<"\n"
        <<"Number of events with sync slips between surfs: "<<sync_slips_surf_to_surf<<"\n"
@@ -691,10 +702,10 @@ void quickCheckForErrors() {
   //  average_doublePulse_triggerdiff=average_doublePulse_triggerdiff/(double)avg_ctr;
   
   //print out trigger efficiency on second pulse in double pulse
- //  ferrs<<"\n Trigger Efficiency of Second Pulse of Ground Pulser Double Pulse: "<<efficiency_of_double_pulses<<"\n"
-//        <<"Numerator (number of times second pulse triggered if first pulse triggered) is: "<<efficiency_numerator<<"\n"
-//        <<"Denominator (number of times first pulse triggered) is: "<<efficiency_denominator<<"\n"
-//        <<"Mean time between triggers when two pulsed: "<<average_doublePulse_triggerdiff<<"\n\n" ;
+  //  ferrs<<"\n Trigger Efficiency of Second Pulse of Ground Pulser Double Pulse: "<<efficiency_of_double_pulses<<"\n"
+  //        <<"Numerator (number of times second pulse triggered if first pulse triggered) is: "<<efficiency_numerator<<"\n"
+  //        <<"Denominator (number of times first pulse triggered) is: "<<efficiency_denominator<<"\n"
+  //        <<"Mean time between triggers when two pulsed: "<<average_doublePulse_triggerdiff<<"\n\n" ;
   
 
 	   
@@ -703,13 +714,14 @@ void quickCheckForErrors() {
   //} //
   
   cout << "End writing general errors.\n";
-  ferrs.close();
+  ferrs.close(); 
+  cout << "Closed.\n";
   
 }
 
 void lookForWaveformFunniness() //look for the same waveforms repeated event to event
-                                               //also check dc offsets versus time between triggers
-                                              //check trigger times to last 10 events if you find a repeated waveform
+//also check dc offsets versus time between triggers
+//check trigger times to last 10 events if you find a repeated waveform
 {
 
   loadEventTree();
@@ -791,7 +803,7 @@ void lookForWaveformFunniness() //look for the same waveforms repeated event to 
 	  for (int prev_number=9;prev_number>=0;prev_number--){
 	    if (prev_number==0) voltage_previous[prev_number][surfctr][channelctr][ctr]=voltage_this[ctr];
 	    if (prev_number!=0) voltage_previous[prev_number][surfctr][channelctr][ctr]=
-	      voltage_previous[prev_number-1][surfctr][channelctr][ctr];
+				  voltage_previous[prev_number-1][surfctr][channelctr][ctr];
 	  }
 	}
 	//voltage_average=voltage_average/(double)nfftpoints;
@@ -836,7 +848,6 @@ void lookForWaveformFunniness() //look for the same waveforms repeated event to 
       delta_trigTime[prev_number]=delta_trigTime[prev_number-1]; //get set previous = this one
     }
   }//end event loop
-
   ferrors.close();
   //TCanvas *c1=new TCanvas("c1","Time since previous trigger for waveform repeats",800,600);
   /*c1->Divide(2,1);

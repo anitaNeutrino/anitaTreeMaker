@@ -70,7 +70,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 //   sprintf(inName,"run%dFileList.txt",run);
 //   sprintf(rootFileName,"/data/anita/ANITA-novtest/root/run%d/headFile%d.root",run,run);
   strncpy(rootFileName,outName,FILENAME_MAX);
-  ifstream SillyFile(inName);
+  std::ifstream SillyFile(inName);
 
     int numBytes=0;
     char fileName[180];

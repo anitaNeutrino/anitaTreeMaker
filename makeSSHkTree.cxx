@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
 void makeHkTree(char *calInName, char *rawInName, char *outName) {
    strncpy(rootFileName,outName,FILENAME_MAX);
    {
-      ifstream PosFile(calInName);
+      std::ifstream PosFile(calInName);
       
       int numBytes=0;
       char fileName[180];
@@ -96,7 +96,7 @@ void makeHkTree(char *calInName, char *rawInName, char *outName) {
    }
    {
       
-      ifstream PosFile(rawInName);
+      std::ifstream PosFile(rawInName);
 	
 	int numBytes=0;
 	char fileName[180];

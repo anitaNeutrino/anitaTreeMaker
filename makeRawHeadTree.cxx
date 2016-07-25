@@ -26,6 +26,7 @@ int eventInMap(UInt_t eventNumber);
 std::map<UInt_t,UInt_t> eventNumberMap;
 
 AnitaEventHeader_t theHeader;
+AnitaEventHeaderVer33_t theHeader33;
 AnitaEventHeaderVer13_t theHeader13;
 AnitaEventHeaderVer12_t theHeader12;
 AnitaEventHeaderVer11_t theHeader11;
@@ -69,11 +70,11 @@ void makeRunHeadTree(char *inName, char *outName) {
 //   sprintf(inName,"run%dFileList.txt",run);
 //   sprintf(rootFileName,"/data/anita/ANITA-novtest/root/run%d/headFile%d.root",run,run);
   strncpy(rootFileName,outName,FILENAME_MAX);
-  ifstream SillyFile(inName);
+  std::ifstream SillyFile(inName);
 
     int numBytes=0;
     char fileName[180];
-    int error=0;
+    //    int error=0;
 //    int headerNumber=1;
     int counter=0;
 
@@ -116,6 +117,12 @@ void makeRunHeadTree(char *inName, char *outName) {
 	    std::cout << "Old version of AnitaEventHeader_t -- " << (int)gHdr.verId
 		 << std::endl;
 	    switch(gHdr.verId) {
+	    case 33:
+	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer33_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=33;
+	       }
+	       break;
 	    case 13:
 	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer13_t)) {
 		  std::cout << "Size matches will proceed\n";
@@ -145,37 +152,49 @@ void makeRunHeadTree(char *inName, char *outName) {
 	       exit(0);
 	    }
 	 }	 
-	   std::cout << "Got version:\t" << int(gHdr.verId) << " current " 
-		     << VER_EVENT_HEADER << "\n";
+	 std::cout << "Got version:\t" << int(gHdr.verId) << " current " 
+		   << VER_EVENT_HEADER << "\n";
 	   firstTime=0;
 	}
 
 
  
 	//	cout << infile << " " << fileName << endl;
-	for(int i=0;i<100;i++) {	
+	for(int i=0;i<100;i++) {
+	  int thisEventNumber=0;
 	  //	  std::cout << i << std::endl;
 	   int numBytesExpected=sizeof(AnitaEventHeader_t);
 	   if(version==VER_EVENT_HEADER) {
 	      numBytes=gzread(infile,&theHeader,sizeof(AnitaEventHeader_t));
+	      thisEventNumber=theHeader.eventNumber;
 	   }
 	   else {
 	    switch(version) {
+	    case 33:
+	       numBytesExpected=sizeof(AnitaEventHeaderVer33_t);
+	       numBytes=gzread(infile,&theHeader33,numBytesExpected);
+	       thisEventNumber=theHeader33.eventNumber;
+	       //	       std::cout << "Got header33: " << thisEventNumber << "\t" << (int)theHeader33.gHdr.code << "\t" << (int) theHeader33.gHdr.verId << "\n";
+	       break;
 	    case 13:
 	       numBytesExpected=sizeof(AnitaEventHeaderVer13_t);
 	       numBytes=gzread(infile,&theHeader13,numBytesExpected);
+	       thisEventNumber=theHeader13.eventNumber;
 	       break;
 	    case 12:
 	       numBytesExpected=sizeof(AnitaEventHeaderVer12_t);
 	       numBytes=gzread(infile,&theHeader12,numBytesExpected);
+	       thisEventNumber=theHeader12.eventNumber;
 	       break;
 	    case 11:
 	       numBytesExpected=sizeof(AnitaEventHeaderVer11_t);
 	       numBytes=gzread(infile,&theHeader11,numBytesExpected);
+	       thisEventNumber=theHeader11.eventNumber;
 	       break;
 	    case 10:
 	       numBytesExpected=sizeof(AnitaEventHeaderVer10_t);
 	       numBytes=gzread(infile,&theHeader10,numBytesExpected);
+	       thisEventNumber=theHeader10.eventNumber;
 	       break;
 	    default:
 	       std::cerr << "Shouldn't ever get here\n";
@@ -183,6 +202,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 	    }
 	      
 	   }
+	   //	   std::cout << "Version: " << version << "\t" << numBytes << "\t" << numBytesExpected << "\n";
 	    //	    cout << i << "\t" << numBytes << endl;
 	    if(numBytes==-1) {
 	      int errorNum=0;
@@ -190,12 +210,12 @@ void makeRunHeadTree(char *inName, char *outName) {
 	    }
 	    if(numBytes!=numBytesExpected) {	      
 	      if(numBytes!=0) {
-		error=1;
+		//		error=1;
 		break;
 	      }
 	      else break;
 	    } 
-	    if(eventInMap(theHeader.eventNumber)) {
+	    if(eventInMap(thisEventNumber)) {
 	      //	std::cout << "Got event: " << theBody.eventNumber << "\n";
 	      continue;
 	    }
@@ -209,11 +229,11 @@ void makeRunHeadTree(char *inName, char *outName) {
 
 void makeHeadTree() {
 //    std::cout << sizeof(AnitaEventHeader_t) << std::endl;
-    ifstream SillyFile("sillyFileOfFilenames.txt");
+    std::ifstream SillyFile("sillyFileOfFilenames.txt");
     sprintf(rootFileName,"/unix/anita1/tempTrees/bufferHeadFile.root");
     int numBytes=0;
     char fileName[180];
-    int error=0;
+    //    int error=0;
 //    int headerNumber=1;
     int counter=0;
     while(SillyFile >> fileName) {
@@ -237,7 +257,7 @@ void makeHeadTree() {
 	    numBytes=gzread(infile,&theHeader,sizeof(AnitaEventHeader_t));
 	    cout << i << "\t" << numBytes << endl;
 	    if(numBytes!=sizeof(AnitaEventHeader_t)) {
-		error=1;
+	      //		error=1;
 		break;
 	    }
 	    processHeader(VER_EVENT_HEADER);
@@ -251,6 +271,7 @@ void makeHeadTree() {
 #define C3PO_AVG 20
 
 void processHeader(int version) {
+  //  std::cout << "processHeader( " << version << " )\n";
   static UInt_t c3poNumArray[C3PO_AVG]={0};
   static UInt_t ppsNumArray[C3PO_AVG]={0};
   static UInt_t c3poCounter=0;
@@ -261,6 +282,7 @@ void processHeader(int version) {
   if(!doneInit) {
     //    char name[128];
     //    char def[128];
+    std::cout << "Creating " << rootFileName << "\n";
     theFile = new TFile(rootFileName,"RECREATE");
     
     headTree = new TTree("headTree","Tree of Anita Event Headers");
@@ -278,6 +300,12 @@ void processHeader(int version) {
   
   if(version != VER_EVENT_HEADER) {
     switch(version) {
+    case 33:
+	  ppsNum=theHeader33.turfio.ppsNum;
+	  unixTime=theHeader33.unixTime;
+	  trigTime=theHeader33.turfio.trigTime;
+	  c3poNum=theHeader33.turfio.c3poNum;
+	  break;
     case 13:
 	  ppsNum=theHeader13.turfio.ppsNum;
 	  unixTime=theHeader13.unixTime;
@@ -330,7 +358,11 @@ void processHeader(int version) {
       }
       c3poTemp/=numToAvg;
       c3poNum=c3poTemp;
-      theHeader.turfio.c3poNum=c3poNum; //<Here we are doing naughty things
+      if(version==VER_EVENT_HEADER) 
+	theHeader.turfio.c3poNum=c3poNum; //<Here we are doing naughty things
+      else if(version==33)
+	theHeader33.turfio.c3poNum=c3poNum;
+      
       //      std::cout << c3poTemp << "\t" << numToAvg << "\t" << c3poNum << "\n";
     }
 
@@ -372,6 +404,10 @@ void processHeader(int version) {
     }
     else {
        switch(version) {
+       case 33:
+	 //	 std::cout << "Trying with version 33\n";
+	 theHead = new RawAnitaHeader((AnitaEventHeaderVer33_t*)&theHeader33,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+	 break;
        case 13:
 	  theHead = new RawAnitaHeader(&theHeader13,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
 	  break;

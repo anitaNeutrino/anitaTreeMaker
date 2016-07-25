@@ -51,7 +51,7 @@ void makeGpsTttTree(char *tttInName)
   setupOutTree();
   {
     std::cout << "Starting TTT" << endl;
-    ifstream GpsFile(tttInName);      
+    std::ifstream GpsFile(tttInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;

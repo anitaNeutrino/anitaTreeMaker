@@ -68,7 +68,7 @@ void makeAuxTree(char *acqdStartInName, char *gpsdStartInName,
 {
   setupOutTree();
   {
-    ifstream PosFile(acqdStartInName);      
+    std::ifstream PosFile(acqdStartInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -101,7 +101,7 @@ void makeAuxTree(char *acqdStartInName, char *gpsdStartInName,
     acqdStartTree->AutoSave();
   }
   {
-    ifstream PosFile(gpsdStartInName);      
+    std::ifstream PosFile(gpsdStartInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -134,7 +134,7 @@ void makeAuxTree(char *acqdStartInName, char *gpsdStartInName,
     gpsdStartTree->AutoSave();
   }
   {
-    ifstream PosFile(logWatchdStartInName);      
+    std::ifstream PosFile(logWatchdStartInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;
@@ -167,7 +167,7 @@ void makeAuxTree(char *acqdStartInName, char *gpsdStartInName,
     logWatchdStartTree->AutoSave();
   }
   {
-    ifstream PosFile(commandEchoInName);      
+    std::ifstream PosFile(commandEchoInName);      
     int numBytes=0;
     char fileName[180];
     int error=0;

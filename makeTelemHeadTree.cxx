@@ -69,7 +69,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 //   sprintf(inName,"run%dFileList.txt",run);
 //   sprintf(rootFileName,"/data/anita/ANITA-novtest/root/run%d/headFile%d.root",run,run);
   strncpy(rootFileName,outName,FILENAME_MAX);
-  ifstream SillyFile(inName);
+  std::ifstream SillyFile(inName);
 
     int numBytes=0;
     char fileName[180];
@@ -158,7 +158,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 
 void makeHeadTree() {
 //    std::cout << sizeof(AnitaEventHeader_t) << std::endl;
-    ifstream SillyFile("sillyFileOfFilenames.txt");
+    std::ifstream SillyFile("sillyFileOfFilenames.txt");
     sprintf(rootFileName,"/unix/anita1/tempTrees/bufferHeadFile.root");
     int numBytes=0;
     char fileName[180];

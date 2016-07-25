@@ -117,7 +117,7 @@ void makeBodyTree(char *inputName, char *outDir) {
   strncpy(outDirName,outDir,FILENAME_MAX);
   theEvent = new RawAnitaEvent();
   //    cout << sizeof(PedSubbedEventBody_t) << endl;
-  ifstream SillyFile(inputName);
+  std::ifstream SillyFile(inputName);
 
   int numBytes=0;
   char fileName[180];

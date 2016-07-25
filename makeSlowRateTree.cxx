@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 void makeSlowRateTree(char *inName, char *outName) {
    strncpy(rootFileName,outName,FILENAME_MAX);
 
-    ifstream PosFile(inName);
+    std::ifstream PosFile(inName);
 
     int numBytes=0;
     char fileName[180];

@@ -114,7 +114,7 @@ static int removeNaNs(TGraphErrors * g)
   
   for (int i = 0; i < g->GetN(); i++ ) 
   {
-    if (isnan(g->GetY()[i]) || isnan(g->GetEY()[i])) 
+    if (std::isnan(g->GetY()[i]) || std::isnan(g->GetEY()[i])) 
     {
       g->SetPoint(i, g->GetX()[i], 0); 
       g->SetPointError(i, 0, TMath::Infinity()); 
