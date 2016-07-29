@@ -32,6 +32,7 @@ RawHk   *avzHkPtr=0;
 HkDataStruct_t theHk;
 TFile *theFile;
 TTree *hkTree=0;
+TTree *hkRawTree=0;
 TTree *hkCalTree=0;
 TTree *hkAvzTree=0;
 char rootFileName[FILENAME_MAX];
@@ -131,6 +132,8 @@ void makeHkTree(char *calInName, char *rawInName, char *outName) {
 	}
 	if(hkTree) 
 	   hkTree->AutoSave();
+	if(hkRawTree)
+	  hkRawTree->AutoSave();
 	//	theFile->Close();
     }
     doneInit=0;
@@ -146,7 +149,11 @@ void processHk() {
 	    theFile = new TFile(rootFileName,"UPDATE");
 
 	hkTree = new TTree("hkTree","Tree of Anita Housekeepings");
-	hkTree->Branch("hk","CalibratedHk",&goodHkPtr);	
+	hkTree->Branch("hk","CalibratedHk",&goodHkPtr);
+
+	hkRawTree= new TTree("hkRawTree","Raw housekeeping");
+	hkRawTree->Branch("hk","RawHk",&rawHkPtr);
+	
 	if(hkCalTree) 
 	   hkCalTree->BuildIndex("payloadTime","payloadTimeUs");
 	if(hkAvzTree)
@@ -179,7 +186,8 @@ void processHk() {
        goodHkPtr = new CalibratedHk(rawHkPtr,avzHkPtr,calHkPtr);    
     else 
        goodHkPtr = new CalibratedHk(rawHkPtr,0,0);
-    hkTree->Fill();                
+    hkTree->Fill();
+    hkRawTree->Fill();
 }
 
 

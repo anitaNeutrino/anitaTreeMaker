@@ -26,6 +26,7 @@ int eventInMap(UInt_t eventNumber);
 std::map<UInt_t,UInt_t> eventNumberMap;
 
 AnitaEventHeader_t theHeader;
+AnitaEventHeaderVer33_t theHeader33;
 AnitaEventHeaderVer13_t theHeader13;
 AnitaEventHeaderVer12_t theHeader12;
 AnitaEventHeaderVer11_t theHeader11;
@@ -101,6 +102,63 @@ void makeRunHeadTree(char *inName, char *outName) {
 
 	version=VER_EVENT_HEADER;
  
+	if(firstTime) {
+	   //Need to work out which version this is
+	   numBytes=gzread(infile,&gHdr,sizeof(GenericHeader_t));
+	   if(numBytes!=sizeof(GenericHeader_t)) {
+	      std::cerr << "Error reading GenericHeader_t to determine version\n";
+	      exit(0);
+	   }
+	   gzrewind(infile);
+	   if(gHdr.code != PACKET_HD) {
+	      std::cerr << "not an AnitaEventHeader_t\n";
+	      exit(0);
+	   }
+
+	 if(gHdr.verId != VER_EVENT_HEADER) {
+	    std::cout << "Old version of AnitaEventHeader_t -- " << (int)gHdr.verId
+		 << std::endl;
+	    switch(gHdr.verId) {
+	    case 33:
+	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer33_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=33;
+	       }
+	       break;
+	    case 13:
+	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer13_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=13;
+	       }
+	       break;
+	    case 12:
+	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer12_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=12;
+	       }
+	       break;
+	    case 11:
+	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer11_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=11;
+	       }
+	       break;	       
+	    case 10:
+	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer10_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=10;
+	       }
+	       break;
+	    default:
+	       std::cerr << "This version is not currently supported someone needs, to update me\n";
+	       exit(0);
+	    }
+	 }	 
+	 std::cout << "Got version:\t" << int(gHdr.verId) << " current " 
+		   << VER_EVENT_HEADER << "\n";
+	   firstTime=0;
+	}
+
 	//	cout << infile << " " << fileName << endl;
 	for(int i=0;i<100;i++) {	
 	  //	  std::cout << i << std::endl;
@@ -110,6 +168,10 @@ void makeRunHeadTree(char *inName, char *outName) {
 	   }
 	   else {
 	    switch(version) {
+	    case 33:
+	       numBytesExpected=sizeof(AnitaEventHeaderVer33_t);
+	       numBytes=gzread(infile,&theHeader33,numBytesExpected);
+	       break;
 	    case 13:
 	       numBytesExpected=sizeof(AnitaEventHeaderVer13_t);
 	       numBytes=gzread(infile,&theHeader13,numBytesExpected);
@@ -231,6 +293,16 @@ void processHeader(int version) {
    
   if(version==VER_EVENT_HEADER) {
     theHead = new RawAnitaHeader(&theHeader,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+  }
+  else if(version==33) {
+    //This is wrong, but good enough for telemetry
+    UInt_t trigTime=theHeader33.turfio.trigTime;
+    UInt_t triggerTime=theHeader33.unixTime;
+    UInt_t triggerTimeNs=1e9*(trigTime/250e6);
+    Int_t goodTimeFlag=1;
+    realTime=theHeader33.unixTime;
+
+    theHead = new RawAnitaHeader(&theHeader33,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
   }
   
   headTree->Fill();                

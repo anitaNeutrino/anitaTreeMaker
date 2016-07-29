@@ -6,6 +6,10 @@
 #include <utime.h>    
 #include <map>  
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 using namespace std;
 
 #include "TTree.h"

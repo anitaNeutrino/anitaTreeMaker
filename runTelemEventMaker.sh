@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 if [ "$3" = "" ]
 then
    echo "usage: `basename $0` <run no> <raw run ir> <root run dir>" 1>&2
