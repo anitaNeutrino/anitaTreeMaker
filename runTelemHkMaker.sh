@@ -42,13 +42,13 @@ done
 
 HK_ROOT_FILE=${ROOT_RUN_DIR}/hkFile${RUN}.root
 if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
-    ./makeHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
+    makeHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
     rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
 
     if [ "$HEAD_ROOT_FILE" ]; then
 	echo "Making pretty hk file (interpolated)"
 	PRETTYHK_ROOT_FILE=${ROOT_RUN_DIR}/prettyHkFile${RUN}.root
-	./makePrettyHkTree  ${HK_ROOT_FILE} ${HEAD_ROOT_FILE} ${PRETTYHK_ROOT_FILE}
+	makePrettyHkTree  ${HK_ROOT_FILE} ${HEAD_ROOT_FILE} ${PRETTYHK_ROOT_FILE}
     fi
 else
     rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
@@ -76,7 +76,7 @@ done
 
 HK_ROOT_FILE=${ROOT_RUN_DIR}/sshkFile${RUN}.root
 if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
-    ./makeSSHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
+    makeSSHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
     rm ${HKRAW_FILE_LIST} ${HKCAL_FILE_LIST}
 
    

@@ -34,7 +34,7 @@ done
 
 if  test `cat ${AVGSURF_FILE_LIST} | wc -l` -gt 0 ; then
     AVGSURF_ROOT_FILE=${ROOT_RUN_DIR}/avgSurfHkFile${RUN}.root
-    ./makeAveragedSurfHkTree ${AVGSURF_FILE_LIST} ${AVGSURF_ROOT_FILE}
+    makeAveragedSurfHkTree ${AVGSURF_FILE_LIST} ${AVGSURF_ROOT_FILE}
     rm ${AVGSURF_FILE_LIST}
     echo "Done Averaged SURF Hk File"
 else

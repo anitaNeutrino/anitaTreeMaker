@@ -29,7 +29,7 @@ find ${RAW_RUN_DIR}/event -name "evhd*.gz" | sort -n > ${HEAD_FILE_LIST}
 #cat $HEAD_FILE_LIST
 if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     HEAD_ROOT_FILE=${ROOT_RUN_DIR}/eventHeadFile${RUN}.root
-    ./makeEventHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
+    makeEventHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=true
     echo "Done Header File"
@@ -43,7 +43,7 @@ echo "Starting Event File"
 EVENT_FILE_LIST=`mktemp`
 find ${RAW_RUN_DIR}/event -name "psev*.gz" | sort -n> ${EVENT_FILE_LIST}
 if  test `cat ${EVENT_FILE_LIST} | wc -l` -gt 0 ; then
-    ./updateEventRunTree ${EVENT_FILE_LIST} ${EVENT_BASE_DIR}
+    updateEventRunTree ${EVENT_FILE_LIST} ${EVENT_BASE_DIR}
     rm ${EVENT_FILE_LIST}
     echo "Done Event File"
 else

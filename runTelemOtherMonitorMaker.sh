@@ -32,7 +32,7 @@ done
 
 if  test `cat ${OTHER_FILE_LIST} | wc -l` -gt 0 ; then
     OTHER_ROOT_FILE=${ROOT_RUN_DIR}/monitorFile${RUN}.root
-    ./makeOtherTree ${OTHER_FILE_LIST} ${OTHER_ROOT_FILE}
+    makeOtherTree ${OTHER_FILE_LIST} ${OTHER_ROOT_FILE}
     rm ${OTHER_FILE_LIST}
     echo "Done Other Rate File"
 else

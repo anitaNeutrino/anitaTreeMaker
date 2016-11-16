@@ -32,17 +32,17 @@ ls ${RAW_RUN_DIR}
 
 cd $ANITA_TREE_MAKER_DIR
 
-./runTelemHeaderMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemEventMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemTurfRateMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemSurfHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemSumTurfRateMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemAvgSurfHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemMonitorMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemOtherMonitorMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemGpsMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
-./runTelemAuxMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemHeaderMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemEventMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemTurfRateMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemSurfHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemSumTurfRateMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemAvgSurfHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemMonitorMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemOtherMonitorMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemGpsMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemAuxMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 
 
 

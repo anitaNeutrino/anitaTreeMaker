@@ -1,66 +1,49 @@
-#############################################################################
-## Makefile -- New Version of my Makefile that works on both linux
-##              and mac os x
-## Ryan Nichol <rjn@hep.ucl.ac.uk>
-##############################################################################
-include Makefile.arch
-
-#Site Specific  Flags
-SYSINCLUDES	=
-SYSLIBS         = 
-
-ifdef ANITA_UTIL_INSTALL_DIR
-ANITA_UTIL_LIB_DIR=${ANITA_UTIL_INSTALL_DIR}/lib
-ANITA_UTIL_INC_DIR=${ANITA_UTIL_INSTALL_DIR}/include
-LD_ANITA_UTIL=-L$(ANITA_UTIL_LIB_DIR)
-INC_ANITA_UTIL=-I$(ANITA_UTIL_INC_DIR)
-else
-ANITA_UTIL_LIB_DIR=
-ANITA_UTIL_INC_DIR=
-ifdef EVENT_READER_DIR
-LD_ANITA_UTIL=-L$(EVENT_READER_DIR)
-INC_ANITA_UTIL=-I$(EVENT_READER_DIR)
-endif
-endif
+### Makefile that delegates building either to cmake or legacy Makefile 
+### Cmake is default, if you don't want to use CMake, you can do make legacy   
+### ( or move this file and rename Makefile.legacy to Makefile,
+###  or modify the all/clean/install targets below  ) 
+###
 
 
-#Toggles the FFT functions on and off
-USE_FFT_TOOLS=1
+.PHONY: all configure clean cleaner install legacy legacy-clean legacy-install cmake-build cmake-clean cmake-install
 
-ifdef USE_FFT_TOOLS
-FFTLIBS = -lRootFftwWrapper -lfftw3
-FFTFLAG = -DUSE_FFT_TOOLS
-else
-FFTLIBS =
-FFTFLAG =
-endif
-
-#Generic and Site Specific Flags
-CXXFLAGS     += $(ROOTCFLAGS) $(FFTFLAG) $(SYSINCLUDES) $(INC_ANITA_UTIL) -Wall
-LDFLAGS      += -g $(ROOTLDFLAGS) 
-
-LIBS          = -lz $(ROOTLIBS)  -lMinuit $(SYSLIBS) $(LD_ANITA_UTIL) $(FFTLIBS) -lAnitaEvent
-GLIBS         = $(ROOTGLIBS) $(SYSLIBS)
+all: cmake-build 
+clean: cmake-clean
+install: cmake-install 
 
 
-TREE_MAKER = makeRawHeadTree makeMonitorTree makeGpuTree makeOtherTree \
-						makeHkTree makePrettyHkTree makeTurfRateTree makeSurfHkTree\
-						makeEventRunTree makeRawScalerTree makeSummedTurfRateTree \
-						makeAveragedSurfHkTree makeGpsTree makeAuxiliaryTree \
-						quickCheckForErrors makeRunSummaryFile makeCalibratedEventTrees \
-						checkForCorruptEvents makeAdu5PatFiles makeSuperSmoothAdu5PatFiles \
-						makeConcatanatedFiles makeSSHkTree makeEventHeadTree makeSlowRateTree\
-					 	makeTelemHeadTree makeGpsEventTree  makeGpsEventTreeBothAdu5s makeGpsTttTree fixTriggerTimeAnita3 updateEventRunTree
+### TODO add doxygen into CMakelists 
+doc: legacy-doc
 
+cmake-build: build/Makefile 
+	@make -C  ./build
 
-all : $(TREE_MAKER)
+legacy-doc: 
+	@make -f Makefile.legacy doc 
 
-% :  %.$(SRCSUF)
-	@echo "<**Linking**> "  
-	$(LD)  $(CXXFLAGS) $(LDFLAGS) $<  $(LIBS) -o $@
+legacy: 
+	@make -f Makefile.legacy 
 
+legacy-clean: 
+	@make -f Makefile.legacy clean 
 
-clean:
-	@rm -f *Dict*
-	@rm -f *.${OBJSUF}
-	@rm -f $(TREE_MAKER)
+legacy-install: 
+	@make -f Makefile.legacy install 
+
+configure: build/Makefile 
+	@ccmake . build 
+
+cmake-install: 
+	@make -C ./build install 
+
+build/Makefile: 
+	@echo "Setting up cmake build. Use "make legacy" to use legacy Makefile" 
+	@mkdir -p build 
+	@cd build && cmake ../ 
+
+distclean: 
+	@echo "Removing cmake directory" 
+	@rm -rf build 
+
+cmake-clean: build/Makefile 
+	@make -C ./build clean 
