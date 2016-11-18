@@ -101,9 +101,9 @@ void processScaler() {
     if(!doneInit) {
 	theFile = new TFile(rootFileName,"RECREATE");
 	rawScalerTree = new TTree("rawScalerTree","Tree of Anita Scalers And Thresholds");
-	rawScalerTree->Branch("unixTime",&theScaler.unixTime,"unixTime/i");
-	rawScalerTree->Branch("unixTimeUs",&theScaler.unixTimeUs,"unixTimeUs/i");
-	rawScalerTree->Branch("scaler",&theScaler.scaler[0][0],"scaler[10][32]/s");
+	rawScalerTree->Branch("unixTime",&theScaler.unixTime,"unixTime/I");
+	rawScalerTree->Branch("unixTimeUs",&theScaler.unixTimeUs,"unixTimeUs/I");
+	rawScalerTree->Branch("scaler",&theScaler.scaler[0][0],"scaler[12][32]/S");
 	rawScalerTree->Branch("pL1",pL1,"pL1[10][4]/F");
 	rawScalerTree->Branch("pLow",pLow,"pLow[10][4]/F");
 	rawScalerTree->Branch("pMid",pMid,"pMid[10][4]/F");
