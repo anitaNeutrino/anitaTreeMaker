@@ -279,6 +279,7 @@ void processHeader(int version) {
   static UInt_t lastTriggerTime=0;
   static UInt_t ppsOffset=0;
   static UInt_t lastPps=0;
+  UInt_t ppsNotReset=0;
   if(!doneInit) {
     //    char name[128];
     //    char def[128];
@@ -297,6 +298,9 @@ void processHeader(int version) {
   UInt_t unixTime=theHeader.unixTime;
   UInt_t trigTime=theHeader.turfio.trigTime;
   UInt_t c3poNum=theHeader.turfio.c3poNum;
+  UInt_t rawppsNum=theHeader.turfio.ppsNum;
+  UInt_t rawtrigTime=theHeader.turfio.trigTime;
+  UInt_t rawc3poNum=theHeader.turfio.c3poNum;
   
   if(version != VER_EVENT_HEADER) {
     switch(version) {
@@ -335,7 +339,8 @@ void processHeader(int version) {
 	  break;
        }
     }
-    
+
+  ppsNotReset=0;
     if(c3poCounter==0) {
       c3poNumArray[c3poCounter]=c3poNum;
       ppsNumArray[c3poCounter]=ppsNum;
@@ -345,7 +350,7 @@ void processHeader(int version) {
       Int_t lastIndex=(c3poCounter-1)%C3PO_AVG;
       Int_t thisIndex=(c3poCounter%C3PO_AVG);
       //      std::cout << thisIndex << "\t" << lastIndex << "\t" << ppsNum << "\t" << ppsNumArray[lastIndex] << "\n";
-      if(ppsNum!=ppsNumArray[lastIndex]) {
+      if(ppsNum!=ppsNumArray[lastIndex] && (c3poNum>249.996e6) && (c3poNum<249.998e6) ) {
 	c3poNumArray[thisIndex]=c3poNum;
 	ppsNumArray[thisIndex]=ppsNum;
 	c3poCounter++;
@@ -367,40 +372,42 @@ void processHeader(int version) {
     }
 
 
-
     if(ppsOffset==0 || ppsNum<lastPps) {
       //Need to reset the ppsOffset;  
       ppsOffset=unixTime-ppsNum;
       while(lastTriggerTime>ppsNum+ppsOffset)
 	ppsOffset++;
     }
-    UInt_t triggerTime=ppsNum+ppsOffset;
-    lastTriggerTime=triggerTime;
-    lastPps=ppsNum;
     //    std::cout << c3poNum << std::endl;
     realTime=unixTime;
     UInt_t triggerTimeNs=trigTime;
     Int_t goodTimeFlag=0;
     
-    //    if(c3poNum>133.63e6 && c3poNum<133.7e6) {
       //Good c3poNum;
     if(trigTime<=c3poNum) {
       //Good trigTime
-      triggerTimeNs=(UInt_t)(1e9*(Double_t(trigTime)/Double_t(c3poNum)));
       goodTimeFlag=1;
     }
     else {
-      triggerTimeNs=(UInt_t)1e9;
+      trigTime=trigTime-c3poNum;
+      ppsNotReset=1;
     }
-    //    }
-    //    else {
-    //      triggerTimeNs=(UInt_t)(1e9*Double_t(trigTime)/133.67e6);
-    //      goodTimeFlag=0;
-    //    }
-    //    std::cout << triggerTime << "\t" << triggerTimeNs << "\n";
+    triggerTimeNs=(UInt_t)(1e9*(Double_t(trigTime)/Double_t(c3poNum)));
+
+
+    UInt_t triggerTime=ppsNum+ppsOffset+ppsNotReset;
+    lastTriggerTime=triggerTime;
+    lastPps=ppsNum;
+    //    std::cout << "Trigger Time " << triggerTime << " " << ppsNum << " " << ppsOffset << " " << ppsNotReset << std::endl;
+
+
     
     if(version==VER_EVENT_HEADER) {
        theHead = new RawAnitaHeader(&theHeader,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+       theHead->trigTime    = trigTime;
+       theHead->rawtrigTime = rawtrigTime;
+       theHead->rawppsNum   = rawppsNum + ppsNotReset;
+       theHead->rawc3poNum  = rawc3poNum;
     }
     else {
        switch(version) {
