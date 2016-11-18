@@ -33,7 +33,7 @@ done
 
 if  test `cat ${SUMTURF_FILE_LIST} | wc -l` -gt 0 ; then
     SUMTURF_ROOT_FILE=${ROOT_RUN_DIR}/sumTurfRateFile${RUN}.root
-    ./makeSummedTurfRateTree ${SUMTURF_FILE_LIST} ${SUMTURF_ROOT_FILE}
+    makeSummedTurfRateTree ${SUMTURF_FILE_LIST} ${SUMTURF_ROOT_FILE}
     rm ${SUMTURF_FILE_LIST}
     echo "Done SUMTURF Rate File"
 else

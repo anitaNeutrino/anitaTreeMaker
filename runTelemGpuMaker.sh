@@ -33,7 +33,7 @@ done
 
 if  test `cat ${GPU_FILE_LIST} | wc -l` -gt 0 ; then
     GPU_ROOT_FILE=${ROOT_RUN_DIR}/gpuFile${RUN}.root
-    ./makeGpuTree ${GPU_FILE_LIST} ${GPU_ROOT_FILE}
+    makeGpuTree ${GPU_FILE_LIST} ${GPU_ROOT_FILE}
     rm ${GPU_FILE_LIST}
     echo "Done Gpu File"
 else

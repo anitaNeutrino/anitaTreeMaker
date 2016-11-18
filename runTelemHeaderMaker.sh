@@ -29,7 +29,7 @@ find ${RAW_RUN_DIR}/event -name "hd*.gz" | sort -n > ${HEAD_FILE_LIST}
 
 if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     HEAD_ROOT_FILE=${ROOT_RUN_DIR}/headFile${RUN}.root
-    ./makeTelemHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
+    makeTelemHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=true
     echo "Done Header File"

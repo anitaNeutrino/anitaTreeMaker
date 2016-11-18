@@ -32,7 +32,7 @@ done
 
 if  test `cat ${TURF_FILE_LIST} | wc -l` -gt 0 ; then
     TURF_ROOT_FILE=${ROOT_RUN_DIR}/turfRateFile${RUN}.root
-    ./makeTurfRateTree ${TURF_FILE_LIST} ${TURF_ROOT_FILE}
+    makeTurfRateTree ${TURF_FILE_LIST} ${TURF_ROOT_FILE}
     rm ${TURF_FILE_LIST}
     echo "Done TURF Rate File"
 else

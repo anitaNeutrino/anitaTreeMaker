@@ -33,7 +33,7 @@ done
 
 if  test `cat ${MONITOR_FILE_LIST} | wc -l` -gt 0 ; then
     MONITOR_ROOT_FILE=${ROOT_RUN_DIR}/monitorFile${RUN}.root
-    ./makeMonitorTree ${MONITOR_FILE_LIST} ${MONITOR_ROOT_FILE}
+    makeMonitorTree ${MONITOR_FILE_LIST} ${MONITOR_ROOT_FILE}
     rm ${MONITOR_FILE_LIST}
     echo "Done Monitor Rate File"
 else

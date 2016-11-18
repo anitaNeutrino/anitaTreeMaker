@@ -33,7 +33,7 @@ done
 
 if  test `cat ${SLOW_FILE_LIST} | wc -l` -gt 0 ; then
     SLOW_ROOT_FILE=${ROOT_RUN_DIR}/slowFile${RUN}.root
-    ./makeSlowRateTree ${SLOW_FILE_LIST} ${SLOW_ROOT_FILE}
+    makeSlowRateTree ${SLOW_FILE_LIST} ${SLOW_ROOT_FILE}
     rm ${SLOW_FILE_LIST}
     echo "Done Slow Rate File"
 else

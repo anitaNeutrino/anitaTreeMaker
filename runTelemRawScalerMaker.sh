@@ -36,7 +36,7 @@ done
 
 if  test `cat ${SCALER_FILE_LIST} | wc -l` -gt 0 ; then
     SCALER_ROOT_FILE=${ROOT_RUN_DIR}/rawScalerFile${RUN}.root
-    ./makeRawScalerTree ${SCALER_FILE_LIST} ${SCALER_ROOT_FILE}
+    makeRawScalerTree ${SCALER_FILE_LIST} ${SCALER_ROOT_FILE}
     rm ${SCALER_FILE_LIST}
     echo "Done Raw Scaler File"
 else
