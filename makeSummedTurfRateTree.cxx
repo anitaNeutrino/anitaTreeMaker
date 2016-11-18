@@ -110,11 +110,11 @@ void makeSummedTurfRateTree(char *inName, char *outName) {
 	      }
 	   }
 	   else {
-	    int numBytesExpected=sizeof(TurfRateStruct_t);
+	    int numBytesExpected=sizeof(SummedTurfRateStruct_t);
 	    switch(version) {
 	    case 40:
-	       numBytesExpected=sizeof(TurfRateStructVer40_t);
-	       numBytes=gzread(infile,&theTurfRateVer40,numBytesExpected);
+	       numBytesExpected=sizeof(SummedTurfRateStructVer40_t);
+	       numBytes=gzread(infile,&theSummedTurfRateVer40,numBytesExpected);
 	       break;
 	    default:
 	       std::cerr << "Shouldn't ever get here\n";

@@ -66,6 +66,10 @@ int main(int argc, char **argv) {
 void makeAuxTree(char *acqdStartInName, char *gpsdStartInName, 
 		 char *logWatchdStartInName, char *commandEchoInName)
 {
+  std::cerr << "makeAuxTree\n" << acqdStartInName << "\t"
+	    << gpsdStartInName << "\n"
+	    << logWatchdStartInName << "\n"
+	    << commandEchoInName << "\n";
   setupOutTree();
   {
     std::ifstream PosFile(acqdStartInName);      
