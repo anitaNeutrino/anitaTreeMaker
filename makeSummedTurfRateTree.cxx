@@ -20,6 +20,7 @@ void makeSummedTurfRateTree(char *inName, char *outName);
 
 //Global Variable
 SummedTurfRateStruct_t theSummedTurfRate;
+SummedTurfRateStructVer40_t theSummedTurfRateVer40;
 TFile *theFile;
 TTree *sumTurfRateTree=0;
 SummedTurfRate *theSummedTurfRateClass;
@@ -82,9 +83,21 @@ void makeSummedTurfRateTree(char *inName, char *outName) {
 	    exit(0);
 	 }
 
-	 if(gHdr.verId != VER_SUM_TURF_RATE) 	    
+	 if(gHdr.verId != VER_SUM_TURF_RATE) {	    
 	    std::cout << "Got version:\t" << version << " current " << VER_SUM_TURF_RATE << "\n";
+	    switch(gHdr.verId) {
+	    case 40:
+	      if(gHdr.numBytes==sizeof(SummedTurfRateStructVer40_t)) {
+		  std::cout << "Size matches will proceed\n";
+		  version=40;
+	      }
+	    default:
+	      std::cerr << "This version is not currently supported someone needs, to update me\n";
+	      exit(0);
+	    }
 
+
+	 }
 	 firstTime=0;
       }
 
@@ -97,8 +110,16 @@ void makeSummedTurfRateTree(char *inName, char *outName) {
 	      }
 	   }
 	   else {
-	      std::cout << "Confused about versions\n";
-	      break;
+	    int numBytesExpected=sizeof(TurfRateStruct_t);
+	    switch(version) {
+	    case 40:
+	       numBytesExpected=sizeof(TurfRateStructVer40_t);
+	       numBytes=gzread(infile,&theTurfRateVer40,numBytesExpected);
+	       break;
+	    default:
+	       std::cerr << "Shouldn't ever get here\n";
+	       exit(0);
+	    }	
 	   }
 	   processTurfRate(version);
 	}
@@ -130,8 +151,19 @@ void processTurfRate(int version) {
        theSummedTurfRateClass = new SummedTurfRate(runNumber,
 						   theSummedTurfRate.unixTime,
 						   &theSummedTurfRate);
-    }		       
-    sumTurfRateTree->Fill();  
+    }
+    else {
+      switch(version) {
+       case 40:
+	  theSummedTurfRateClass = new SummedTurfRate(runNumber,theSummedTurfRateVer40.unixTime,&theSummedTurfRateVer40);
+	  break;
+       default:
+	  std::cout << "And shouldn't ever get here\n";
+	  exit(0);
+      }
+    }
+    sumTurfRateTree->Fill();
+    delete theSummedTurfRateClass;
 }
 
 
