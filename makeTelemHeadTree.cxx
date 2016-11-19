@@ -26,6 +26,7 @@ int eventInMap(UInt_t eventNumber);
 std::map<UInt_t,UInt_t> eventNumberMap;
 
 AnitaEventHeader_t theHeader;
+AnitaEventHeaderVer40_t theHeader40;
 AnitaEventHeaderVer33_t theHeader33;
 AnitaEventHeaderVer13_t theHeader13;
 AnitaEventHeaderVer12_t theHeader12;
@@ -100,7 +101,6 @@ void makeRunHeadTree(char *inName, char *outName) {
 
 	gzFile infile = gzopen (fileName, "rb");   
 
-	version=VER_EVENT_HEADER;
  
 	if(firstTime) {
 	   //Need to work out which version this is
@@ -119,6 +119,13 @@ void makeRunHeadTree(char *inName, char *outName) {
 	    std::cout << "Old version of AnitaEventHeader_t -- " << (int)gHdr.verId
 		 << std::endl;
 	    switch(gHdr.verId) {
+	    case 40:
+	      if(gHdr.numBytes==sizeof(AnitaEventHeaderVer40_t)) {
+		std::cout << "Size matches will proceed\n";
+		version=40;
+	      }
+	      break;
+	      
 	    case 33:
 	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer33_t)) {
 		  std::cout << "Size matches will proceed\n";
@@ -158,6 +165,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 		   << VER_EVENT_HEADER << "\n";
 	   firstTime=0;
 	}
+	//	std::cout << "Version : " << version << "\n";
 
 	//	cout << infile << " " << fileName << endl;
 	for(int i=0;i<100;i++) {	
@@ -168,6 +176,11 @@ void makeRunHeadTree(char *inName, char *outName) {
 	   }
 	   else {
 	    switch(version) {
+	    case 40:
+	      //	      std::cout << "Reading version 40\n";
+	       numBytesExpected=sizeof(AnitaEventHeaderVer40_t);
+	       numBytes=gzread(infile,&theHeader40,numBytesExpected);
+	       break;
 	    case 33:
 	       numBytesExpected=sizeof(AnitaEventHeaderVer33_t);
 	       numBytes=gzread(infile,&theHeader33,numBytesExpected);
@@ -205,12 +218,18 @@ void makeRunHeadTree(char *inName, char *outName) {
 		break;
 	      }
 	      else break;
-	    } 
-	    if(eventInMap(theHeader.eventNumber)) {
-	      //	std::cout << "Got event: " << theBody.eventNumber << "\n";
-	      continue;
+	    }
+	    if(version==VER_EVENT_HEADER) {
+	      if(eventInMap(theHeader.eventNumber)) {
+		//	std::cout << "Got event: " << theHeader.eventNumber << "\n";
+		continue;
+	      }
+	    }
+	    else if(version==40) {
+	      if(eventInMap(theHeader40.eventNumber)) continue;
 	    }
 	    processHeader(version);
+	      
 	}
 	gzclose(infile);
 //	if(error) break;
@@ -262,6 +281,7 @@ void makeHeadTree() {
 #define C3PO_AVG 20
 
 void processHeader(int version) {
+
   static UInt_t c3poNumArray[C3PO_AVG]={0};
   static UInt_t ppsNumArray[C3PO_AVG]={0};
   static UInt_t c3poCounter=0;
@@ -269,10 +289,12 @@ void processHeader(int version) {
   static UInt_t lastTriggerTime=0;
   static UInt_t ppsOffset=0;
   static UInt_t lastPps=0;
+  //  std::cout << "processHeader(" << version << ")\t" << doneInit << "\n";
   if(!doneInit) {
     //    char name[128];
     //    char def[128];
     theFile = new TFile(rootFileName,"RECREATE");
+    std::cout << theFile << "\t" << rootFileName << "\n";
     
     headTree = new TTree("headTree","Tree of Anita Event Headers");
     headTree->Branch("header","RawAnitaHeader",&theHead);
@@ -290,7 +312,9 @@ void processHeader(int version) {
   UInt_t triggerTimeNs=1e9*(trigTime/250e6);
   Int_t goodTimeFlag=1;
   realTime=theHeader.unixTime;
-   
+
+
+  //  std::cout << version << "\t" << VER_EVENT_HEADER << "\n";
   if(version==VER_EVENT_HEADER) {
     theHead = new RawAnitaHeader(&theHeader,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
   }
@@ -303,6 +327,17 @@ void processHeader(int version) {
     realTime=theHeader33.unixTime;
 
     theHead = new RawAnitaHeader(&theHeader33,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+  }
+  else if(version==40) {
+    //    std::cout << "Here with version 40\n";
+    //This is wrong, but good enough for telemetry
+    UInt_t trigTime=theHeader40.turfio.trigTime;
+    UInt_t triggerTime=theHeader40.unixTime;
+    UInt_t triggerTimeNs=1e9*(trigTime/250e6);
+    Int_t goodTimeFlag=1;
+    realTime=theHeader40.unixTime;
+
+    theHead = new RawAnitaHeader(&theHeader40,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
   }
   
   headTree->Fill();                

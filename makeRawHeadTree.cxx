@@ -119,6 +119,7 @@ void makeRunHeadTree(char *inName, char *outName) {
 		 << std::endl;
 	    switch(gHdr.verId) {
 	    case 40:
+	      std::cout << gHdr.numBytes << "\t" << sizeof(AnitaEventHeader_t) << "\n";
 	       if(gHdr.numBytes==sizeof(AnitaEventHeaderVer40_t)) {
 		  std::cout << "Size matches will proceed\n";
 		  version=40;
@@ -322,6 +323,9 @@ void processHeader(int version) {
 	  unixTime=theHeader40.unixTime;
 	  trigTime=theHeader40.turfio.trigTime;
 	  c3poNum=theHeader40.turfio.c3poNum;
+	  rawppsNum=theHeader40.turfio.ppsNum;
+	  rawtrigTime=theHeader40.turfio.trigTime;
+	  rawc3poNum=theHeader40.turfio.c3poNum;
 	  break;
     case 33:
 	  ppsNum=theHeader33.turfio.ppsNum;
@@ -435,6 +439,10 @@ void processHeader(int version) {
        case 40:
 	 //	 std::cout << "Trying with version 40\n";
 	 theHead = new RawAnitaHeader((AnitaEventHeaderVer40_t*)&theHeader40,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+	 theHead->trigTime    = trigTime;
+	 theHead->rawtrigTime = rawtrigTime;
+	 theHead->rawppsNum   = rawppsNum + ppsNotReset;
+	 theHead->rawc3poNum  = rawc3poNum;
 	 break;
        case 33:
 	 //	 std::cout << "Trying with version 33\n";

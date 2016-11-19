@@ -88,7 +88,7 @@ install (TARGETS ${loop_prog} DESTINATION ${UTIL_BIN_DIR})
 endforeach(loop_prog )
 
 foreach(script remakeHkFiles.sh runTelemEventMaker.sh runTelemMonitorMaker.sh runTelemSurfHkMaker.sh runAdu5PatSmoother.sh runTelemGpsMaker.sh runTelemOtherMonitorMaker.sh runTelemTurfRateMaker.sh runAnita4FileMakerTelem.sh   runTelemGpuMaker.sh          runTelemRawScalerMaker.sh runTelemAuxMaker.sh          runTelemHeaderMaker.sh       runTelemSlowMaker.sh runTelemAvgSurfHkMaker.sh    runTelemHkMaker.sh           runTelemSumTurfRateMaker.sh)
-  install(FILES ${script} DESTINATION ${UTIL_BIN_DIR})
+  install(PROGRAMS ${script} DESTINATION ${UTIL_BIN_DIR})
 endforeach(script)
 
 

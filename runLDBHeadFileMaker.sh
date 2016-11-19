@@ -23,6 +23,8 @@ fi
 echo "Using $RAW_RUN_DIR"
 ls ${RAW_RUN_DIR}
 
+cd ${ANITA_UTIL_INSTALL_DIR}/bin
+
 echo "Starting Header File"
 HEAD_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/event/*/ev?/hd*gz; 
@@ -78,7 +80,7 @@ cat ${HEAD_FILE_LIST}
 
 if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     HEAD_ROOT_FILE=${ROOT_RUN_DIR}/headFile${RUN}.root
-    ./build/makeRawHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
+    ./makeRawHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=true
     echo "Done Header File"
