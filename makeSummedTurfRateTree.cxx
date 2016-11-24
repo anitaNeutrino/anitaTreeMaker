@@ -163,7 +163,7 @@ void processTurfRate(int version) {
       }
     }
     sumTurfRateTree->Fill();
-    delete theSummedTurfRateClass;
+    //    delete theSummedTurfRateClass;
 }
 
 
