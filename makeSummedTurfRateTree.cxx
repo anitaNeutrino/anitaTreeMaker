@@ -142,9 +142,9 @@ void processTurfRate(int version) {
 	doneInit=1;
 	std::cout << sumTurfRateTree << "\n";
     }
-    //    cout << theSummedTurfRate.unixTime
-    //	 << "\t" << theSummedTurfRate.gHdr.code
-    //	 << endl;
+    cout << theSummedTurfRate.unixTime
+    	 << "\t" << theSummedTurfRate.gHdr.code
+    	 << endl;
     if(theSummedTurfRateClass) 
        delete theSummedTurfRateClass;
     if(version == VER_SUM_TURF_RATE) {

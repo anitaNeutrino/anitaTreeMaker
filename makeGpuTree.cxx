@@ -3,7 +3,7 @@
 #include <iostream>
 #include <zlib.h>
 #include <libgen.h>
-   
+
 
 #include "TTree.h"
 #include "TFile.h"
@@ -62,8 +62,8 @@ void makeGpuTree(char *inName, char *outName) {
 	if(counter%100==0)
 	    std::cout << fileName << std::endl;
 	counter++;
-	gzFile infile = gzopen (fileName, "rb");    
-	for(int i=0;i<1000;i++) {	
+	gzFile infile = gzopen (fileName, "rb");
+	for(int i=0;i<1000;i++) {
 	    numBytes=gzread(infile,&theGpu,sizeof(GpuPhiSectorPowerSpectrumStruct_t));
 	    if(numBytes!=sizeof(GpuPhiSectorPowerSpectrumStruct_t)) {
 		error=1;
@@ -72,9 +72,10 @@ void makeGpuTree(char *inName, char *outName) {
 	    processGpu();
 	}
 	gzclose(infile);
-//	if(error) break;
+	// if(error) break;
+	error;
     }
-    
+
     gpuTree->AutoSave();
     theFile->Close();
     doneInit=0;
@@ -90,7 +91,15 @@ void processGpu() {
     }
     if(theGpuPtr) delete theGpuPtr;
     theGpuPtr = new GpuPowerSpectra(runNumber,theGpu.unixTimeFirstEvent,&theGpu);
-    gpuTree->Fill();                
+    gpuTree->Fill();
+    std::cout << theGpu.gHdr.code << "\t" << theGpu.gHdr.packetNumber << "\t"
+	      << (int) theGpu.gHdr.feByte << "\t" << (int) theGpu.gHdr.verId << "\t"
+	      << (int) theGpu.gHdr.checksum << std::endl;
+    // PacketCode_t code;
+    // unsigned int packetNumber; ///<Especially for Ped
+    // unsigned short numBytes;
+    // unsigned char feByte;
+    // unsigned char verId;
+    // unsigned int checksum;
+
 }
-
-
