@@ -184,7 +184,7 @@ for file in ${RAW_RUN_DIR}/house/surfhk/*/*/s*gz;
 done
 
 #cat ${SURF_FILE_LIST}
-x
+
 if  test `cat ${SURF_FILE_LIST} | wc -l` -gt 0 ; then
     SURF_ROOT_FILE=${ROOT_RUN_DIR}/surfHkFile${RUN}.root
     ./makeSurfHkTree ${SURF_FILE_LIST} ${SURF_ROOT_FILE}
