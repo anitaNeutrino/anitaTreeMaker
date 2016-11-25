@@ -24,7 +24,7 @@ cd $ANITA_TREE_MAKER_DIR
 
 echo "Starting TUFF STATUS File"
 TUFF_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*gz; 
+for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*
   do
   if [[ -f $file ]]; then
       echo $file >> ${TUFF_FILE_LIST}
@@ -33,7 +33,7 @@ done
 
 if  test `cat ${TUFF_FILE_LIST} | wc -l` -gt 0 ; then
     TUFF_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
-    makeTuffStatusree ${TUFF_FILE_LIST} ${TUFF_ROOT_FILE}
+    makeTuffStatusTree ${TUFF_FILE_LIST} ${TUFF_ROOT_FILE}
     rm ${TUFF_FILE_LIST}
     echo "Done TUFF File"
 else
