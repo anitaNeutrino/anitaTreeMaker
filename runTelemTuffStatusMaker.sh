@@ -33,6 +33,7 @@ done
 
 if  test `cat ${TUFF_FILE_LIST} | wc -l` -gt 0 ; then
     TUFF_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
+    echo $TUFF_ROOT_FILE
     makeTuffStatusTree ${TUFF_FILE_LIST} ${TUFF_ROOT_FILE}
     rm ${TUFF_FILE_LIST}
     echo "Done TUFF File"

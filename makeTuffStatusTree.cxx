@@ -29,9 +29,9 @@ void processTuffNotch() {
   if(theTuffPtr) delete theTuffPtr;
     theTuffPtr = new TuffNotchStatus(runNumber,&theTuff);
     tuffTree->Fill();
-    std::cout << theTuff.gHdr.code << "\t" << theTuff.gHdr.packetNumber << "\t"
-	      << (int) theTuff.gHdr.feByte << "\t" << (int) theTuff.gHdr.verId << "\t"
-	      << (int) theTuff.gHdr.checksum << std::endl;
+//    std::cout << theTuff.gHdr.code << "\t" << theTuff.gHdr.packetNumber << "\t"
+//	      << (int) theTuff.gHdr.feByte << "\t" << (int) theTuff.gHdr.verId << "\t"
+//	      << (int) theTuff.gHdr.checksum << std::endl;
     // PacketCode_t code;
     // unsigned int packetNumber; ///<Especially for Ped
     // unsigned short numBytes;
@@ -91,6 +91,7 @@ int main(int nargs, char ** args)
   }
 
 
+  strcpy(rootFileName, args[2]); 
 
   makeTuffNotchTree(args[1],args[2]); 
 
