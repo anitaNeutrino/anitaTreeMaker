@@ -75,7 +75,7 @@ void makeGpuTree(char *inName, char *outName) {
 	// if(error) break;
 	error;
     }
-
+    std::cout << error << "\t" << sizeof(GpuPhiSectorPowerSpectrumStruct_t) << std::endl;
     gpuTree->AutoSave();
     theFile->Close();
     doneInit=0;
