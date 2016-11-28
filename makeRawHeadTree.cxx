@@ -365,7 +365,11 @@ void processHeader(int version) {
 
   ppsNotReset=0;
     if(c3poCounter==0) {
-      c3poNumArray[c3poCounter]=c3poNum;
+      // if ((c3poNum>249.996e6) && (c3poNum<249.998e6)) {
+	c3poNumArray[c3poCounter]=c3poNum;
+      // } else {
+      // 	c3poNumArray[c3poCounter]=c3poNumOld;
+      // }
       ppsNumArray[c3poCounter]=ppsNum;
       c3poCounter++;
     }
