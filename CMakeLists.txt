@@ -80,14 +80,14 @@ message("UTIL_INC_DIR is set to ${UTIL_INC_DIR}")
 message("DICTNAME is set to ${DICTNAME}" )
 message("PROJECT_BINARY_DIR is set to ${PROJECT_BINARY_DIR}")
 
-foreach(loop_prog checkForCorruptEvents            makeGpsEventTreeBothAdu5s        makeSSHkTree fixTriggerTimeAnita3             makeGpsTree                      makeSlowRateTree makeAdu5PatFiles                 makeGpsTttTree                   makeSummedTurfRateTree makeAuxiliaryTree                makeGpuTree                      makeSuperSmoothAdu5PatFiles makeAveragedSurfHkTree           makeHkTree                      makeSurfHkTree makeCalibratedEventTrees         makeMonitorTree                  makeTelemHeadTree makeConcatanatedFiles            makeOtherTree                    makeTurfRateTree makeEventHeadTree                makePrettyHkTree                 quickCheckForErrors makeEventRunTree                 makeRawHeadTree                  updateAdu5PatTreesFromTelemetry makeFixedEventHeaderTrees        makeRawScalerTree                updateEventRunTree makeGpsEventTree                 makeRunSummaryFile
+foreach(loop_prog checkForCorruptEvents            makeGpsEventTreeBothAdu5s        makeSSHkTree fixTriggerTimeAnita3             makeGpsTree                      makeSlowRateTree makeAdu5PatFiles                 makeGpsTttTree                   makeSummedTurfRateTree makeAuxiliaryTree                makeGpuTree                      makeSuperSmoothAdu5PatFiles makeAveragedSurfHkTree           makeHkTree                      makeSurfHkTree makeCalibratedEventTrees         makeMonitorTree                  makeTelemHeadTree makeConcatanatedFiles            makeOtherTree                    makeTurfRateTree makeEventHeadTree                makePrettyHkTree                 quickCheckForErrors makeEventRunTree                 makeRawHeadTree                  updateAdu5PatTreesFromTelemetry makeFixedEventHeaderTrees        makeRawScalerTree                updateEventRunTree makeGpsEventTree                 makeRunSummaryFile makeTuffStatusTree
 )
 add_executable (${loop_prog} ${loop_prog}.cxx)
 target_link_libraries (${loop_prog} LINK_PUBLIC AnitaEvent RootFftwWrapper ${ROOT_LIBRARIES} ${ZLIB_LIBRARIES} )
 install (TARGETS ${loop_prog} DESTINATION ${UTIL_BIN_DIR})
 endforeach(loop_prog )
 
-foreach(script remakeHkFiles.sh runTelemEventMaker.sh runTelemMonitorMaker.sh runTelemSurfHkMaker.sh runAdu5PatSmoother.sh runTelemGpsMaker.sh runTelemOtherMonitorMaker.sh runTelemTurfRateMaker.sh runAnita4FileMakerTelem.sh   runTelemGpuMaker.sh          runTelemRawScalerMaker.sh runTelemAuxMaker.sh          runTelemHeaderMaker.sh       runTelemSlowMaker.sh runTelemAvgSurfHkMaker.sh    runTelemHkMaker.sh           runTelemSumTurfRateMaker.sh)
+foreach(script remakeHkFiles.sh runTelemEventMaker.sh runTelemMonitorMaker.sh runTelemSurfHkMaker.sh runAdu5PatSmoother.sh runTelemGpsMaker.sh runTelemOtherMonitorMaker.sh runTelemTurfRateMaker.sh runAnita4FileMakerTelem.sh   runTelemGpuMaker.sh          runTelemRawScalerMaker.sh runTelemAuxMaker.sh          runTelemHeaderMaker.sh       runTelemSlowMaker.sh runTelemAvgSurfHkMaker.sh    runTelemHkMaker.sh           runTelemSumTurfRateMaker.sh  runTelemTuffStatusMaker.sh) 
   install(PROGRAMS ${script} DESTINATION ${UTIL_BIN_DIR})
 endforeach(script)
 
