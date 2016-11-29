@@ -19,7 +19,6 @@ else
     exit 0;
 fi
 
-cd $ANITA_TREE_MAKER_DIR
 
 echo "Starting Header File"
 HEAD_FILE_LIST=`mktemp`

@@ -19,7 +19,7 @@ else
     exit 0;
 fi
 
-cd $ANITA_TREE_MAKER_DIR
+
 
 echo "Starting Averaged SURF Hk File"
 AVGSURF_FILE_LIST=`mktemp`
