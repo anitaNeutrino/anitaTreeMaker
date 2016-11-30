@@ -20,7 +20,7 @@ else
     exit 0;
 fi
 
-cd $ANITA_TREE_MAKER_DIR
+
 
 
 echo "Starting Event Header File"

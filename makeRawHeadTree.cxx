@@ -165,13 +165,12 @@ void makeRunHeadTree(char *inName, char *outName) {
 	   firstTime=0;
 	}
 
-
- 
 	//	cout << infile << " " << fileName << endl;
 	for(int i=0;i<100;i++) {
 	  int thisEventNumber=0;
 	  //	  std::cout << i << std::endl;
 	   int numBytesExpected=sizeof(AnitaEventHeader_t);
+
 	   if(version==VER_EVENT_HEADER) {
 	      numBytes=gzread(infile,&theHeader,sizeof(AnitaEventHeader_t));
 	      thisEventNumber=theHeader.eventNumber;
@@ -315,7 +314,8 @@ void processHeader(int version) {
   UInt_t rawppsNum=theHeader.turfio.ppsNum;
   UInt_t rawtrigTime=theHeader.turfio.trigTime;
   UInt_t rawc3poNum=theHeader.turfio.c3poNum;
-  
+
+
   if(version != VER_EVENT_HEADER) {
     switch(version) {
     case 40:
@@ -364,20 +364,22 @@ void processHeader(int version) {
     }
 
   ppsNotReset=0;
-    if(c3poCounter==0) {
-      // if ((c3poNum>249.996e6) && (c3poNum<249.998e6)) {
-	c3poNumArray[c3poCounter]=c3poNum;
-      // } else {
-      // 	c3poNumArray[c3poCounter]=c3poNumOld;
-      // }
-      ppsNumArray[c3poCounter]=ppsNum;
-      c3poCounter++;
+  if(c3poCounter==0) {
+    
+    if ((c3poNum>249.995e6) && (c3poNum<249.998e6))
+      c3poNumArray[c3poCounter]=c3poNum;
+    else
+      c3poNumArray[c3poCounter]=c3poNum=249.997e6;
+
+    ppsNumArray[c3poCounter]=ppsNum;
+    c3poCounter++;
     }
     else {
       Int_t lastIndex=(c3poCounter-1)%C3PO_AVG;
       Int_t thisIndex=(c3poCounter%C3PO_AVG);
-      //      std::cout << thisIndex << "\t" << lastIndex << "\t" << ppsNum << "\t" << ppsNumArray[lastIndex] << "\n";
-      if(ppsNum!=ppsNumArray[lastIndex] && (c3poNum>249.996e6) && (c3poNum<249.998e6) ) {
+      //      std::cout << thisIndex << "\t" << lastIndex << "\t" << ppsNum << "\t" << ppsNumArray[lastIndex] << " " << c3poNum << "\n";
+
+      if((ppsNum!=ppsNumArray[lastIndex]) && (c3poNum>249.995e6) && (c3poNum<249.998e6) ) {
 	c3poNumArray[thisIndex]=c3poNum;
 	ppsNumArray[thisIndex]=ppsNum;
 	c3poCounter++;
@@ -433,6 +435,7 @@ void processHeader(int version) {
     
     if(version==VER_EVENT_HEADER) {
        theHead = new RawAnitaHeader(&theHeader,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+       theHead->c3poNum     = c3poNum;
        theHead->trigTime    = trigTime;
        theHead->rawtrigTime = rawtrigTime;
        theHead->rawppsNum   = rawppsNum + ppsNotReset;
@@ -443,6 +446,7 @@ void processHeader(int version) {
        case 40:
 	 //	 std::cout << "Trying with version 40\n";
 	 theHead = new RawAnitaHeader((AnitaEventHeaderVer40_t*)&theHeader40,runNumber,realTime,triggerTime,triggerTimeNs,goodTimeFlag);
+	 theHead->c3poNum     = c3poNum;
 	 theHead->trigTime    = trigTime;
 	 theHead->rawtrigTime = rawtrigTime;
 	 theHead->rawppsNum   = rawppsNum + ppsNotReset;
@@ -469,7 +473,6 @@ void processHeader(int version) {
 	  break;
        }
     }
-   // std::cout << theHeader.eventNumber << std::endl;
 
     headTree->Fill();                
 }

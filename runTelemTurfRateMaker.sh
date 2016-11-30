@@ -19,7 +19,7 @@ else
     exit 0;
 fi
 
-cd $ANITA_TREE_MAKER_DIR
+
 
 echo "Starting TURF Rate File"
 TURF_FILE_LIST=`mktemp`
