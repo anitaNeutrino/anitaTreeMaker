@@ -43,5 +43,7 @@ runTelemHkMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 runTelemGpsMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 runTelemAuxMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 
+runTelemTuffStatusMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
+runTelemRTLSpectrumMaker.sh $RUN $RAW_RUN_DIR $ROOT_RUN_DIR
 
 
