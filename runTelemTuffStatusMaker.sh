@@ -1,4 +1,4 @@
-#/bin/bash
+#! /bin/bash
 if [ "$3" = "" ]
 then
    echo "usage: `basename $0` <run no> <raw run dir> <root run dir>" 1>&2
@@ -28,6 +28,8 @@ for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*
       echo $file >> ${TUFF_FILE_LIST}
   fi
 done
+
+
 
 if  test `cat ${TUFF_FILE_LIST} | wc -l` -gt 0 ; then
     TUFF_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
