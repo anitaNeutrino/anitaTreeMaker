@@ -90,13 +90,24 @@ void makeRunHeadTree(char *inName, char *outName) {
       if(counter%100==0) 
 	std::cout << fileName << std::endl;
 	counter++;
+
+	const char *justFile = gSystem->BaseName(fileName);
+	//	std::cout << justFile << "\n";
+	int testEvent=0;
+	sscanf(justFile,"hd_%d.dat.gz",&testEvent);
+	if(testEvent==0) continue;
+	
 	
 	const char *subDir = gSystem->DirName(fileName);
+	//	std::cout << subDir << "\n";
 	const char *subSubDir = gSystem->DirName(subDir);
 	const char *eventDir = gSystem->DirName(subSubDir);
 	const char *runDir = gSystem->DirName(eventDir);
 	const char *justRun = gSystem->BaseName(runDir);
 //	std::cout << justRun << std::endl;
+//	std::cout << fileName << "\t" << subDir << "\t" << subSubDir << "\n";
+
+	
 	sscanf(justRun,"run%d",&runNumber);
 
 	gzFile infile = gzopen (fileName, "rb");   
