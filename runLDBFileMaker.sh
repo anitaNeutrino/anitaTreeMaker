@@ -487,12 +487,12 @@ echo "Start Tuff Status File"
 TUFF_STATUS_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*; 
 do 
-  if [-f $file ]; then 
+  if [ -f $file ]; then 
     echo $file >> ${TUFF_STATUS_FILE_LIST}
   fi
 done
 
-TUFF_STATUS_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatus${RUN}.root
+TUFF_STATUS_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
 ./makeTuffStatusTree ${TUFF_STATUS_FILE_LIST} ${TUFF_STATUS_ROOT_FILE}
 rm ${TUFF_STATUS_FILE_LIST} 
 echo "Done Tuff Status File" 
@@ -501,12 +501,12 @@ echo "Start RTL Spectrum File"
 RTL_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/house/rtl/*/*/rtl*; 
 do 
-  if [-f $file ]; then 
+  if [ -f $file ]; then 
     echo $file >> ${RTL_FILE_LIST}
   fi
 done
 
-RTL_ROOT_FILE=${ROOT_RUN_DIR}/rtlSpectrum${RUN}.root
+RTL_ROOT_FILE=${ROOT_RUN_DIR}/rtlSpectrumFile${RUN}.root
 ./makeRtlSdrTree ${RTL_FILE_LIST} ${RTL_ROOT_FILE}
 rm ${RTL_FILE_LIST} 
 echo "Done RTL Spectrum File" 
