@@ -176,11 +176,11 @@ void makeRunHeadTree(char *inName, char *outName) {
 		   << VER_EVENT_HEADER << "\n";
 	   firstTime=0;
 	}
-	//	std::cout << "Version : " << version << "\n";
+	std::cout << "Version : " << version << "\n";
 
 	//	cout << infile << " " << fileName << endl;
 	for(int i=0;i<100;i++) {	
-	  //	  std::cout << i << std::endl;
+	  std::cout << i << std::endl;
 	   int numBytesExpected=sizeof(AnitaEventHeader_t);
 	   if(version==VER_EVENT_HEADER) {
 	      numBytes=gzread(infile,&theHeader,sizeof(AnitaEventHeader_t));
@@ -231,8 +231,9 @@ void makeRunHeadTree(char *inName, char *outName) {
 	      else break;
 	    }
 	    if(version==VER_EVENT_HEADER) {
+	      std::cout << "Got event: " << theHeader.eventNumber << "\n";
 	      if(eventInMap(theHeader.eventNumber)) {
-		//	std::cout << "Got event: " << theHeader.eventNumber << "\n";
+		
 		continue;
 	      }
 	    }

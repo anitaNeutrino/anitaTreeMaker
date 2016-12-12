@@ -32,8 +32,17 @@ if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=true
     echo "Done Header File"
+
+    ROOT_BASE_DIR=`dirname ${ROOT_RUN_DIR}`
+    makeGpsEventTree $ROOT_BASE_DIR ${RUN}
+
+    makeGpuSourceJsonFiles ${ANITA_TELEM_DATA_DIR}/root/run${RUN}/headFile${RUN}.root ${ANITA_TELEM_DATA_DIR}/root/run${RUN}/gpsEvent${RUN}.root 
+
+
 else
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=false
     echo "No header files"
 fi
+
+
