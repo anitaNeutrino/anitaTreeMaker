@@ -19,7 +19,7 @@
 static TGraph * calibration[NUM_RTLSDR] = {0}; 
 
 void processRtlSdr();
-void makeRtlSdrTree(char *inName, char *outName);
+void makeRtlSdrTree(int nin, char **inNames, char *outName);
 
 //Global Variable
 RTLSpectrum *theRtlSdrPtr;
@@ -37,9 +37,29 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  if (argc > 2)
+  //check if there is more than one ROOT file, if so, then the second shoul be a calibraiton file 
+
+
+  int nroot =0; 
+  int iout = -1; 
+  int ical = -1; 
+
+  for (int i = 1; i < argc; i++)
   {
-    TFile *f = new TFile(argv[3]); 
+    if (strstr(argv[i],".root"))
+    {
+      nroot++; 
+
+      if (nroot == 1) iout = i; 
+      if (nroot == 2) ical = i; 
+
+
+    }
+  }
+
+  if (ical > 2)
+  {
+    TFile *f = new TFile(argv[ical]); 
 
     for (int i = 0; i < NUM_RTLSDR; i++) 
     {
@@ -47,15 +67,18 @@ int main(int argc, char **argv) {
     }
   }
 
-  makeRtlSdrTree(argv[1],argv[2]);
+  makeRtlSdrTree(iout-1, argv+1,argv[iout]);
   return 0;
 }
 
 
-void makeRtlSdrTree(char *inName, char *outName) {
+void makeRtlSdrTree(int nin, char **inNames, char *outName) {
    strncpy(rootFileName,outName,FILENAME_MAX);
 
-   std::ifstream PosFile(inName);
+
+   for (int i = 0; i < nin; i++) 
+   {
+   std::ifstream PosFile(inNames[i]);
 
     int numBytes=0;
     char fileName[180];
@@ -87,9 +110,11 @@ void makeRtlSdrTree(char *inName, char *outName) {
        gzclose(infile);
     }
 
-    rtlTree->AutoSave();
-    theFile->Close();
-    doneInit=0;
+   }
+   rtlTree->AutoSave();
+   theFile->Close();
+   doneInit=0;
+
 }
 
 void processRtlSdr() {
