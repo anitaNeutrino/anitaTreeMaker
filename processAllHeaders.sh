@@ -13,7 +13,7 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
     fi    
 
     echo "${bold}Now on run $n${normal}"
-    ./runNonEventFileMakerWHead.sh $n
+    ./runHeadFileMakerANITA4.sh $n # making headFiles only (saves times), to check for c3poNum correction
     echo "${bold}Run $n complete! ${normal}"
     echo "<----------------------------------------->"
 

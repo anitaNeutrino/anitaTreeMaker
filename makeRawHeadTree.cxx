@@ -366,7 +366,7 @@ void processHeader(int version) {
   ppsNotReset=0;
   if(c3poCounter==0) {
     
-    if ((c3poNum>249.995e6) && (c3poNum<249.998e6))
+    if ((c3poNum>249.990e6) && (c3poNum<250.010e6))
       c3poNumArray[c3poCounter]=c3poNum;
     else
       c3poNumArray[c3poCounter]=c3poNum=249.997e6;
@@ -379,7 +379,7 @@ void processHeader(int version) {
       Int_t thisIndex=(c3poCounter%C3PO_AVG);
       //      std::cout << thisIndex << "\t" << lastIndex << "\t" << ppsNum << "\t" << ppsNumArray[lastIndex] << " " << c3poNum << "\n";
 
-      if((ppsNum!=ppsNumArray[lastIndex]) && (c3poNum>249.995e6) && (c3poNum<249.998e6) ) {
+      if((ppsNum!=ppsNumArray[lastIndex]) && (c3poNum>249.990e6) && (c3poNum<250.010e6) ) {
 	c3poNumArray[thisIndex]=c3poNum;
 	ppsNumArray[thisIndex]=ppsNum;
 	c3poCounter++;
