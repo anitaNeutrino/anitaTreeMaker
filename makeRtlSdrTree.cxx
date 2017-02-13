@@ -73,7 +73,10 @@ int main(int argc, char **argv) {
 
 
 void makeRtlSdrTree(int nin, char **inNames, char *outName) {
-   strncpy(rootFileName,outName,FILENAME_MAX);
+
+  if (nin == 0) return; 
+
+  strncpy(rootFileName,outName,FILENAME_MAX);
 
 
    for (int i = 0; i < nin; i++) 
