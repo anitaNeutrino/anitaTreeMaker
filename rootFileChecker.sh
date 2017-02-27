@@ -27,7 +27,7 @@ fi
 cd ${RUN_BASE_DIR}
 
 # Files to search
-declare -a rootFiles=("aux" "avgSurfHk" "gps" "gpu" "head" "hk" "monitor" "prettyHk" "rawScaler" "sshk" "sumTurfRate" "surfHk" "tuffStatus" "turfRate")
+declare -a rootFiles=("aux" "avgSurfHk" "event" "gps" "gpu" "head" "hk" "monitor" "prettyHk" "rawScaler" "sshk" "sumTurfRate" "surfHk" "tuffStatus" "turfRate")
 rootFileslength=${#rootFiles[@]}
 
 for (( i=0; i<${rootFileslength}; i++ ));

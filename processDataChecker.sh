@@ -1,4 +1,5 @@
 # Simple script to iterate through all the runs in ANITA-4 to check for missing folders / files for raw and rootified data
+
 #!/bin/sh
 
 FIRSTRUN=1
@@ -15,7 +16,7 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
 
     ### Re-comment one of the scripts if you want to run it
     ./rawFolderChecker.sh $n # which raw folders are missing?
-    ./rootFileChecker.sh $n # which rootified files are missing?
+    #./rootFileChecker.sh $n # which rootified files are missing?
 
     if [ $n == ${LASTRUN} ]; then
 	echo "${bold}ANITA-4 data set checked"
