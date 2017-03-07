@@ -30,8 +30,7 @@ fi
 echo "Using $RAW_RUN_DIR"
 ls ${RAW_RUN_DIR}
 
-echo "Rootifying non-event data..."
-echo "Non-event data includes: calib, gps, gpu, hk, monitor, rtl, surfhk, tuff, turfhk,  aux files and well as header files"
+echo "Rootifying header data"
 
 cd ${ANITA_UTIL_INSTALL_DIR}/bin
 #cat ${HEAD_FILE_LIST}
@@ -102,5 +101,3 @@ else
     DONE_HEAD_FILE=false
     echo "No header files"
 fi
-
-
