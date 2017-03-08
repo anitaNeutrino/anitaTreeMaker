@@ -283,6 +283,7 @@ void makeHeadTree() {
 }
 #define C3PO_AVG 20
 
+
 void processHeader(int version) {
   //  std::cout << "processHeader( " << version << " )\n";
   static UInt_t c3poNumArray[C3PO_AVG]={0};
@@ -290,8 +291,11 @@ void processHeader(int version) {
   static UInt_t c3poCounter=0;
   static int doneInit=0;
   static UInt_t lastTriggerTime=0;
+  static int lastNormalPpsNum = 0; 
+  static int lastSmallC3po = 0; 
   static UInt_t ppsOffset=0;
   static UInt_t lastPps=0;
+  static double payloadTimeLastPps = 0; 
   UInt_t ppsNotReset=0;
   if(!doneInit) {
     //    char name[128];
@@ -309,6 +313,7 @@ void processHeader(int version) {
   
   UInt_t ppsNum=theHeader.turfio.ppsNum;
   UInt_t unixTime=theHeader.unixTime;
+  UInt_t unixTimeUs=theHeader.unixTimeUs;
   UInt_t trigTime=theHeader.turfio.trigTime;
   UInt_t c3poNum=theHeader.turfio.c3poNum;
   UInt_t rawppsNum=theHeader.turfio.ppsNum;
@@ -321,6 +326,7 @@ void processHeader(int version) {
     case 40:
 	  ppsNum=theHeader40.turfio.ppsNum;
 	  unixTime=theHeader40.unixTime;
+	  unixTimeUs=theHeader40.unixTimeUs;
 	  trigTime=theHeader40.turfio.trigTime;
 	  c3poNum=theHeader40.turfio.c3poNum;
 	  rawppsNum=theHeader40.turfio.ppsNum;
@@ -330,29 +336,34 @@ void processHeader(int version) {
     case 33:
 	  ppsNum=theHeader33.turfio.ppsNum;
 	  unixTime=theHeader33.unixTime;
+	  unixTimeUs=theHeader33.unixTimeUs;
 	  trigTime=theHeader33.turfio.trigTime;
 	  c3poNum=theHeader33.turfio.c3poNum;
 	  break;
     case 13:
 	  ppsNum=theHeader13.turfio.ppsNum;
 	  unixTime=theHeader13.unixTime;
+	  unixTimeUs=theHeader13.unixTimeUs;
 	  trigTime=theHeader13.turfio.trigTime;
 	  c3poNum=theHeader13.turfio.c3poNum;
 	  break;
        case 12:
 	  ppsNum=theHeader12.turfio.ppsNum;
 	  unixTime=theHeader12.unixTime;
+	  unixTimeUs=theHeader12.unixTimeUs;
 	  trigTime=theHeader12.turfio.trigTime;
 	  c3poNum=theHeader12.turfio.c3poNum;
 	  break;
        case 11:
 	  ppsNum=theHeader11.turfio.ppsNum;
 	  unixTime=theHeader11.unixTime;
+	  unixTimeUs=theHeader11.unixTimeUs;
 	  trigTime=theHeader11.turfio.trigTime;
 	  c3poNum=theHeader11.turfio.c3poNum;
 	  break;
        case 10:
 	  ppsNum=theHeader10.turfio.ppsNum;
+	  unixTimeUs=theHeader10.unixTimeUs;
 	  unixTime=theHeader10.unixTime;
 	  trigTime=theHeader10.turfio.trigTime;
 	  c3poNum=theHeader10.turfio.c3poNum;
@@ -414,21 +425,59 @@ void processHeader(int version) {
     UInt_t triggerTimeNs=trigTime;
     Int_t goodTimeFlag=0;
     
-      //Good c3poNum;
-    if(trigTime<=c3poNum) {
+    double payloadTime = unixTime + 1e-6 *unixTimeUs; 
+
+    if(ppsNum > 0) { //otherwise, this means we don't have a pps happening :( 
       //Good trigTime
       goodTimeFlag=1;
     }
-    else {
-      trigTime=trigTime-c3poNum;
-      ppsNotReset=1;
+
+    if (rawc3poNum < 1e6 || (ppsNum - lastNormalPpsNum == 2)) 
+    {
+      if (rawc3poNum < 1e6)
+      {
+        lastSmallC3po = rawc3poNum; 
+      }
+
+      goodTimeFlag = -1; 
+      if (ppsNum - lastNormalPpsNum == 2) 
+      {
+        ppsNum--; 
+        trigTime+=lastSmallC3po; 
+      }
     }
+    else if (ppsNum > lastPps && payloadTime- payloadTimeLastPps < 0.15 && ppsNum > 3)
+    {
+      //for some reason, we skipped the small c3poNum? 
+      //If we could look ahead, we'd see that trigTime goes past c3poNum, but 
+      //that would require modifying the structure of the code...
+      //This check will fail in the case we miss the pps AND software trigger within a period :( 
+      // but in that case, we don't really have any triggers anyway I guess? 
+      
+      lastNormalPpsNum = ppsNum-2; 
+      lastSmallC3po = 0; 
+      goodTimeFlag = -2; 
+      ppsNum--; 
+    }
+    else
+    {
+      lastNormalPpsNum = ppsNum; 
+
+
+    }
+
+
+
     triggerTimeNs=(UInt_t)(1e9*(Double_t(trigTime)/Double_t(c3poNum)));
 
 
-    UInt_t triggerTime=ppsNum+ppsOffset+ppsNotReset;
+    UInt_t triggerTime=ppsNum+ppsOffset + int(triggerTimeNs/1e9);
+    triggerTimeNs-=int(triggerTimeNs/1e9)*1e9; 
     lastTriggerTime=triggerTime;
+    if (ppsNum > lastPps) 
+      payloadTimeLastPps = payloadTime; 
     lastPps=ppsNum;
+
     //    std::cout << "Trigger Time " << triggerTime << " " << ppsNum << " " << ppsOffset << " " << ppsNotReset << std::endl;
 
 
