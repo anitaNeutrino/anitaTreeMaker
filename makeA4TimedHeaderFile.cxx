@@ -34,7 +34,7 @@ void meanRmsDifference(int N, const double * a, const double * b, double * pmean
 double alignmentFraction(int N, const double * trigger_times, int delta, int Nttt, double * ttt, double eps = 0.005) 
 {
 
-  if (Nttt == 0) return 0; 
+  if (Nttt == 0 || N == 0) return -1; 
 
   //start by bracketing the ttts 
   int ttt_i = 0; 
@@ -45,7 +45,11 @@ double alignmentFraction(int N, const double * trigger_times, int delta, int Ntt
 
   ttt_i = Nttt-1; 
 
-  while (ttt[ttt_i] > trigger_times[N-1]-delta) ttt_i--; 
+  while (ttt[ttt_i] > trigger_times[N-1]-delta)
+  {
+    ttt_i--; 
+    if (ttt_i < 0) return -1; 
+  }
 
   int max_ttt = ttt_i; 
 
@@ -55,6 +59,7 @@ double alignmentFraction(int N, const double * trigger_times, int delta, int Ntt
 
 
   printf("max_matches: %d\n", max_matches); 
+  if (!max_matches) return -1; 
   int nmatches = 0; 
   for (int i = min_ttt; i <= max_ttt;i++)
   {
@@ -67,6 +72,10 @@ double alignmentFraction(int N, const double * trigger_times, int delta, int Ntt
     else if (idx < N-1 && fabs(trigger_times[idx+1] -delta- ttt[i]) < eps) 
     {
       nmatches++; 
+    }
+    else
+    {
+//      printf("  No good alignment for delta=%d, ttt=%g (%g,%g)\n", delta, ttt[i], trigger_times[idx], idx < N-1 ? trigger_times[idx+1] : -1); 
     }
   }
 
@@ -86,11 +95,13 @@ void makeTimedHeaderTree(int run)
   TTree * headTree = (TTree*) fhead.Get("headTree"); 
   headTree->SetBranchAddress("header",&raw); 
 
-  int secOffset = headTree->GetMinimum("payloadTime"); 
+  unsigned secOffset = headTree->GetMinimum("payloadTime"); 
 
   TFile ftimed(TString::Format("%s/run%d/timedHeadFile%d.root",getenv("ANITA_ROOT_DATA"), run, run), "RECREATE"); 
   TTree * timedTree = new TTree ("headTree","Timed  Head Tree"); 
   timedTree->Branch("header",&raw); 
+  double alignment_fraction = 0; 
+  timedTree->Branch("tttAlignedFraction",&alignment_fraction); 
 
   TFile fttt(TString::Format("%s/run%d/tttFile%d.root", getenv("ANITA_ROOT_DATA"), run, run)); 
   TTree * tttTree = (TTree*) fttt.Get("tttTree"); 
@@ -102,9 +113,10 @@ void makeTimedHeaderTree(int run)
 
   if (tttTree) 
   {
-    tttTree->Draw(TString::Format("unixTimeGps-3-%d+subTimeGps*1e-7",secOffset)); //GPS offset of 14 already applied . GPS offset should be 17 for A4 flight
+    tttTree->Draw(TString::Format("unixTimeGps-3-%u+subTimeGps*1e-7",secOffset),"","goff"); //GPS offset of 14 already applied . GPS offset should be 17 for A4 flight
     Nttt = tttTree->GetEntries(); 
     ttt = tttTree->GetV1(); 
+    std::sort(ttt,ttt+Nttt); 
     printf("nttt: %d\n", Nttt); 
   }
 
@@ -112,32 +124,66 @@ void makeTimedHeaderTree(int run)
   epochs.push_back(0); 
   int nepochs = 1; 
 
- headTree->Draw(TString::Format("triggerTime-%d + 1e-9*triggerTimeNs:payloadTime-%d+1e-6*payloadTimeUs:trigType&0xf:ppsNum",secOffset,secOffset),"","goff"); 
+ headTree->Draw(TString::Format("triggerTime-%u + 1e-9*triggerTimeNs:payloadTime-%u+1e-6*payloadTimeUs:trigType&0xf:ppsNum:trigTime:rawc3poNum:goodTimeFlag",secOffset,secOffset),"","goff"); 
 
  double * trigger_time= headTree->GetV1(); 
  double * payload_time = headTree->GetV2(); 
  double * trigType = headTree->GetV3(); 
  double * pps= headTree->GetV4(); 
+ double * trig = headTree->GetVal(4); 
+ double * c3po = headTree->GetVal(5); 
+ double * old_good_time_flag = headTree->GetVal(6); 
 
  int N = headTree->GetEntries(); 
  double* corrected_times = new double[N]; 
  int *good_time_flags = new int[N]; 
- int last = 0; 
 
+
+ int last_pps = pps[0]; 
+ double last_pps_payload_time = payload_time[0]; 
+ bool back_to_normal = false;
+ 
  /** build epochs 
   *
   **/ 
- for (int i = 0; i < N; i++) 
+
+ bool stalled = pps[0] ==0; 
+ for (int i = 1; i < N; i++) 
  {
-    if (pps[i] < last) 
+    
+    back_to_normal = (c3po[i-1] < 200e6 || c3po[i-1] > 300e6) && (c3po[i] > 200e6 && c3po[i] < 300e6) ; 
+
+
+    if (pps[i] < pps[i-1]   // pps smaller than before
+       || payload_time[i] > payload_time[i-1]+2   //big gap in payload time 
+       || (pps[i] == last_pps && trig[i] > 600e6 && !stalled)   //pps stalled updating
+       || (pps[i] > last_pps && stalled) // pps resumed updating
+       || back_to_normal //after c3poNum glitch
+       )
     {
+
+      printf("New epoch at %d\n",i); 
       epochs.push_back(i); 
       nepochs++; 
     }
-    last = pps[i]; 
+
+    if (pps[i] > last_pps)
+    {
+      if (stalled) printf("unstalled? %g %g\n", pps[i], payload_time[i] ); 
+      stalled = false; 
+      last_pps = pps[i]; 
+      last_pps_payload_time = payload_time[i]; 
+    }
+    else if (!stalled && pps[i] == last_pps && trig[i] > 600e6)
+    {
+      if (!stalled) printf("stalled? %g %g %g\n", pps[i], payload_time[i], last_pps_payload_time ); 
+      stalled = true; 
+    }
+
   }
   epochs.push_back(headTree->GetEntries()); 
 
+ double *aligned = new double[nepochs]; 
 
  for (int epoch = 0; epoch < nepochs; epoch++)
  {
@@ -152,20 +198,21 @@ void makeTimedHeaderTree(int run)
    if (rms_diff > 1) 
    {
      // that means we don't have a pps for the whole thing, so let's just set according to payload time when no pps. We will recalculate the offset at each pps trigger. 
-     // note that we don't yet detect cases where there is a combination of ppsNum incrementing and not
-     
      //first, let's find the first pps pulse. For some reason, this is 4 when ppsNum is gone... I think.  
 
-     double offset = 0; 
+     double offset = 0.2; 
      double * pps = std::find(trigType+start, trigType+end, 4); 
      if (pps >= trigType+end) 
      {
-       offset = -0.2; //close enough!
+       offset = 0.2; //close enough!
      }
      else 
      {
        int idx = (int) (pps - (trigType+start)); 
-       offset = 1+int(payload_time[idx]) - payload_time[idx]; 
+       double new_offset = 1+int(payload_time[idx]) - payload_time[idx]; 
+       
+       //only update if it's reasonable 
+       if (new_offset > 0.1 && new_offset < 0.3) offset=new_offset; 
      }
 
      printf("start offset: %g\n",offset); 
@@ -174,38 +221,35 @@ void makeTimedHeaderTree(int run)
 
        if (trigType[i] == 4) 
        {
-         offset = 1-payload_time[i] + int(payload_time[i]); 
+         double new_offset = 1-payload_time[i] + int(payload_time[i]); 
+         if (new_offset > 0.1 && new_offset < 0.3) offset=new_offset; 
          printf("new offset: %g\n",offset); 
        }
 
        corrected_times[i] = payload_time[i] + offset; 
-       good_time_flags[i] = -1; 
+       good_time_flags[i] = 0; 
      }
 
+     aligned[epoch] = alignmentFraction(end-start, corrected_times+start,0,Nttt,ttt); 
    }
    else
    {
 
      int delta = round(mean_diff); 
+     double offset = 0.2; 
 
 
-     if (delta != 0 && delta != -1) 
+
+     double match[5]; 
+
+     for (int i = -2; i<=2; i++) 
      {
-       fprintf(stderr,"!!!! !!!! delta expected to be 0 or -1");  
-       return; 
+       match[2+i] = alignmentFraction(end-start, trigger_time+start,delta+i, Nttt, ttt); 
+       printf("Delta: %d, Alignment: %g\n", delta+i, match[2+i]); 
      }
+       
 
-     double match_0 = alignmentFraction(end-start, trigger_time+start,0, Nttt, ttt); 
-     double match_n1 = alignmentFraction(end-start, trigger_time+start,-1, Nttt, ttt); 
-
-     if  (  (delta == 0 && match_n1 > match_0 ) || (delta == -1 && match_0 > match_n1))
-     {
-       fprintf(stderr, "!!!! alignment disagrees with paylaod time!!!!\n"); 
-
-     }
-
-     printf("Chose delta=%d for epoch %d. alignment is %g (other alignment is %g)\n", delta, epoch, delta == 0 ? match_0 : match_n1, delta == 0 ? match_n1 : match_0); 
-
+     printf("Chose delta=%d for epoch %d. alignment is %g\n", delta, epoch, match[2]); 
 
      //offset correction
      for (int i = start; i < end; i++) 
@@ -213,27 +257,33 @@ void makeTimedHeaderTree(int run)
        corrected_times[i] = trigger_time[i] - delta; 
 
        //final glitch detection
-       if (fabs(corrected_times[i] - payload_time[i]) > 0.5 )
+       if (fabs(corrected_times[i] -offset- payload_time[i]) > 0.75 )
        {
-         corrected_times[i] -= round(corrected_times[i] - payload_time[i]); 
+         corrected_times[i] -= round(corrected_times[i]-offset - payload_time[i]); 
          good_time_flags[i] = -3; 
        }
        else
        {
-         good_time_flags[i] = 1; 
+         good_time_flags[i] = old_good_time_flag[i]; 
        }
      }
+
+     //this is the real calculation
+     aligned[epoch] = alignmentFraction(end-start, corrected_times+start,0,Nttt,ttt); 
    }
  }
 
 
+ int j = 0; //epoch index 
  for ( int i = 0; i < N; i++) 
  {
    headTree->GetEntry(i); 
    ftimed.cd(); 
-   raw->triggerTime = int(corrected_times[i])+secOffset; 
+   raw->triggerTime = unsigned(corrected_times[i])+secOffset; 
    raw->triggerTimeNs = 1e9*(corrected_times[i] - int(corrected_times[i])); 
    raw->goodTimeFlag = good_time_flags[i]; 
+   if (i >= epochs[j+1]) j++; 
+   alignment_fraction = aligned[j]; 
    timedTree->Fill(); 
  }
 

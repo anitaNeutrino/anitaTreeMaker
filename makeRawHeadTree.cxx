@@ -414,7 +414,7 @@ void processHeader(int version) {
     }
 
 
-    if(ppsOffset==0 || ppsNum<lastPps) {
+    if(ppsOffset==0 || ppsNum<lastPps ) {
       //Need to reset the ppsOffset;  
       ppsOffset=unixTime-ppsNum;
       while(lastTriggerTime>ppsNum+ppsOffset)
