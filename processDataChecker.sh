@@ -16,7 +16,7 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
 
     ### Re-comment one of the scripts if you want to run it
     ./rawFolderChecker.sh $n # which raw folders are missing?
-    #./rootFileChecker.sh $n # which rootified files are missing?
+    ./rootFileChecker.sh $n # which rootified files are missing?
 
     if [ $n == ${LASTRUN} ]; then
 	echo "${bold}ANITA-4 data set checked"
