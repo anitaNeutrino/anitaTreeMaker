@@ -22,17 +22,19 @@ fi
 
 echo "Starting RTL Spectrum File"
 RTL_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/rtl/*/*/rtl*
+for file in `ls ${RAW_RUN_DIR}/run${RUN}/house/rtl/*/*/rtl*`
   do
+  echo $file
   if [[ -f $file ]]; then
       echo $file >> ${RTL_FILE_LIST}
   fi
 done
 
+
 if  test `cat ${RTL_FILE_LIST} | wc -l` -gt 0 ; then
     ROOT_FILE=${ROOT_RUN_DIR}/rtlSpectrumFile${RUN}.root
     echo $RTL_ROOT_FILE
-    makeRtlSdrTree ${RTL_FILE_LIST} ${RTL_ROOT_FILE}
+    ./makeRtlSdrTree ${RTL_FILE_LIST} ${ROOT_FILE}
     rm ${RTL_FILE_LIST}
     echo "Done RTL File"
 else

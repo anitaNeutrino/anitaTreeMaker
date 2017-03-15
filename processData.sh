@@ -17,9 +17,10 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
     echo "${bold}Now on run $n${normal}"
     
     ### uncomment which selection of data you want to process    
-    ./runEventFileMaker.sh $n # for events only
+    #./runEventFileMaker.sh $n # for events only
     #./runNonEventFileMaker.sh # house 
-    #./runNonEventFileMakerWHead.sh # house + event headers
+    #./runNonEventFileMakerWHead.sh $n # house + event headers
+    ./runHeaderFileMaker.sh $n # headers only
     echo "${bold}Run $n complete! ${normal}"
     echo "<----------------------------------------->"
 

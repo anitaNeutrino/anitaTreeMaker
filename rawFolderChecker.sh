@@ -49,27 +49,31 @@ do
     then ## if the main directory doesn't exist, tell us
 	echo "${MainDir[$i]} raw dir missing in run ${RUN}"
 
-    else ## if the directory does exist, search the subdirectories
-	if [ i == 1 ] ## gps
+    else ## if the directory does exist, search the subdirectories 
+	if [ $i == 1 ] ## gps
 	then
-	    for (( i=0; i<${gpsSubDirlength}; i++ ));
+	    cd ${MainDir[$i]}
+	    for (( j=0; j<${gpsSubDirlength}; j++ ));
 	    do
-		if [ ! -d "${gpsSubDir[$i]}" ];
+		if [ ! -d "${gpsSubDir[$j]}" ];
 		then ## if the sub directory doesn't exist, tell us
-		    echo "${gpsSubDir[$i]} raw sub dir missing in run ${RUN}"
+		    echo "${MainDir[$i]} main dir: ${gpsSubDir[$j]} raw sub dir missing in run ${RUN}"
 		fi
 	    done
+	    cd ..
 	fi
 	
-	if [ i == 3 ] ## hk
+	if [ $i == 3 ] ## hk
 	then
-	    for (( i=0; i<${hkSubDirlength}; i++ ));
+	    cd ${MainDir[$i]}
+	    for (( j=0; j<${hkSubDirlength}; j++ ));
 	    do
-		if [ ! -d "${hkSubDir[$i]}" ];
+		if [ ! -d "${hkSubDir[$j]}" ];
 		then ## if the sub directory doesn't exist, tell us
-		    echo "${hkSubDir[$i]} raw sub dir missing in run ${RUN}"
+		    echo "${MainDir[$i]} main dir: ${hkSubDir[$j]} raw sub dir missing in run ${RUN}"
 		fi
 	    done
+	    cd ..
 	fi
     fi
 done
