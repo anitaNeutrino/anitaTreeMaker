@@ -99,7 +99,15 @@ target_link_libraries (${loop_prog} LINK_PUBLIC AnitaEvent RootFftwWrapper ${ROO
 install (TARGETS ${loop_prog} DESTINATION ${UTIL_BIN_DIR})
 endforeach(loop_prog )
 
-foreach(script remakeHkFiles.sh runTelemEventMaker.sh runTelemMonitorMaker.sh runTelemSurfHkMaker.sh runAdu5PatSmoother.sh runTelemGpsMaker.sh runTelemOtherMonitorMaker.sh runTelemTurfRateMaker.sh runAnita4FileMakerTelem.sh   runTelemGpuMaker.sh          runTelemRawScalerMaker.sh runTelemAuxMaker.sh          runTelemHeaderMaker.sh       runTelemSlowMaker.sh runTelemAvgSurfHkMaker.sh    runTelemHkMaker.sh           runTelemSumTurfRateMaker.sh  runTelemTuffStatusMaker.sh) 
+foreach(script remakeHkFiles.sh runTelemEventMaker.sh runTelemMonitorMaker.sh
+    runTelemSurfHkMaker.sh runAdu5PatSmoother.sh runTelemGpsMaker.sh
+    runTelemOtherMonitorMaker.sh runTelemTurfRateMaker.sh
+    runAnita4FileMakerTelem.sh   runTelemGpuMaker.sh
+    runTelemRawScalerMaker.sh runTelemAuxMaker.sh
+    runTelemHeaderMaker.sh       runTelemSlowMaker.sh
+    runTelemAvgSurfHkMaker.sh    runTelemHkMaker.sh
+    runTelemSumTurfRateMaker.sh  runTelemTuffStatusMaker.sh
+    anita4FlightFileMakerUChicago.sh ) 
   install(PROGRAMS ${script} DESTINATION ${UTIL_BIN_DIR})
 endforeach(script)
 
