@@ -80,7 +80,19 @@ message("UTIL_INC_DIR is set to ${UTIL_INC_DIR}")
 message("DICTNAME is set to ${DICTNAME}" )
 message("PROJECT_BINARY_DIR is set to ${PROJECT_BINARY_DIR}")
 
-foreach(loop_prog checkForCorruptEvents            makeGpsEventTreeBothAdu5s        makeSSHkTree fixTriggerTimeAnita3             makeGpsTree                      makeSlowRateTree makeAdu5PatFiles                 makeGpsTttTree                   makeSummedTurfRateTree makeAuxiliaryTree                makeGpuTree                      makeSuperSmoothAdu5PatFiles makeAveragedSurfHkTree           makeHkTree                      makeSurfHkTree makeCalibratedEventTrees         makeMonitorTree                  makeTelemHeadTree makeConcatanatedFiles            makeOtherTree                    makeTurfRateTree makeEventHeadTree                makePrettyHkTree                 quickCheckForErrors makeEventRunTree                 makeRawHeadTree                  updateAdu5PatTreesFromTelemetry makeFixedEventHeaderTrees        makeRawScalerTree                updateEventRunTree makeGpsEventTree                 makeRunSummaryFile makeTuffStatusTree makeRtlSdrTree fixTelemHeadEventTrees
+foreach(loop_prog checkForCorruptEvents            makeGpsEventTreeBothAdu5s
+    makeSSHkTree fixTriggerTimeAnita3             makeGpsTree
+    makeSlowRateTree makeAdu5PatFiles                 makeGpsTttTree
+    makeSummedTurfRateTree makeAuxiliaryTree                makeGpuTree
+    makeSuperSmoothAdu5PatFiles makeAveragedSurfHkTree           makeHkTree
+    makeSurfHkTree makeCalibratedEventTrees         makeMonitorTree
+    makeTelemHeadTree makeConcatanatedFiles            makeOtherTree
+    makeTurfRateTree makeEventHeadTree                makePrettyHkTree
+    quickCheckForErrors makeEventRunTree                 makeRawHeadTree
+    updateAdu5PatTreesFromTelemetry makeFixedEventHeaderTrees
+    makeRawScalerTree                updateEventRunTree makeGpsEventTree
+    makeRunSummaryFile makeTuffStatusTree makeRtlSdrTree
+    fixTelemHeadEventTrees makeA4TimedHeaderFile
 )
 add_executable (${loop_prog} ${loop_prog}.cxx)
 target_link_libraries (${loop_prog} LINK_PUBLIC AnitaEvent RootFftwWrapper ${ROOT_LIBRARIES} ${ZLIB_LIBRARIES} )
