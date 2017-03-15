@@ -10,7 +10,7 @@ fi
 ###
 
 RUN=$1
-BASE_DIR=/unix/anita4/flight2016/raw/
+BASE_DIR=$ANITA_4_BASE_DIR
 START_DIR=${BASE_DIR}/run${RUN}/start
 EVENT_DIR=${BASE_DIR}/run${RUN}/event
 HOUSE_DIR=${BASE_DIR}/run${RUN}/house

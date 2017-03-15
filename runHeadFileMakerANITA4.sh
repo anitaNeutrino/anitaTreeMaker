@@ -6,11 +6,11 @@ then
 fi
 
 RUN=$1
-BASE_DIR=/unix/anita4/flight2016
+BASE_DIR=$ANITA_4_BASE_DIR
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
-TREE_MAKER_DIR=/home/batten/anitaTreeMaker/build/ # Put your custom directory here to lead to your existing anitaTreeMaker/build
+TREE_MAKER_DIR=$HOME/anita/anitaTreeMaker/build  # Put your custom directory here to lead to your existing anitaTreeMaker/build
 
 if [ ! -d "$TREE_MAKER_DIR" ]; then
     echo "TREE_MAKER_DIR ($TREE_MAKER_DIR) does not exist. Please check the directory leading to your anitaTreeMaker/dir setup exists within this file. Aborting."
@@ -89,6 +89,7 @@ if  test `cat ${HEAD_FILE_LIST} | wc -l` -gt 0 ; then
     ./makeRawHeadTree ${HEAD_FILE_LIST} ${HEAD_ROOT_FILE}
     rm ${HEAD_FILE_LIST}
     DONE_HEAD_FILE=true
+    ./makeA4TimedHeaderFile $RUN
     echo "Done Header File"
 else
     rm ${HEAD_FILE_LIST}
