@@ -10,5 +10,8 @@
 echo $@ 
 source /home/cozzyd/anita/env.sh
 
-srun sh anita4FlightFileMakerUChicago.sh $1
+
+for i in "${@:1}"; 
+  do srun sh anita4FlightFileMakerUChicago.sh $i; 
+done; 
 
