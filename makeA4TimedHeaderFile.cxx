@@ -113,7 +113,7 @@ void makeTimedHeaderTree(int run)
 
   if (tttTree) 
   {
-    tttTree->Draw(TString::Format("unixTimeGps-3-%u+subTimeGps*1e-7",secOffset),"","goff"); //GPS offset of 14 already applied . GPS offset should be 17 for A4 flight
+    tttTree->Draw(TString::Format("unixTimeGps-3-%u+subTimeGps*1e-7",secOffset),"","paragoff"); //GPS offset of 14 already applied . GPS offset should be 17 for A4 flight
     Nttt = tttTree->GetEntries(); 
     ttt = tttTree->GetV1(); 
     std::sort(ttt,ttt+Nttt); 
@@ -124,7 +124,7 @@ void makeTimedHeaderTree(int run)
   epochs.push_back(0); 
   int nepochs = 1; 
 
- headTree->Draw(TString::Format("triggerTime-%u + 1e-9*triggerTimeNs:payloadTime-%u+1e-6*payloadTimeUs:trigType&0xf:ppsNum:trigTime:rawc3poNum:goodTimeFlag",secOffset,secOffset),"","goff"); 
+ headTree->Draw(TString::Format("triggerTime-%u + 1e-9*triggerTimeNs:payloadTime-%u+1e-6*payloadTimeUs:trigType&0xf:ppsNum:trigTime:rawc3poNum:goodTimeFlag",secOffset,secOffset),"","paragoff"); 
 
  double * trigger_time= headTree->GetV1(); 
  double * payload_time = headTree->GetV2(); 
