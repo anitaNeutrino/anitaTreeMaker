@@ -1,5 +1,6 @@
 #include "RawAnitaHeader.h" 
 #include <vector>
+#include "TimedAnitaHeader.h" 
 #include <stdlib.h>
 #include "TMath.h" 
 #include <stdio.h>
@@ -91,6 +92,7 @@ void makeTimedHeaderTree(int run)
   printf("Processing run %d\n",run); 
 
   RawAnitaHeader * raw  = 0; 
+  TimedAnitaHeader * timed  = new TimedAnitaHeader; 
   TFile fhead(TString::Format("%s/run%d/headFile%d.root",getenv("ANITA_ROOT_DATA"), run, run)); 
   TTree * headTree = (TTree*) fhead.Get("headTree"); 
   headTree->SetBranchAddress("header",&raw); 
@@ -99,9 +101,7 @@ void makeTimedHeaderTree(int run)
 
   TFile ftimed(TString::Format("%s/run%d/timedHeadFile%d.root",getenv("ANITA_ROOT_DATA"), run, run), "RECREATE"); 
   TTree * timedTree = new TTree ("headTree","Timed  Head Tree"); 
-  timedTree->Branch("header",&raw); 
-  double alignment_fraction = 0; 
-  timedTree->Branch("tttAlignedFraction",&alignment_fraction); 
+  timedTree->Branch("header",&timed); 
 
   TFile fttt(TString::Format("%s/run%d/tttFile%d.root", getenv("ANITA_ROOT_DATA"), run, run)); 
   TTree * tttTree = (TTree*) fttt.Get("tttTree"); 
@@ -279,11 +279,9 @@ void makeTimedHeaderTree(int run)
  {
    headTree->GetEntry(i); 
    ftimed.cd(); 
-   raw->triggerTime = unsigned(corrected_times[i])+secOffset; 
-   raw->triggerTimeNs = 1e9*(corrected_times[i] - int(corrected_times[i])); 
-   raw->goodTimeFlag = good_time_flags[i]; 
    if (i >= epochs[j+1]) j++; 
-   alignment_fraction = aligned[j]; 
+   new (timed) TimedAnitaHeader(*raw, unsigned(corrected_times[i]) + secOffset, 1e9 * (corrected_times[i] - int(corrected_times[i])), aligned[j]); 
+   timed->goodTimeFlag = good_time_flags[i]; 
    timedTree->Fill(); 
  }
 
