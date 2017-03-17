@@ -37,15 +37,15 @@ void makePayloadTriggerPlots(int start_run, int end_run = -1, bool timed = false
 
     title.Form("Run %d Diagnostics",i); 
 
-    TH2I axis("diagnostics",title, 10,min,max,10,-3,3); 
+    TH2I axis("diagnostics",title, 10,min,max,10,-1.1,1.1); 
     axis.GetXaxis()->SetTitle("Payload Time"); 
     if (timed) 
     {
-      axis.GetYaxis()->SetTitle("B: tr-pay, R: c3poNum/250e6-1, G: ppsNum/100, P: tttFrac" ); 
+      axis.GetYaxis()->SetTitle("B: tr-pay, R: c3poNum/250e6-1, G: ppsNum/7200, P: tttFrac" ); 
     }
     else
     {
-      axis.GetYaxis()->SetTitle("B: tr-pay, R: c3poNum/250e6-1, G: ppsNum/100"); 
+      axis.GetYaxis()->SetTitle("B: tr-pay, R: c3poNum/250e6-1, G: ppsNum/7200"); 
     }
     axis.GetXaxis()->SetTimeDisplay(1); 
     axis.DrawCopy(); 
@@ -53,7 +53,7 @@ void makePayloadTriggerPlots(int start_run, int end_run = -1, bool timed = false
     tree->SetLineColor(2); 
     tree->Draw("rawc3poNum/250e6-1:payloadTime","","lsame"); 
     tree->SetLineColor(3); 
-    tree->Draw("ppsNum/1000:payloadTime","","lsame"); 
+    tree->Draw("ppsNum/7200.:payloadTime","","lsame"); 
     if (timed) 
     {
       tree->SetLineColor(6); 
