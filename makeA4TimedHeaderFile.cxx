@@ -113,7 +113,7 @@ void makeTimedHeaderTree(int run)
 
   if (tttTree) 
   {
-    tttTree->Draw(TString::Format("unixTimeGps-3-%u+subTimeGps*1e-7",secOffset),"","paragoff"); //GPS offset of 14 already applied . GPS offset should be 17 for A4 flight
+    tttTree->Draw(TString::Format("unixTimeGps-3-%u+subTimeGps*1e-7",secOffset),"","goff"); //GPS offset of 14 already applied . GPS offset should be 17 for A4 flight
     Nttt = tttTree->GetEntries(); 
     ttt = tttTree->GetV1(); 
     std::sort(ttt,ttt+Nttt); 
