@@ -1,3 +1,5 @@
+#include "FFTtools.h" 
+
 static TCanvas * static_canvas = 0;  
 static int current_run = 0; 
 
