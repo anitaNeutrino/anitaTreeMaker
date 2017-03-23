@@ -21,7 +21,7 @@ void makeTurfRateTree(char *inName, char *outName);
 TurfRateStruct_t theTurfRate;
 TurfRateStructVer41_t theTurfRateVer41;
 TurfRateStructVer40_t theTurfRateVer40;
-TurfRateStructVer34_t theTurfRateVer34;
+TurfRateStructVer35_t theTurfRateVer35;
 TurfRateStructVer16_t theTurfRateVer16;
 TurfRateStructVer15_t theTurfRateVer15;
 TurfRateStructVer14_t theTurfRateVer14;
@@ -105,10 +105,10 @@ void makeTurfRateTree(char *inName, char *outName) {
 		  version=40;
 	       }
 	       break;
-	    case 34:
-	       if(gHdr.numBytes==sizeof(TurfRateStructVer34_t)) {
+	    case 35:
+	       if(gHdr.numBytes==sizeof(TurfRateStructVer35_t)) {
 		  std::cout << "Size matches will proceed\n";
-		  version=34;
+		  version=35;
 	       }
 	       break;
 	    case 16:
@@ -177,8 +177,8 @@ void makeTurfRateTree(char *inName, char *outName) {
 	       numBytes=gzread(infile,&theTurfRateVer40,numBytesExpected);
 	       break;
 	    case 34:
-	       numBytesExpected=sizeof(TurfRateStructVer34_t);
-	       numBytes=gzread(infile,&theTurfRateVer34,numBytesExpected);
+	       numBytesExpected=sizeof(TurfRateStructVer35_t);
+	       numBytes=gzread(infile,&theTurfRateVer35,numBytesExpected);
 	       break;
 	    case 16:
 	       numBytesExpected=sizeof(TurfRateStructVer16_t);
@@ -253,8 +253,8 @@ void processTurfRate(int version) {
       case 40:
 	  theTurfRateClass = new TurfRate(runNumber,theTurfRateVer40.unixTime,&theTurfRateVer40);
 	  break;
-      case 34:
-	  theTurfRateClass = new TurfRate(runNumber,theTurfRateVer34.unixTime,&theTurfRateVer34);
+      case 35:
+	  theTurfRateClass = new TurfRate(runNumber,theTurfRateVer35.unixTime,&theTurfRateVer35);
 	  break;
        // case 16:
        // 	  theTurfRateClass = new TurfRate(runNumber,theTurfRateVer16.unixTime,&theTurfRateVer16);
