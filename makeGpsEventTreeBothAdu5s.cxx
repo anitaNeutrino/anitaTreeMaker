@@ -12,7 +12,7 @@
 #include "AnitaGeomTool.h"
 #include "RawAnitaHeader.h" 
 #include "Adu5Pat.h"
-
+#include <string>
 
 /** makeAdu5PatFilesBothADUs.cxx
  *
@@ -58,6 +58,8 @@ const double adu5A_attitude_a_priori_weight = 1.4;
 const double adu5B_attitude_a_priori_weight = 1.; 
 
 
+
+
 /* Relative contributions of the mrms and brms to the weights. These will automatically be normalized */ 
 const double mrms_weight = 1; 
 const double brms_weight = 1; 
@@ -82,14 +84,19 @@ const FFTtools::DigitalFilter * filter = new FFTtools::SavitzkyGolayFilter(4,20,
  * it was too hard to find good parameters for everything, so they can be overriden for indiviudal runs. Woohoo! */ 
  
 const double default_min_score = 1;  // minimum score for the algorithm... just read the code
-const bool enableStrictAttFlag = true; 
-const int strict_attflag_exceptions[][2] = {{340,1}, {406,1}};    //add exceptions here if there need be any
-const double min_score_exceptions[][2] = { {142,5}, {293,4}, {431,5}};    //add exceptions here if there need be any
+const bool enableStrictAttFlag = true;
+
+//const int strict_attflag_exceptions[][2] = {{340,1}, {406,1}};    //add exceptions here if there need be any
+//const double min_score_exceptions[][2] = { {142,5}, {293,4}, {431,5}};    //add exceptions here if there need be any
 
 const double heading_slope_thresh = 1; 
-const double heading_slope_exceptions[][2] = { {142,0.2},{270,0.8}, {340,1.5},{431,0.5}};    //add exceptions here if there need be any
+//const double heading_slope_exceptions[][2] = { {142,0.2},{270,0.8}, {340,1.5},{431,0.5}};    //add exceptions here if there need be any
 
+const int strict_attflag_exceptions[][2] = {{0,0}, {0,0}};
+const double min_score_exceptions[][2] = {{0,0},{0,0}};
+const double heading_slope_exceptions[][2] = {{0,0},{0,0}};
 
+// Get rid of the ANITA-3 specific corrections
 
 static bool debugFlag = false; // this is set from the command line by the second argument. If true, some stuff will be written to disk. 
 
@@ -300,7 +307,7 @@ static int temperDiscontinuities(TGraph *g, double slope_thresh , double expecte
 }
 
 // use scores instead/
- /*
+/*
 static int removeLonePoints(TGraph* g, double expected_dx = 1) 
 {
   double xlast = g->GetX()[0]; 
@@ -324,8 +331,8 @@ static int removeLonePoints(TGraph* g, double expected_dx = 1)
   }
 
   return int(remove.size()); 
-}
-*/ 
+} 
+*/
 
 //this didn't work well... scores worked better I think 
 /*
@@ -415,7 +422,8 @@ static TGraphErrors * makeInterpolatedAttitudeGraph(const char *var,
   bool isHeading = !strcmp(var,"heading");  //yeah, yeah, yeah... 
 
 
-  printf("%d points removed\n", temperDiscontinuities(&g, slope_thresh, 1, min_score )); 
+  printf("%d points removed\n", temperDiscontinuities(&g, slope_thresh, 1, min_score ));
+
   
   //unwrap the values  
   if (isHeading)
@@ -424,10 +432,13 @@ static TGraphErrors * makeInterpolatedAttitudeGraph(const char *var,
   }
 
 
-//  penalizeLargeJumps(&g); 
+//  penalizeLargeJumps(&g);
 
   TGraphErrors * gj = FFTtools::getInterpolatedGraphSparseInvert(&g, 1, 0,max_time, 0, 0, regularization_parameter, isHeading ? regularization_order_heading : regularization_order); 
 
+  //printf("%d lone points removed \n",removeLonePoints(gj, 1));
+  
+  
   printf("%d NaN's removed\n", removeNaNs(gj)); 
 
   if (filter) 
@@ -443,7 +454,87 @@ static TGraphErrors * makeInterpolatedAttitudeGraph(const char *var,
   return gj; 
 }
 
+/* Ignore this test, I can do it a simpler way
+// Accounting for GPS outages, there is NO ADU5A information available, so we must rely on ADU5B
+static void accountForGpsOutage(TChain * c2,  TGraph * glat, TGraph * glon,  TGraph * galt)
+{
+  int n2 = c2->GetEntries(); 
+  Adu5Pat *pat2 = new Adu5Pat; 
+  c2->SetBranchAddress("pat",&pat2); 
 
+  int i2 = 0; 
+
+  std::vector<double> time; 
+  time.reserve(n2); 
+  std::vector<double> lat; 
+  lat.reserve(n2); 
+  std::vector<double> lon; 
+  lon.reserve(n2); 
+  std::vector<double> alt; 
+  alt.reserve(n2);
+  
+  UInt_t tod2 = 0; 
+  bool wrap2 = false; 
+
+  while (i2 < n2) 
+  {
+    c2->GetEntry(i2); 
+    if (pat2->timeOfDay < tod2 && !wrap2) wrap2 = true; 
+
+    tod2 = pat2->timeOfDay; 
+
+    if (wrap2) tod2 += 24 * 60 * 60 * 1000; 
+
+    // POSITION DATA: if lat is illogical (outside Antarctic circle) or altitude is illogical (i.e. when it goes to 0 on gps resets), don't use
+    
+    if(pat2->latitude > -66.5 ||pat2->altitude == 0)
+      {
+	i2++;
+      }
+
+    else
+    {
+      lat.push_back(pat2->latitude); 
+      lon.push_back(pat2->longitude); 
+      alt.push_back(pat2->altitude); 
+      time.push_back(tod2/1000.);
+      i2++;
+    }
+    
+  }
+  
+  //assert (lon.size() < unsigned(n1 + n2));  // sanity check to make sure we don't loop infinitely and use all the memory on the cluster 
+
+
+
+
+  // copy to graphs 
+  glat->Set(time.size()); 
+  memcpy(glat->GetX(), &time[0], sizeof(double) * time.size()); 
+  memcpy(glat->GetY(), &lat[0], sizeof(double) * time.size());
+
+  glon->Set(time.size()); 
+  memcpy(glon->GetX(), &time[0], sizeof(double) * time.size()); 
+  memcpy(glon->GetY(), &lon[0], sizeof(double) * time.size()); 
+
+  galt->Set(time.size()); 
+  memcpy(galt->GetX(), &time[0], sizeof(double) * time.size()); 
+  memcpy(galt->GetY(), &alt[0], sizeof(double) * time.size()); 
+
+
+  FFTtools::unwrap(glon->GetN(), glon->GetY(), 360); 
+//  glon->Write("glon"); 
+  if (filter && n2)
+  {
+    filter->filterGraph(glat); 
+    filter->filterGraph(glon); 
+    filter->filterGraph(galt); 
+  }
+
+  std::cout << "Accounted for one run involved in ADU5A outage" << std::endl;
+
+}
+*/
 
 static void makePositionGraphs(TChain *c1, TChain * c2,  TGraph * glat, TGraph * glon,  TGraph * galt,  double offset)
 {
@@ -472,7 +563,6 @@ static void makePositionGraphs(TChain *c1, TChain * c2,  TGraph * glat, TGraph *
   UInt_t tod2 = 0; 
   bool wrap1 = false; 
   bool wrap2 = false; 
-  
 
   while (i1 < n1 || i2 < n2) 
   {
@@ -493,49 +583,60 @@ static void makePositionGraphs(TChain *c1, TChain * c2,  TGraph * glat, TGraph *
     if (wrap1) tod1 += 24 * 60 * 60 * 1000; 
     if (wrap2) tod2 += 24 * 60 * 60 * 1000; 
 
-
-    //account for cases when times are not synced
-    if (tod1 < tod2 && i1 < n1) 
-    {
-      lat.push_back(pat1->latitude); 
-      lon.push_back(pat1->longitude); 
-      alt.push_back(pat1->altitude); 
-      time.push_back(tod1/1000. + offset); 
-      i1++; 
-    }
-    else if (tod2 < tod1 && i2 < n2) 
-    {
-      lat.push_back(pat2->latitude); 
-      lon.push_back(pat2->longitude); 
-      alt.push_back(pat2->altitude); 
-      time.push_back(tod2/1000. + offset); 
-      i2++; 
-    }
-    else  // if they are synced, take the average of the two positions 
-    {
-      time.push_back(tod1/1000. + offset); 
-
-      double p1[3], p2[3]; 
-      geom->getCartesianCoords(pat1->latitude,pat1->longitude,pat1->altitude, p1); 
-      geom->getCartesianCoords(pat2->latitude,pat2->longitude,pat2->altitude, p2); 
-
-      for (int i = 0; i < 3; i++) 
+    // POSITION DATA: if lat is illogical (outside Antarctic circle) or altitude is illogical (i.e. when it goes to 0 on gps resets), don't use
+    
+    if(pat2->latitude > -66.5 ||pat2->altitude == 0)
       {
-        p1[i]+=p2[i]; 
-        p1[i]/=2; 
+	i1++;
+	i2++;
       }
 
-      double dlat, dlon, dalt; 
-      geom->getLatLonAltFromCartesian(p1, dlat,dlon,dalt); 
-//      printf("%f %f %f\n", dlat,dlon,dalt); 
-      lat.push_back(dlat); 
-      lon.push_back(dlon); 
-      alt.push_back(dalt); 
-      i1++; 
-      i2++; 
-    }
+    else
+    {
+	//account for cases when times are not synced
+	if (tod1 < tod2 && i1 < n1) 
+	  {
+	    lat.push_back(pat1->latitude); 
+	    lon.push_back(pat1->longitude); 
+	    alt.push_back(pat1->altitude); 
+	    time.push_back(tod1/1000. + offset); 
+	    i1++; 
+	  }
+	else if (tod2 < tod1 && i2 < n2) 
+	  {
+	    lat.push_back(pat2->latitude); 
+	    lon.push_back(pat2->longitude); 
+	    alt.push_back(pat2->altitude); 
+	    time.push_back(tod2/1000. + offset); 
+	    i2++; 
+	  }
+	else  // if they are synced, take the average of the two positions 
+	  {
+	    time.push_back(tod1/1000. + offset); 
 
-    assert (lon.size() < unsigned(n1 + n2));  // sanity check to make sure we don't loop infinitely and use all the memory on the cluster 
+	    double p1[3], p2[3]; 
+	    geom->getCartesianCoords(pat1->latitude,pat1->longitude,pat1->altitude, p1); 
+	    geom->getCartesianCoords(pat2->latitude,pat2->longitude,pat2->altitude, p2);
+
+	    for (int i = 0; i < 3; i++) 
+	      {
+		p1[i]+=p2[i]; 
+		p1[i]/=2; 
+	      }
+
+	    double dlat, dlon, dalt; 
+	    geom->getLatLonAltFromCartesian(p1, dlat,dlon,dalt); 
+	    //      printf("%f %f %f\n", dlat,dlon,dalt); 
+	    lat.push_back(dlat); 
+	    lon.push_back(dlon); 
+	    alt.push_back(dalt); 
+	    i1++; 
+	    i2++; 
+	  }
+
+	}
+  
+	//assert (lon.size() < unsigned(n1 + n2));  // sanity check to make sure we don't loop infinitely and use all the memory on the cluster 
   }
 
 
@@ -543,7 +644,7 @@ static void makePositionGraphs(TChain *c1, TChain * c2,  TGraph * glat, TGraph *
   // copy to graphs 
   glat->Set(time.size()); 
   memcpy(glat->GetX(), &time[0], sizeof(double) * time.size()); 
-  memcpy(glat->GetY(), &lat[0], sizeof(double) * time.size()); 
+  memcpy(glat->GetY(), &lat[0], sizeof(double) * time.size());
 
   glon->Set(time.size()); 
   memcpy(glon->GetX(), &time[0], sizeof(double) * time.size()); 
@@ -577,16 +678,18 @@ static double best(TGraphErrors* A, TGraphErrors *B, double time, double * err, 
   Bval  = Aval - delta; 
 
 
-
   double wA = 1./(Aerr*Aerr); 
   double wB = 1./(Berr*Berr); 
 
+  //std::cout << "wA = " << wA << ",wB = " << wB <<  std::endl;
       
   if (wA ==0 && wB == 0)  
   {
     // this is hopeless, let's play russian roulette!  
-    free((void*)0xdeadbeef); 
-    *err = TMath::Infinity(); 
+    //free((void*)0xdeadbeef); // These lines shoot me in the head for a seg fault
+    //*err = TMath::Infinity(); // So does this, i.e. for run3 of the ANITA-4 data set
+    //*err =std::numeric_limits<double>::infinity(); // doesn't work either
+    *err = TMath::Infinity();
     return 0; 
   }
   if (wA == 0) 
@@ -609,13 +712,15 @@ static double best(TGraphErrors* A, TGraphErrors *B, double time, double * err, 
 
 
 
-int main (int nargs, char ** args) 
+int main (int nargs, char const ** args) 
 {
-
   //set up input 
-   char * datadir = getenv("ANITA_ROOT_DATA"); 
-   TChain headers("headTree"); 
+  //char * datadir = getenv("ANITA_ROOT_GPS_DATA");
 
+  // Put your working ANITA data directory below
+  char const * datadir = "/home/berg/Dropbox/LinuxSync/PhD/ANITA/2017Work/gpsEvent";
+  
+  TChain headers("headTree");
 
    RawAnitaHeader * hdr = new RawAnitaHeader; 
    headers.SetBranchAddress("header",&hdr); 
@@ -623,9 +728,10 @@ int main (int nargs, char ** args)
    TChain adu5A("adu5PatTree"); 
    TChain adu5B("adu5bPatTree"); 
 
-   int run = atoi(args[1]); 
+   int run = atoi(args[1]);
+   std::cout << "run is " << run << std::endl;
 
-   headers.Add(TString::Format("%s/run%d/headFile%d.root", datadir, run, run)); 
+   headers.Add(TString::Format("%s/run%d/timedHeadFile%d.root", datadir, run, run)); 
    adu5A.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
    adu5B.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
 
@@ -635,17 +741,17 @@ int main (int nargs, char ** args)
    }
 
    //setup output 
-   TFile out(TString::Format("%s/run%d/gpsEvent%d.root",datadir,run,run),"RECREATE"); 
-   TTree * tree = new TTree("adu5PatTree","Tree of Interpolated ADU5 Positions and Attitude"); 
+   TFile out(TString::Format("%s/run%d/timedGpsEvent%d.root",datadir,run,run),"RECREATE"); 
+   TTree * tree = new TTree("adu5PatTree","Timed tree of Interpolated ADU5 Positions and Attitude"); 
 
    Adu5Pat * pat = new Adu5Pat(); 
    tree->Branch("pat",&pat); 
    tree->Branch("eventNumber",&hdr->eventNumber); 
    tree->Branch("run",&run); 
 
-
    //figure out timeoffset for timeofday
-   TLeaf * timeleaf = adu5A.GetLeaf("realTime"); 
+   TLeaf * timeleaf = adu5B.GetLeaf("realTime");
+   // changing this from adu5A -> adu5B to aid in accounting for adu5A outages
 
    //timeleaf->GetBranch()->GetEntry(run == 434 ? 960 : 0); /////Special case run 434 which has a problem 
    timeleaf->GetBranch()->GetEntry(0); /////nevermind, I had an old gpsFile 
@@ -704,21 +810,30 @@ int main (int nargs, char ** args)
       }
    }
 
+       TGraphErrors * headingA = makeInterpolatedAttitudeGraph("heading",heading_cutstr, &adu5A, wA, offset,hthresh, this_min_score); 
+       TGraphErrors * headingB = makeInterpolatedAttitudeGraph("heading",heading_cutstr, &adu5B, wB, offset,hthresh, this_min_score); 
+       TGraphErrors * pitchA = makeInterpolatedAttitudeGraph("pitch",other_cutstr, &adu5A, wA, offset,0.1, this_min_score); 
+       TGraphErrors * pitchB = makeInterpolatedAttitudeGraph("pitch",other_cutstr, &adu5B, wB, offset,0.1, this_min_score); 
+       TGraphErrors * rollA = makeInterpolatedAttitudeGraph("roll",other_cutstr, &adu5A, wA, offset,0.1, this_min_score); 
+       TGraphErrors * rollB = makeInterpolatedAttitudeGraph("roll",other_cutstr, &adu5B, wB, offset,0.1, this_min_score); 
+   
+   // generate the position graphs
 
-   TGraphErrors * headingA = makeInterpolatedAttitudeGraph("heading",heading_cutstr, &adu5A, wA, offset,hthresh, this_min_score); 
-   TGraphErrors * headingB = makeInterpolatedAttitudeGraph("heading",heading_cutstr, &adu5B, wB, offset,hthresh, this_min_score); 
-   TGraphErrors * pitchA = makeInterpolatedAttitudeGraph("pitch",other_cutstr, &adu5A, wA, offset,0.1, this_min_score); 
-   TGraphErrors * pitchB = makeInterpolatedAttitudeGraph("pitch",other_cutstr, &adu5B, wB, offset,0.1, this_min_score); 
-   TGraphErrors * rollA = makeInterpolatedAttitudeGraph("roll",other_cutstr, &adu5A, wA, offset,0.1, this_min_score); 
-   TGraphErrors * rollB = makeInterpolatedAttitudeGraph("roll",other_cutstr, &adu5B, wB, offset,0.1, this_min_score); 
+       TGraph alt, lon, lat;
 
-   // generate the position graphs 
-   TGraph alt, lon, lat; 
-   makePositionGraphs(&adu5A, &adu5B, &lat, &lon, &alt, offset); 
-
-
-   //make output 
-   for (int i = 0; i < headers.GetEntries(); i++) 
+       //if(run >= 294 && pat->run <= 298)
+       //{
+       //std:: cout << "Correcting for GPS outage" << std::endl;
+	   
+       //accountForGpsOutage(&adu5B, &lat, &lon, &alt );
+       //}
+       //else
+       //{
+       makePositionGraphs(&adu5A, &adu5B, &lat, &lon, &alt, offset); // <- currently crashing here
+       //}
+   
+       //make output 
+       for (int i = 0; i < headers.GetEntries(); i++) 
    {
      headers.GetEntry(i); 
 
@@ -726,15 +841,14 @@ int main (int nargs, char ** args)
      double t = hdr->triggerTime+ hdr->triggerTimeNs*1e-9; 
      pat->latitude = lat.Eval(t); 
      pat->longitude = FFTtools::wrap(lon.Eval(t),360,0); 
-     pat->altitude = alt.Eval(t); 
-
+     pat->altitude = alt.Eval(t);
 
      double headingError; 
      pat->heading = best(headingA, headingB, t, &headingError); 
      pat->pitch = best(pitchA, pitchB, t, 0,0); 
      pat->roll = best(rollA, rollB, t, 0,0); 
 
-     if (headingError == TMath::Infinity()) headingError = -1; 
+     
 
      /* too lazy to estimate mrms and brms right now, set them both to the weight on the heading  */
      pat->mrms = headingError; 
@@ -755,18 +869,14 @@ int main (int nargs, char ** args)
      if (pat->intFlag == 0) pat->intFlag = 1;  // avoid confustion with raw data 
      tree->Fill(); 
 
-
+     //std::cout << "blob" << std::endl;
 
 
    }
 
-   tree->Write(); 
+   tree->Write();
+
+   std::cout << "Done" << std::endl;
 
    return 0; 
 }
-
-
-
-
-
-
