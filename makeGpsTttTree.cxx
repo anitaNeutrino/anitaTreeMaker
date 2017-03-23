@@ -87,6 +87,7 @@ void makeGpsTttTree(char *tttInName)
     tttTree->AutoSave();
   }
 
+  tttTree->Write(); 
   theFile->Close();
 }
 
