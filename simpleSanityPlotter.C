@@ -23,7 +23,7 @@
 #include "Adu5Pat.h"
 #include <string>
 
-Int_t run = 107;
+Int_t run = 296;
 
 TCanvas* plotPatVar(string patVar)
 {

@@ -21,7 +21,8 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
     #./runNonEventFileMaker.sh # house 
     #./runNonEventFileMakerWHead.sh $n # house + event headers
     #./runHeaderFileMaker.sh $n # headers only
-    ./runHeadFileMakerANITA4.sh $n # includes new headers (timed)
+    #./runHeadFileMakerANITA4.sh $n # includes new headers (timed)
+    ./ANITA4rootifier.sh $n # full rootifier
     echo "${bold}Run $n complete! ${normal}"
     echo "<----------------------------------------->"
 
