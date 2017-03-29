@@ -142,8 +142,17 @@ struct segment
   double min; 
   int start_i; 
   int end_i; 
-}; 
-
+};
+/* // Just force it to follow adu5B instead by making use of an empty tree
+void removeTree()
+{
+  std::string file_name="gpsFile293.root";
+  TFile *file=new TFile((file_name).c_str(),"update");
+  std::string object_to_remove="adu5PatTree;1";
+  gDirectory->Delete(object_to_remove.c_str());
+  file->Close();
+}
+*/
 static double scoreSegment(segment * seg, segment * last, segment * next, double slope_thresh = 1, double slope_penalty_factor = 5)
 {
   int n = seg->end_i - seg->start_i +1; 
@@ -536,6 +545,136 @@ static void accountForGpsOutage(TChain * c2,  TGraph * glat, TGraph * glon,  TGr
 }
 */
 
+static void makePositionGraphsPostOutage(TChain *c1, TChain * c2,  TGraph * glat, TGraph * glon,  TGraph * galt,  double offset)
+{
+
+  int n1 = c1->GetEntries(); 
+  int n2 = c2->GetEntries(); 
+  Adu5Pat *pat1 = new Adu5Pat; 
+  Adu5Pat *pat2 = new Adu5Pat; 
+  c1->SetBranchAddress("pat",&pat1); 
+  c2->SetBranchAddress("pat",&pat2); 
+
+
+  int i1 = 0; 
+  int i2 = 0; 
+
+  std::vector<double> time; 
+  time.reserve(n1); 
+  std::vector<double> lat; 
+  lat.reserve(n1); 
+  std::vector<double> lon; 
+  lon.reserve(n1); 
+  std::vector<double> alt; 
+  alt.reserve(n1); 
+
+  UInt_t tod1 = 0; 
+  UInt_t tod2 = 0; 
+  bool wrap1 = false; 
+  bool wrap2 = false; 
+
+  while (i1 < n1 || i2 < n2) 
+  {
+    c1->GetEntry(i1); 
+    c2->GetEntry(i2); 
+
+//      printf("%d %d %u %u\n",i1,i2,pat1->timeOfDay,pat2->timeOfDay);   // debugging shit 
+//    c1->Show(i1); 
+//    c2->Show(i2); 
+//
+    //need to handle wrapping properly here in case not synced and don't reset to 0 at same time. we assume you can only wrap once (i.e. runs shorter than one day) 
+    if (pat1->timeOfDay < tod1 && !wrap1) wrap1 = true; 
+    if (pat2->timeOfDay < tod2 && !wrap2) wrap2 = true; 
+
+    tod1 = pat1->timeOfDay; 
+    tod2 = pat2->timeOfDay; 
+
+    if (wrap1) tod1 += 24 * 60 * 60 * 1000; 
+    if (wrap2) tod2 += 24 * 60 * 60 * 1000; 
+
+    // POSITION DATA: if lat is illogical (outside Antarctic circle) or altitude is illogical (i.e. when it goes to 0 on gps resets), don't use
+    
+    if(pat2->latitude > -66.5 ||pat2->altitude == 0 || pat1->latitude == 0 || pat1->altitude == 0)
+      {
+	i1++;
+	i2++;
+      }
+
+    else
+    {
+	//account for cases when times are not synced
+	if (tod1 < tod2 && i1 < n1) 
+	  {
+	    lat.push_back(pat1->latitude); 
+	    lon.push_back(pat1->longitude); 
+	    alt.push_back(pat1->altitude); 
+	    time.push_back(tod1/1000. + offset); 
+	    i1++; 
+	  }
+	else if (tod2 < tod1 && i2 < n2) 
+	  {
+	    lat.push_back(pat2->latitude); 
+	    lon.push_back(pat2->longitude); 
+	    alt.push_back(pat2->altitude); 
+	    time.push_back(tod2/1000. + offset); 
+	    i2++; 
+	  }
+	else  // if they are synced, take the average of the two positions 
+	  {
+	    time.push_back(tod1/1000. + offset); 
+
+	    double p1[3], p2[3]; 
+	    geom->getCartesianCoords(pat1->latitude,pat1->longitude,pat1->altitude, p1); 
+	    geom->getCartesianCoords(pat2->latitude,pat2->longitude,pat2->altitude, p2);
+
+	    for (int i = 0; i < 3; i++) 
+	      {
+		p1[i]+=p2[i]; 
+		p1[i]/=2; 
+	      }
+
+	    double dlat, dlon, dalt; 
+	    geom->getLatLonAltFromCartesian(p1, dlat,dlon,dalt); 
+	    //      printf("%f %f %f\n", dlat,dlon,dalt); 
+	    lat.push_back(dlat); 
+	    lon.push_back(dlon); 
+	    alt.push_back(dalt); 
+	    i1++; 
+	    i2++; 
+	  }
+
+	}
+  
+	//assert (lon.size() < unsigned(n1 + n2));  // sanity check to make sure we don't loop infinitely and use all the memory on the cluster 
+  }
+
+
+
+  // copy to graphs 
+  glat->Set(time.size()); 
+  memcpy(glat->GetX(), &time[0], sizeof(double) * time.size()); 
+  memcpy(glat->GetY(), &lat[0], sizeof(double) * time.size());
+
+  glon->Set(time.size()); 
+  memcpy(glon->GetX(), &time[0], sizeof(double) * time.size()); 
+  memcpy(glon->GetY(), &lon[0], sizeof(double) * time.size()); 
+
+  galt->Set(time.size()); 
+  memcpy(galt->GetX(), &time[0], sizeof(double) * time.size()); 
+  memcpy(galt->GetY(), &alt[0], sizeof(double) * time.size()); 
+
+
+  FFTtools::unwrap(glon->GetN(), glon->GetY(), 360); 
+//  glon->Write("glon"); 
+  if (filter && (n1 || n2))
+  {
+    filter->filterGraph(glat); 
+    filter->filterGraph(glon); 
+    filter->filterGraph(galt); 
+  }
+
+}
+
 static void makePositionGraphs(TChain *c1, TChain * c2,  TGraph * glat, TGraph * glon,  TGraph * galt,  double offset)
 {
 
@@ -732,9 +871,20 @@ int main (int nargs, char const ** args)
    std::cout << "run is " << run << std::endl;
 
    headers.Add(TString::Format("%s/run%d/timedHeadFile%d.root", datadir, run, run)); 
-   adu5A.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
-   adu5B.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
-
+   
+   if(run == 293)
+     {
+       adu5A.Add(TString::Format("%s/run294/gpsFile294.root", datadir)); // add an empty tree. This will make the interpolation follow ADU5B and ignore this set. I could use any empty tree, but this is convenient...
+       adu5B.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
+     }
+   
+   else
+     {
+   
+       adu5A.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
+       adu5B.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
+     }
+   
    if (nargs > 2 && atoi(args[2])) 
    {
      debugFlag = true; 
@@ -821,16 +971,16 @@ int main (int nargs, char const ** args)
 
        TGraph alt, lon, lat;
 
-       //if(run >= 294 && pat->run <= 298)
-       //{
-       //std:: cout << "Correcting for GPS outage" << std::endl;
-	   
-       //accountForGpsOutage(&adu5B, &lat, &lon, &alt );
-       //}
-       //else
-       //{
-       makePositionGraphs(&adu5A, &adu5B, &lat, &lon, &alt, offset); // <- currently crashing here
-       //}
+
+       if(run == 299)
+	 {
+	   makePositionGraphsPostOutage(&adu5A, &adu5B, &lat, &lon, &alt, offset);
+	 }
+
+       else
+	 {
+	   makePositionGraphs(&adu5A, &adu5B, &lat, &lon, &alt, offset); // <- currently crashing here
+	 }
    
        //make output 
        for (int i = 0; i < headers.GetEntries(); i++) 

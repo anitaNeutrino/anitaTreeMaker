@@ -23,7 +23,12 @@
 #include "Adu5Pat.h"
 #include <string>
 
-Int_t run = 296;
+//Int_t run = 107; // interpolation not great
+//Int_t run = 282; // interpolation not great
+//Int_t run = 299; // interpolation not great
+//Int_t run = 312; // Interpolation not great
+
+Int_t run = 293;
 
 TCanvas* plotPatVar(string patVar)
 {
@@ -95,7 +100,7 @@ TCanvas* plotPatVar(string patVar)
     {
       cout << "adu5A entries = " << adu5A->GetEntries() << endl;
       cout << "adu5B entries = " << adu5B->GetEntries() << endl;
-      cerr << "May be an error with amount of entries used" << endl;
+      cerr << "There is a difference in ADU5A/B entries. Probably due to an outage. Manually check this." << endl;
     }
 
   c1_3->cd();
