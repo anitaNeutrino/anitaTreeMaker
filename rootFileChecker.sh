@@ -10,7 +10,7 @@ fi
 ###
 
 RUN=$1
-BASE_DIR=$ANITA_4_BASE_DIR
+BASE_DIR=$ANITA4_BASE_DIR/root
 RUN_BASE_DIR=${BASE_DIR}/run${RUN}
 
 if [ ! -d "$BASE_DIR" ]; then
