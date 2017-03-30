@@ -491,18 +491,31 @@ rm ${ACQD_START_FILE_LIST} ${GPSD_START_FILE_LIST} ${LOGWATCHD_START_FILE_LIST} 
 echo "Done Auxiliary File"
 
 echo "Start Tuff Status File" 
-TUFF_STATUS_FILE_LIST=`mktemp`
-for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*; 
-do 
-  if [ -f $file ]; then 
-    echo $file >> ${TUFF_STATUS_FILE_LIST}
-  fi
-done
 
-TUFF_STATUS_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
-./makeTuffStatusTree ${TUFF_STATUS_FILE_LIST} ${TUFF_STATUS_ROOT_FILE}
-rm ${TUFF_STATUS_FILE_LIST} 
-echo "Done Tuff Status File" 
+# Check if the tuff status folder exists, if it does not, the program will try and rootify anyway, resulting in a seg fault
+if [ -d ${RAW_RUN_DIR}/house/tuff/ ]; then
+    echo "Rootifying tuff data..."
+
+    TUFF_STATUS_FILE_LIST=`mktemp`
+    for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*; 
+    do 
+	if [ -f $file ]; then 
+	    echo $file >> ${TUFF_STATUS_FILE_LIST}
+	fi
+    done
+
+    TUFF_STATUS_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
+    ./makeTuffStatusTree ${TUFF_STATUS_FILE_LIST} ${TUFF_STATUS_ROOT_FILE}
+    rm ${TUFF_STATUS_FILE_LIST} 
+    echo "Done Tuff Status File" 
+
+else
+    echo "No tuff raw data to rootify"
+fi
+
+# Check if the rtl folder exists, if it does not, the program will try and rootify anyway, resulting in a seg fault
+if [ -d ${RAW_RUN_DIR}/house/rtl/ ]; then
+    echo "Rootifying rtl data..."
 
 echo "Start RTL Spectrum File" 
 RTL_FILE_LIST=`mktemp`
@@ -517,3 +530,8 @@ RTL_ROOT_FILE=${ROOT_RUN_DIR}/rtlSpectrumFile${RUN}.root
 ./makeRtlSdrTree ${RTL_FILE_LIST} ${RTL_ROOT_FILE}
 rm ${RTL_FILE_LIST} 
 echo "Done RTL Spectrum File" 
+else
+    echo "No rtl raw data to rootify"
+fi
+
+echo "Done with this run"
