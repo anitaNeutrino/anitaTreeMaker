@@ -7,11 +7,11 @@ fi
 
 
 RUN=$1
-BASE_DIR=$ANITA_4_BASE_DIR
+BASE_DIR=${ANITA4_BASE_DIR}
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
-TREE_MAKER_DIR=$HOME/anita/anitaTreeMaker/build
+TREE_MAKER_DIR=${TREE_DIR}/build
 
 if [ ! -d "$TREE_MAKER_DIR" ]; then
     echo "TREE_MAKER_DIR ($TREE_MAKER_DIR) does not exist. Please check the directory leading to your anitaTreeMaker/dir setup exists within this file. Aborting."
@@ -61,9 +61,10 @@ for file in ${RAW_RUN_DIR}/house/turfhk/*/*/t*gz;
   fi
 done
 
+cd ${TREE_MAKER_DIR}
+
 if  test `cat ${TURF_FILE_LIST} | wc -l` -gt 0 ; then
     TURF_ROOT_FILE=${ROOT_RUN_DIR}/turfRateFile${RUN}.root
-    cd ${TREE_MAKER_DIR}
     ./makeTurfRateTree ${TURF_FILE_LIST} ${TURF_ROOT_FILE}
     rm ${TURF_FILE_LIST}
     echo "Done TURF Rate File"
@@ -227,6 +228,7 @@ do
     fi
 done
 
+echo "Starting Hk Raw File"
 HKRAW_FILE_LIST=`mktemp`
 for file in ${RAW_RUN_DIR}/house/hk/raw/*/*/hk*; 
 do
@@ -235,6 +237,7 @@ do
     fi
 done
 
+echo "Looking for Hk Files..."
 HK_ROOT_FILE=${ROOT_RUN_DIR}/hkFile${RUN}.root
 if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
     ./makeHkTree ${HKCAL_FILE_LIST} ${HKRAW_FILE_LIST} ${HK_ROOT_FILE}
@@ -408,6 +411,3 @@ RTL_ROOT_FILE=${ROOT_RUN_DIR}/rtlSpectrumFile${RUN}.root
 ./makeRtlSdrTree ${RTL_FILE_LIST} ${RTL_ROOT_FILE}
 rm ${RTL_FILE_LIST} 
 echo "Done RTL Spectrum File" 
-
-
-
