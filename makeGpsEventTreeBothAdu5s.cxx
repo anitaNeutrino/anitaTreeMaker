@@ -854,10 +854,10 @@ static double best(TGraphErrors* A, TGraphErrors *B, double time, double * err, 
 int main (int nargs, char const ** args) 
 {
   //set up input 
-  //char * datadir = getenv("ANITA_ROOT_GPS_DATA");
+  char * datadir = getenv("ANITA4_BASE_DIR");
 
   // Put your working ANITA data directory below
-  char const * datadir = "/home/berg/Dropbox/LinuxSync/PhD/ANITA/2017Work/gpsEvent";
+  //char const * datadir = "/home/berg/Dropbox/LinuxSync/PhD/ANITA/2017Work/gpsEvent";
   
   TChain headers("headTree");
 
@@ -870,19 +870,19 @@ int main (int nargs, char const ** args)
    int run = atoi(args[1]);
    std::cout << "run is " << run << std::endl;
 
-   headers.Add(TString::Format("%s/run%d/timedHeadFile%d.root", datadir, run, run)); 
+   headers.Add(TString::Format("%s/root/run%d/timedHeadFile%d.root", datadir, run, run)); 
    
    if(run == 293)
      {
-       adu5A.Add(TString::Format("%s/run294/gpsFile294.root", datadir)); // add an empty tree. This will make the interpolation follow ADU5B and ignore this set. I could use any empty tree, but this is convenient...
-       adu5B.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
+       adu5A.Add(TString::Format("%s/root/run294/gpsFile294.root", datadir)); // add an empty tree. This will make the interpolation follow ADU5B and ignore this set. I could use any empty tree, but this is convenient...
+       adu5B.Add(TString::Format("%s/root/run%d/gpsFile%d.root", datadir, run, run)); 
      }
    
    else
      {
    
-       adu5A.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
-       adu5B.Add(TString::Format("%s/run%d/gpsFile%d.root", datadir, run, run)); 
+       adu5A.Add(TString::Format("%s/root/run%d/gpsFile%d.root", datadir, run, run)); 
+       adu5B.Add(TString::Format("%s/root/run%d/gpsFile%d.root", datadir, run, run)); 
      }
    
    if (nargs > 2 && atoi(args[2])) 
@@ -891,7 +891,7 @@ int main (int nargs, char const ** args)
    }
 
    //setup output 
-   TFile out(TString::Format("%s/run%d/timedGpsEvent%d.root",datadir,run,run),"RECREATE"); 
+   TFile out(TString::Format("%s/root/run%d/timedGpsEvent%d.root",datadir,run,run),"RECREATE"); 
    TTree * tree = new TTree("adu5PatTree","Timed tree of Interpolated ADU5 Positions and Attitude"); 
 
    Adu5Pat * pat = new Adu5Pat(); 
