@@ -93,17 +93,17 @@ void makeTimedHeaderTree(int run)
 
   RawAnitaHeader * raw  = 0; 
   TimedAnitaHeader * timed  = new TimedAnitaHeader; 
-  TFile fhead(TString::Format("%s/run%d/headFile%d.root",getenv("ANITA_ROOT_DATA"), run, run)); 
+  TFile fhead(TString::Format("%s/root/run%d/headFile%d.root",getenv("ANITA4_BASE_DIR"), run, run)); 
   TTree * headTree = (TTree*) fhead.Get("headTree"); 
   headTree->SetBranchAddress("header",&raw); 
 
   unsigned secOffset = headTree->GetMinimum("payloadTime"); 
 
-  TFile ftimed(TString::Format("%s/run%d/timedHeadFile%d.root",getenv("ANITA_ROOT_DATA"), run, run), "RECREATE"); 
+  TFile ftimed(TString::Format("%s/root/run%d/timedHeadFile%d.root",getenv("ANITA4_BASE_DIR"), run, run), "RECREATE"); 
   TTree * timedTree = new TTree ("headTree","Timed  Head Tree"); 
   timedTree->Branch("header",&timed); 
 
-  TFile fttt(TString::Format("%s/run%d/tttFile%d.root", getenv("ANITA_ROOT_DATA"), run, run)); 
+  TFile fttt(TString::Format("%s/root/run%d/tttFile%d.root", getenv("ANITA4_BASE_DIR"), run, run)); 
   TTree * tttTree = (TTree*) fttt.Get("tttTree"); 
 
   int Nttt = 0; 
@@ -306,5 +306,4 @@ int main (int nargs, char ** args)
 
 
 }
-
 

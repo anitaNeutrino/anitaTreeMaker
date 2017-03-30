@@ -6,11 +6,12 @@ then
 fi
 
 RUN=$1
-BASE_DIR=/unix/anita4/flight2016
+BASE_DIR=${ANITA4_BASE_DIR}
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
-TREE_MAKER_DIR=/home/batten/anitaTreeMaker/build/ # Put your custom directory here to lead to your existing anitaTreeMaker/build
+TREE_MAKER_DIR=${TREE_DIR}/build
+
 
 if [ -d $ROOT_RUN_DIR ]; then
     echo "Output dir exists"
