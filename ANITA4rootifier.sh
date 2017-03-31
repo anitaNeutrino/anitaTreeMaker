@@ -499,13 +499,16 @@ for file in ${RAW_RUN_DIR}/house/tuff/*/*/tuff*;
 do 
     if [ -f $file ]; then 
 	echo $file >> ${TUFF_STATUS_FILE_LIST}
-    fi
-done
 
-TUFF_STATUS_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
-./makeTuffStatusTree ${TUFF_STATUS_FILE_LIST} ${TUFF_STATUS_ROOT_FILE}
-rm ${TUFF_STATUS_FILE_LIST} 
-echo "Done Tuff Status File" 
+	TUFF_STATUS_ROOT_FILE=${ROOT_RUN_DIR}/tuffStatusFile${RUN}.root
+	./makeTuffStatusTree ${TUFF_STATUS_FILE_LIST} ${TUFF_STATUS_ROOT_FILE}
+	rm ${TUFF_STATUS_FILE_LIST} 
+	echo "Done Tuff Status File" 
+    else
+	echo "No Tuff Status File to rootify"
+
+fi
+done
 
 ### RTL
 
