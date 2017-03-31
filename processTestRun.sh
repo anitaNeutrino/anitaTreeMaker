@@ -23,9 +23,9 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
     #./runHeaderFileMaker.sh $n # headers only
     #./runHeadFileMakerANITA4.sh $n # includes new headers (timed)
     ./ANITA4rootifier.sh $n # full rootifier
-#    if [ $n > 41 ]; then
-	#./build/makeGpsEventTreeBothAdu5s $n
-#    fi
+    if [ $n > 41 ]; then
+	./build/makeGpsEventTreeBothAdu5s $n
+    fi
     echo "${bold}Run $n complete! ${normal}"
     echo "<----------------------------------------->"
 
