@@ -343,6 +343,9 @@ do
     fi
 done
 
+# force prettyHkFiles to use timedHeadFiles
+HEAD_ROOT_FILE=${ROOT_RUN_DIR}/timedHeadFile${RUN}.root
+
 echo "Looking for Hk Files..."
 HK_ROOT_FILE=${ROOT_RUN_DIR}/hkFile${RUN}.root
 if  test `cat ${HKRAW_FILE_LIST} | wc -l` -gt 0 ; then
