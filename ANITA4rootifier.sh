@@ -11,6 +11,12 @@ RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
 
+if [ -d ${EVENT_BASE_DIR} ]; then
+    echo "Root folder exists"
+else
+    mkdir ${EVENT_BASE_DIR}
+fi
+
 if [ -d ${ROOT_RUN_DIR} ]; then
     echo "Output dir exists"
 elif [ -d ${RAW_RUN_DIR} ]; then
