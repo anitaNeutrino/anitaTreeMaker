@@ -5,18 +5,11 @@ then
    exit 1
 fi
 
-
 RUN=$1
 BASE_DIR=${ANITA4_BASE_DIR}
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
-TREE_MAKER_DIR=${TREE_DIR}/build
-
-if [ ! -d "$TREE_MAKER_DIR" ]; then
-    echo "TREE_MAKER_DIR ($TREE_MAKER_DIR) does not exist. Please check the directory leading to your anitaTreeMaker/dir setup exists within this file. Aborting."
-    exit 0;
-fi
 
 if [ -d $ROOT_RUN_DIR ]; then
     echo "Output dir exists"
@@ -32,6 +25,8 @@ ls ${RAW_RUN_DIR}
 
 echo "Rootifying non-event data..."
 echo "Non-event data includes: calib, gps, gpu, hk, monitor, rtl, surfhk, tuff, turfhk, and aux files"
+
+cd ${ANITA_UTIL_INSTALL_DIR}/bin
 
 echo "Skipping head files for now"
 : <<'END'
@@ -60,8 +55,6 @@ for file in ${RAW_RUN_DIR}/house/turfhk/*/*/t*gz;
       echo $file >> ${TURF_FILE_LIST}
   fi
 done
-
-cd ${TREE_MAKER_DIR}
 
 if  test `cat ${TURF_FILE_LIST} | wc -l` -gt 0 ; then
     TURF_ROOT_FILE=${ROOT_RUN_DIR}/turfRateFile${RUN}.root

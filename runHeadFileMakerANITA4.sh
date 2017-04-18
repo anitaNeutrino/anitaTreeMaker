@@ -10,12 +10,6 @@ BASE_DIR=${ANITA4_BASE_DIR}
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
-TREE_MAKER_DIR=${TREE_DIR}/build
-
-if [ ! -d "$TREE_MAKER_DIR" ]; then
-    echo "TREE_MAKER_DIR ($TREE_MAKER_DIR) does not exist. Please check the directory leading to your anitaTreeMaker/dir setup exists within this file. Aborting."
-    exit 0;
-fi
 
 if [ -d $ROOT_RUN_DIR ]; then
     echo "Output dir exists"
@@ -29,7 +23,7 @@ fi
 echo "Using $RAW_RUN_DIR"
 ls ${RAW_RUN_DIR}
 
-cd ${TREE_MAKER_DIR}
+cd ${ANITA_UTIL_INSTALL_DIR}/bin
 
 echo "Starting Header File"
 HEAD_FILE_LIST=`mktemp`

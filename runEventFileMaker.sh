@@ -10,8 +10,6 @@ BASE_DIR=${ANITA4_BASE_DIR}
 RAW_RUN_DIR=${BASE_DIR}/raw/run${RUN}
 EVENT_BASE_DIR=${BASE_DIR}/root
 ROOT_RUN_DIR=${EVENT_BASE_DIR}/run${RUN}
-TREE_MAKER_DIR=${TREE_DIR}/build
-
 
 if [ -d $ROOT_RUN_DIR ]; then
     echo "Output dir exists"
@@ -25,7 +23,7 @@ fi
 echo "Using $RAW_RUN_DIR"
 ls ${RAW_RUN_DIR}
 
-cd ${TREE_MAKER_DIR}
+cd ${ANITA_UTIL_INSTALL_DIR}/bin
 
 echo "Starting Event File"
 
