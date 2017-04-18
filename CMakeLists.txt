@@ -107,7 +107,8 @@ foreach(script remakeHkFiles.sh runTelemEventMaker.sh runTelemMonitorMaker.sh
     runTelemHeaderMaker.sh       runTelemSlowMaker.sh
     runTelemAvgSurfHkMaker.sh    runTelemHkMaker.sh
     runTelemSumTurfRateMaker.sh  runTelemTuffStatusMaker.sh
-    anita4FlightFileMakerUChicago.sh ANITA4rootifier.sh ) 
+    anita4FlightFileMakerUChicago.sh ANITA4rootifier.sh 
+    processData.sh processDataChecker.sh processTestRun.sh rootFileChecker.sh rawFolderChecker.sh) 
   install(PROGRAMS ${script} DESTINATION ${UTIL_BIN_DIR})
 endforeach(script)
 
