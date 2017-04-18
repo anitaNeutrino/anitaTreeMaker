@@ -2,8 +2,8 @@
 
 #!/bin/sh
 
-FIRSTRUN=50
-LASTRUN=50
+FIRSTRUN=179
+LASTRUN=179
 
 bold=$(tput bold)
 normal=$(tput sgr0)
@@ -24,7 +24,7 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
     #./runHeadFileMakerANITA4.sh $n # includes new headers (timed)
     ./ANITA4rootifier.sh $n # full rootifier
     if [ $n > 41 ]; then
-	./build/makeGpsEventTreeBothAdu5s $n
+	./makeGpsEventTreeBothAdu5s $n
     fi
     echo "${bold}Run $n complete! ${normal}"
     echo "<----------------------------------------->"
