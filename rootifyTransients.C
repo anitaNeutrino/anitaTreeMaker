@@ -1,4 +1,6 @@
-/*  Macro written by John Russell to place transient data into ROOT binaries for ANITA 3 and 4.  */
+/*  Macro written by John Russell in summer of 2017 to place transient data into ROOT binaries for ANITA 3 and 4.  To use it,
+unpack the tar.gz files found under ANITA Log Book ELOG entry 703, labeling the directory of the unpacked contents
+as "A3-list/" for the A3 data, "A4-list" for the A4 data. */
 
 
 //  Function to ROOTify formatted AAD flight logs.
