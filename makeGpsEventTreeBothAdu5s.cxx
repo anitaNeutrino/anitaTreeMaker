@@ -22,7 +22,7 @@
  *
  *   This program takes an input gpsTree containing position and attitude
  *   information from both adu5A and adu5B and combines them into a single,
- *   authorative tree.  All of this is meant for ANITA-III only! 
+ *   authorative tree.
  *
  *   This is less trivial than it sounds because there are times when either
  *   adu5A or adu5B (and sometimes both)  do not report accurate attitude
