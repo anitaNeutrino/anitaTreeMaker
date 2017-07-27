@@ -42,7 +42,7 @@ void basInstrumentsRootifierA3()
   // CUSTOM VARS (calculated from the bas list)
   
   // Load base list
-  std::ifstream ifile("../data/convertedFiles/base_list-unrestricted-A3.csv.4");
+  std::ifstream ifile("./data/convertedFiles/base_list-unrestricted-A3.csv.4");
 
   std::string line; 
   while (std::getline(ifile, line))

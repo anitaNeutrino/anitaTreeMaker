@@ -54,7 +54,7 @@ void basesCampsRootifier()
   // CUSTOM VARS (calculated from the base list)
   
   // Load base list
-  std::ifstream ifile("../data/convertedFiles/base_list-unrestricted-A4.csv.0");
+  std::ifstream ifile("./data/convertedFiles/base_list-unrestricted-A4.csv.0");
 
   std::string line; 
   while (std::getline(ifile, line))

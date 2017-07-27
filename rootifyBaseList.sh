@@ -46,7 +46,7 @@ fi
 rm urlInText.html updatedBaseLists.html
 mkdir ./data
 mv *.tar.gz ./data
-mv *.txt ./data
+mv all_base_locations_new.txt ./data
 cd ./data
 
 echo "Extracting information..."
@@ -102,7 +102,7 @@ do
 
 done
 
-# Move csvs to a folder and tar 'em up (made due to a request)
+# Move csvs to a folder and tar 'em up (made due to a request, probably obsolete)
 if [ ! -d "baseListCSVs" ]; then
     mkdir baseListCSVs
 fi
@@ -112,7 +112,7 @@ tar -zcf baseListCSVs.tar.gz baseListCSVs
 
 echo "--------"
 
-rm ../../rootFiles/*
+cd ../../
 
 echo "Running rootfication scripts"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
@@ -137,8 +137,9 @@ EOF
 
 cp baseList.root baseListA4.root ## Make a copy of base list to suit naming convention
 
-cp ../rootFiles/baseListA*.root  ~/anitaBuildTool/components/anitaEventCorrelator/data  ## Send to build tool dir
+mv baseListA2.root baseListA3.root baseListA4.root  $BUILD_TOOL/components/anitaEventCorrelator/data  ## Send to build tool dir
+rm baseList*.root
 
-rm ../data ../rootFiles
+rm -rf  ./data
 
 echo "Done!"

@@ -51,7 +51,7 @@ void antarcticTreatyRootifier()
   // CUSTOM VARS (calculated from the base list)
   
   // Load base list
-  std::ifstream ifile("../data/convertedFiles/base_list-unrestricted-A4.csv.1");
+  std::ifstream ifile("./data/convertedFiles/base_list-unrestricted-A4.csv.1");
 
   std::string line; 
   while (std::getline(ifile, line))

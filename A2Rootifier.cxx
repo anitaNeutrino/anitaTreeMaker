@@ -42,7 +42,7 @@ void A2Rootifier()
   // CUSTOM VARS (calculated from the base list)
   
   // Load base list
-  std::ifstream ifile("../data/convertedFiles/all_base_locations_new.txt");
+  std::ifstream ifile("./data/convertedFiles/all_base_locations_new.txt");
 
   std::string line; 
   while (std::getline(ifile, line))
