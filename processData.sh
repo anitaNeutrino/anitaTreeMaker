@@ -16,9 +16,9 @@ for ((n=${FIRSTRUN};n<=${LASTRUN};n++)); do
 
     echo "${bold}Now on run $n${normal}"
     
-    ./ANITA4rootifier.sh $n # full rootifier
+    ./ANITA4rootifier.sh $n & # Full rootifier, now running in parallel!
     if [ $n > 41 ]; then
-	./makeGpsEventTreeBothAdu5s $n
+	./makeGpsEventTreeBothAdu5s $n &
     fi
     echo "${bold}Run $n complete! ${normal}"
     echo "<----------------------------------------->"
