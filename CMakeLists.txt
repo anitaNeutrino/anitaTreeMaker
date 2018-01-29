@@ -92,7 +92,7 @@ foreach(loop_prog checkForCorruptEvents            makeGpsEventTreeBothAdu5s
     updateAdu5PatTreesFromTelemetry makeFixedEventHeaderTrees
     makeRawScalerTree                updateEventRunTree makeGpsEventTree
     makeRunSummaryFile makeTuffStatusTree makeRtlSdrTree
-    fixTelemHeadEventTrees makeA4TimedHeaderFile
+    fixTelemHeadEventTrees makeA4TimedHeaderFile makeCalibratedEventInfo
 )
 add_executable (${loop_prog} ${loop_prog}.cxx)
 target_link_libraries (${loop_prog} LINK_PUBLIC AnitaEvent RootFftwWrapper ${ROOT_LIBRARIES} ${ZLIB_LIBRARIES} )
