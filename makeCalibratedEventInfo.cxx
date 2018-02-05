@@ -49,8 +49,12 @@ int main(int argc, char **argv) {
   strcpy(fBaseDir,argv[1]);
   strcpy(fOutBaseDir,argv[2]);
   Int_t run=atoi(argv[3]);
-  std::vector<Double_t> calNumbers(NUM_SURF, 1);
-  std::vector<Double_t> binToBinCalNumbers(NUM_SURF, 1);
+  std::vector<Double_t> rcoArray(NUM_SURF, 1);
+  std::vector<Double_t> clockPhiArray(NUM_SURF, 1);
+  std::vector<Double_t> tempFactorGuesses(NUM_SURF, 1);
+  Int_t clockProblem;
+  Int_t clockSpike;
+  Int_t rfSpike;
   
   char outEventName[FILENAME_MAX];
   sprintf(outEventName,"%s/run%d/calibratedEventInfo%d.root",fOutBaseDir,run,run);
@@ -70,7 +74,12 @@ int main(int argc, char **argv) {
   TFile *outEventFile = new TFile(outEventName,"RECREATE");
   TTree* outEventTree = new TTree("calInfoTree","Tree of Calibration Info");
   outEventTree->Branch("run",&run,"run/I");
-  outEventTree->Branch("tempCalInfo",&calNumbers);
+  outEventTree->Branch("rcoArray",&rcoArray);
+  outEventTree->Branch("clockPhiArray",&clockPhiArray);
+  outEventTree->Branch("tempFactorGuesses",&tempFactorGuesses);
+  outEventTree->Branch("clockProblem",&clockProblem);
+  outEventTree->Branch("clockSpike",&clockSpike);
+  outEventTree->Branch("rfSpike",&rfSpike);
 
   Long64_t numEvents=fInputEventChain->GetEntries();
 
@@ -99,13 +108,22 @@ int main(int argc, char **argv) {
     // UsefulAnitaEvent realEvent(fRawEventPtr,WaveCalType::kNoTriggerJitterNoZeroMean,fHeadPtr);
 
     UsefulAnitaEvent realEvent(fRawEventPtr,WaveCalType::kDefault,fHeadPtr);    
-    for(int surf = 0; surf < NUM_SURF; surf++) calNumbers[surf] = fCal->tempFactors[surf];
     if(fCalEventPtr){
       delete fCalEventPtr;
       fCalEventPtr = NULL;
     }      
     
     fCalEventPtr = new CalibratedAnitaEvent(&realEvent);
+
+    clockProblem = fCalEventPtr->fClockProblem;
+    clockSpike = fCalEventPtr->fClockSpike;
+    rfSpike = fCalEventPtr->fRFSpike;
+    for(int surf = 0; surf < NUM_SURF; surf++)
+    {
+      rcoArray[surf] = fCalEventPtr->fRcoArray[surf];
+      clockPhiArray[surf] = fCalEventPtr->fClockPhiArray[surf];
+      tempFactorGuesses[surf] = fCalEventPtr->fTempFactorGuesses[surf];
+    }
     outEventTree->Fill();
   }
   outEventTree->AutoSave();
