@@ -271,53 +271,127 @@ void rootifyFeedback(TFile * transientFile, int &AVer) {
 	feedbackTree -> Branch("fullLat", &fullLat, "fullLat/D");
 	feedbackTree -> Branch("fullLong", &fullLong, "fullLong/D");
 	
-	// Icetrek feedback data. Start.
-	strcpy(callSign, "Icetrek");
-	strcpy(location, "Ross_Ice_Shelf");
-	strcpy(comment, "Via Reedy Glacier. Estimating.");
-	year = 2016;
-	month = 12;
-	day = 7;
-	timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
-	fullLat = -81.5;
-	fullLong = -175;
-	feedbackTree -> Fill();
+	if (AVer == 3) {
+
+		// Konstantin's feedback data for Russian sledge-caterpillar traverse (SCT). Start.
+		strcpy(callSign, "SCT");
+		strcpy(location, "Progress");
+		strcpy(comment, "None.");
+		year = 2014;
+		month = 10;
+		day = 26;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -69 - 24 / 60.;
+		fullLong = 76 + 24 / 60.;
+		feedbackTree -> Fill();
+
+		strcpy(callSign, "SCT");
+		strcpy(location, "Vostok");
+		strcpy(comment, "None.");
+		year = 2014;
+		month = 12;
+		day = 10;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -78 - 28 / 60.;
+		fullLong = 106 + 48 / 60.;
+		feedbackTree -> Fill();
+
+		strcpy(callSign, "SCT");
+		strcpy(location, "Vostok");
+		strcpy(comment, "None.");
+		year = 2014;
+		month = 12;
+		day = 14;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -78 - 28 / 60.;
+		fullLong = 106 + 48 / 60.;
+		feedbackTree -> Fill();
+
+		//  Konstantin's feedback data. Finish.
+		strcpy(callSign, "SCT");
+		strcpy(location, "Progress");
+		strcpy(comment, "None.");
+		year = 2014;
+		month = 12;
+		day = 21;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -69 - 24 / 60.;
+		fullLong = 76 + 24 / 60.;
+		feedbackTree -> Fill();
+	} else if (AVer == 4) {
+
+		// Icetrek feedback data. Start.
+		strcpy(callSign, "Icetrek");
+		strcpy(location, "Ross_Ice_Shelf");
+		strcpy(comment, "Via Reedy Glacier. Estimating.");
+		year = 2016;
+		month = 12;
+		day = 7;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -81.5;
+		fullLong = -175;
+		feedbackTree -> Fill();
+
+		// Icetrek feedback data. Finish.
+		strcpy(callSign, "Icetrek");
+		strcpy(location, "South_Pole");
+		strcpy(comment, "Via Reedy Glacier. Assuming station.");
+		year = 2017;
+		month = 1;
+		day = 11;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -89 - 59.85 / 60.;
+		fullLong = 139 + 16.368 / 60.;
+		feedbackTree -> Fill();
+
+		// Konstantin's feedback data for Russian sledge-caterpillar traverse (SCT). Start.
+		strcpy(callSign, "SCT");
+		strcpy(location, "Progress");
+		strcpy(comment, "None.");
+		year = 2016;
+		month = 10;
+		day = 18;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -69 - 24 / 60.;
+		fullLong = 76 + 24 / 60.;
+		feedbackTree -> Fill();
 		
-	// Icetrek feedback data. Finish.
-	strcpy(callSign, "Icetrek");
-	strcpy(location, "South_Pole");
-	strcpy(comment, "Via Reedy Glacier. Assuming station.");
-	year = 2017;
-	month = 1;
-	day = 11;
-	timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
-	fullLat = -89 - 59.85 / 60.;
-	fullLong = 139 + 16.368 / 60.;
-	feedbackTree -> Fill();
+		strcpy(callSign, "SCT");
+		strcpy(location, "Vostok");
+		strcpy(comment, "None.");
+		year = 2016;
+		month = 10;
+		day = 30;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -78 - 28 / 60.;
+		fullLong = 106 + 48 / 60.;
+		feedbackTree -> Fill();
+
+		strcpy(callSign, "SCT");
+		strcpy(location, "Vostok");
+		strcpy(comment, "None.");
+		year = 2016;
+		month = 12;
+		day = 3;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -78 - 28 / 60.;
+		fullLong = 106 + 48 / 60.;
+		feedbackTree -> Fill();
+
+		//  Konstantin's feedback data. Finish.
+		strcpy(callSign, "SCT");
+		strcpy(location, "Progress");
+		strcpy(comment, "None.");
+		year = 2016;
+		month = 12;
+		day = 14;
+		timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
+		fullLat = -69 - 24 / 60.;
+		fullLong = 76 + 24 / 60.;
+		feedbackTree -> Fill();
+	} else return;
 	
-	// Konstantin's feedback data for Russian sledge-caterpillar traverse (SCT). Start.
-	strcpy(callSign, "SCT");
-	strcpy(location, "Progress");
-	strcpy(comment, "None.");
-	year = 2016;
-	month = 12;
-	day = 3;
-	timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
-	fullLat = -69 - 24 / 60.;
-	fullLong = 76 + 24 / 60.;
-	feedbackTree -> Fill();
-	
-	// Konstantin feedback data. Finish.
-	strcpy(callSign, "SCT");
-	strcpy(location, "Vostok");
-	strcpy(comment, "None.");
-	year = 2016;
-	month = 12;
-	day = 7;
-	timeUTC = TTimeStamp(year, month, day, (int) 0, (int) 0, (int) 0);
-	fullLat = -78 - 28 / 60.;
-	fullLong = 106 + 48 / 60.;
-	feedbackTree -> Fill();
+
 	
 	// Write to feedbackTree.
 	transientFile -> cd();

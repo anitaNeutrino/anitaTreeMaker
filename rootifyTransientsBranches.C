@@ -211,51 +211,119 @@ void rootifyFeedback(TFile * transientFile, int &AVer) {
 	//  Create the relevant TTree.
 	TTree * feedbackTree = new TTree("feedbackTree", "Feedback on transients data");
 
-	//  Icetrek feedback data.
-	feedbackTree -> Branch("Icetrek", &feedbackStruct, "year/I:month:day:timeUTC:location[20]/C:fullLat/D:fullLong:comment[40]/C");
-	//  Icetrek start.
-	feedbackStruct.year = 2016;
-	feedbackStruct.month = 12;
-	feedbackStruct.day = 7;
-	feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
-	strcpy(feedbackStruct.location, "Ross_Ice_Shelf");
-	feedbackStruct.fullLat = -81.5;
-	feedbackStruct.fullLong = -175;
-	strcpy(feedbackStruct.comment, "Via Reedy Glacier. Estimating.");
-	feedbackTree -> GetBranch("Icetrek") -> Fill();	
-	// Icetrek finish.
-	feedbackStruct.year = 2017;
-	feedbackStruct.month = 1;
-	feedbackStruct.day = 11;
-	feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
-	strcpy(feedbackStruct.location, "South_Pole");
-	feedbackStruct.fullLat = -89 - 59.85 / 60.;
-	feedbackStruct.fullLong = 139 + 16.368 / 60.;	
-	strcpy(feedbackStruct.comment, "Via Reedy Glacier. Assuming station.");
-	feedbackTree -> GetBranch("Icetrek") -> Fill();	
-	
-	//  Konstantin's feedback data for sledge-caterpillar traverse (SCT).
-	feedbackTree -> Branch("SCT", &feedbackStruct, "year/I:month:day:timeUTC:location[20]/C:fullLat/D:fullLong:comment[40]/C");
-	//  Konstantin start.
-	feedbackStruct.year = 2016;
-	feedbackStruct.month = 12;
-	feedbackStruct.day = 3;
-	feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
-	strcpy(feedbackStruct.location, "Progress");
-	feedbackStruct.fullLat = -69 - 24 / 60.;
-	feedbackStruct.fullLong = 76 + 24 / 60.;
-	strcpy(feedbackStruct.comment, "None.");
-	feedbackTree -> GetBranch("SCT") -> Fill();	
-	// Konstantin finish.
-	feedbackStruct.year = 2016;
-	feedbackStruct.month = 12;
-	feedbackStruct.day = 7;
-	feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
-	strcpy(feedbackStruct.location, "Vostok");
-	feedbackStruct.fullLat = -78 - 28 / 60.;
-	feedbackStruct.fullLong = 106 + 48 / 60.;
-	strcpy(feedbackStruct.comment, "None.");
-	feedbackTree -> GetBranch("SCT") -> Fill();	
+	if (AVer == 3) {
+
+		//  Konstantin's feedback data for sledge-caterpillar traverse (SCT).
+		feedbackTree -> Branch("SCT", &feedbackStruct, "year/I:month:day:timeUTC:location[20]/C:fullLat/D:fullLong:comment[40]/C");
+		//  Konstantin start.
+		feedbackStruct.year = 2014;
+		feedbackStruct.month = 10;
+		feedbackStruct.day = 26;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Progress");
+		feedbackStruct.fullLat = -69 - 24 / 60.;
+		feedbackStruct.fullLong = 76 + 24 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+
+		feedbackStruct.year = 2014;
+		feedbackStruct.month = 12;
+		feedbackStruct.day = 10;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Vostok");
+		feedbackStruct.fullLat = -78 - 28 / 60.;
+		feedbackStruct.fullLong = 106 + 48 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+
+		feedbackStruct.year = 2014;
+		feedbackStruct.month = 12;
+		feedbackStruct.day = 14;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Vostok");
+		feedbackStruct.fullLat = -78 - 28 / 60.;
+		feedbackStruct.fullLong = 106 + 48 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+		// Konstantin finish.
+		feedbackStruct.year = 2014;
+		feedbackStruct.month = 12;
+		feedbackStruct.day = 21;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Progress");
+		feedbackStruct.fullLat = -69 - 24 / 60.;
+		feedbackStruct.fullLong = 76 + 24 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+} else if (AVer == 4) {
+
+		//  Icetrek feedback data.
+		feedbackTree -> Branch("Icetrek", &feedbackStruct, "year/I:month:day:timeUTC:location[20]/C:fullLat/D:fullLong:comment[40]/C");
+		//  Icetrek start.
+		feedbackStruct.year = 2016;
+		feedbackStruct.month = 12;
+		feedbackStruct.day = 7;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Ross_Ice_Shelf");
+		feedbackStruct.fullLat = -81.5;
+		feedbackStruct.fullLong = -175;
+		strcpy(feedbackStruct.comment, "Via Reedy Glacier. Estimating.");
+		feedbackTree -> GetBranch("Icetrek") -> Fill();
+		// Icetrek finish.
+		feedbackStruct.year = 2017;
+		feedbackStruct.month = 1;
+		feedbackStruct.day = 11;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "South_Pole");
+		feedbackStruct.fullLat = -89 - 59.85 / 60.;
+		feedbackStruct.fullLong = 139 + 16.368 / 60.;
+		strcpy(feedbackStruct.comment, "Via Reedy Glacier. Assuming station.");
+		feedbackTree -> GetBranch("Icetrek") -> Fill();
+
+		//  Konstantin's feedback data for sledge-caterpillar traverse (SCT).
+		feedbackTree -> Branch("SCT", &feedbackStruct, "year/I:month:day:timeUTC:location[20]/C:fullLat/D:fullLong:comment[40]/C");
+		//  Konstantin start.
+		feedbackStruct.year = 2016;
+		feedbackStruct.month = 10;
+		feedbackStruct.day = 18;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Progress");
+		feedbackStruct.fullLat = -69 - 24 / 60.;
+		feedbackStruct.fullLong = 76 + 24 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+
+		feedbackStruct.year = 2016;
+		feedbackStruct.month = 10;
+		feedbackStruct.day = 30;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Vostok");
+		feedbackStruct.fullLat = -78 - 28 / 60.;
+		feedbackStruct.fullLong = 106 + 48 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+
+		feedbackStruct.year = 2016;
+		feedbackStruct.month = 12;
+		feedbackStruct.day = 3;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Vostok");
+		feedbackStruct.fullLat = -78 - 28 / 60.;
+		feedbackStruct.fullLong = 106 + 48 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+		// Konstantin finish.
+		feedbackStruct.year = 2016;
+		feedbackStruct.month = 12;
+		feedbackStruct.day = 14;
+		feedbackStruct.timeUTC = TTimeStamp(feedbackStruct.year, feedbackStruct.month, feedbackStruct.day, (int) 0, (int) 0, (int) 0);
+		strcpy(feedbackStruct.location, "Progress");
+		feedbackStruct.fullLat = -69 - 24 / 60.;
+		feedbackStruct.fullLong = 76 + 24 / 60.;
+		strcpy(feedbackStruct.comment, "None.");
+		feedbackTree -> GetBranch("SCT") -> Fill();
+	} else return;
+
 	
 	//  Reformatting for the branches inside the tree.
 	feedbackTree -> SetEntries();
