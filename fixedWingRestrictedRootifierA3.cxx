@@ -42,7 +42,7 @@ void fixedWingRestrictedRootifierA3()
   // CUSTOM VARS (calculated from the base list)
   
   // Load base list
-  std::ifstream ifile("./data/convertedFiles/base_list-restricted-A3.csv.2");
+  std::ifstream ifile("./data/convertedFiles/base_list-restricted-A3.csv.5");
 
   std::string line; 
   while (std::getline(ifile, line))

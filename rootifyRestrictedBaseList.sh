@@ -5,7 +5,7 @@ source ~/.bashrc
 # ONLINE=0: uses an old baseList found in OFFLINE_DIR
 # Special option: ONLINE=2: If you want a specific old elog entry, specify here
 #ONLINE=0
-OFFLINE_DIR="~/Downloads" # Set this only if you want to not use the most recent elog pull
+OFFLINE_DIR=~/Downloads # Set this only if you want to not use the most recent elog pull
 
 #if [ "$ONLINE" == 1 ]; then
 #    ## Automatically pull the latest update from the elog!
@@ -31,8 +31,18 @@ OFFLINE_DIR="~/Downloads" # Set this only if you want to not use the most recent
 #elif [ "ONLINE" == 0 ]; then
 #    echo "You are marked as offline..."
 #    echo "Finding an earlier pull of the elog in ~/Downloads. Working with old and limited data."
-    cp "$OFFLINE_DIR/base_data_restricted-A4.tar.gz ./base_data_restricted-A4.tar.gz"
-    cp "$OFFLINE_DIR/base_data_restricted-A3.tar.gz ./base_data_restricted-A3.tar.gz"
+
+if [ ! -d "data" ]; then
+    mkdir data
+    cd ./data
+    mkdir convertedFiles
+    cd ..
+fi
+
+cd ./data/convertedFiles
+
+cp $OFFLINE_DIR/base_data_restricted-A4.tar.gz .
+cp $OFFLINE_DIR/base_data_restricted-A3.tar.gz .
 
 #else
 #    echo "Tell the script if you're online..." 
@@ -53,23 +63,22 @@ echo "Extracting information..."
 tar -zxf base_data_restricted-A4.tar.gz
 tar -zxf base_data_restricted-A3.tar.gz
 
-if [ ! -d "convertedFiles" ]; then
-    mkdir convertedFiles/
-fi
+#mv base_data_restricted-A4/* convertedFiles/
+#mv base_data_restricted-A3/* convertedFiles/
+#mv all_base_locations_new.txt convertedFiles/
 
-mv restricted-A4/* convertedFiles/
-mv restricted-A3/* convertedFiles/
-mv all_base_locations_new.txt convertedFiles/
-
-cd ./convertedFiles
 
 #### Sort out TXT FILE (anita2)
 
 #sed -i 's/\./,/g' all_base_locations_new.txt;
-sed -ri 's/\s+/,/g' all_base_locations_new.txt;
+#sed -ri 's/\s+/,/g' all_base_locations_new.txt;
 #sed -i 's/,_/_/g' all_base_locations_new.txt; 
 
 #### Sort out SPREADSHEETS (anita3&4)
+#### For some reason, ssconvert when called like this doesn't like path-based input files, so we have to copy them explicitly?
+
+cp restricted-A3/base_list-restricted-A3.ods .
+cp restricted-A4/base_list-restricted-A4.ods .
 
 echo "Converting the individual spreadsheet 'sheets' into .csv files"
 # converts spreadsheets into individual sheets
@@ -78,7 +87,7 @@ ssconvert -S base_list-restricted-A3.ods base_list-restricted-A3.csv
 
 echo "Sorting out the files..."
 
-for i in `seq 0 4`;
+for i in `seq 0 5`;
 do
     # get rid of first 2 headers
     sed -i '1,2 d' base_list-restricted-A4.csv.$i
@@ -103,12 +112,12 @@ do
 done
 
 # Move csvs to a folder and tar 'em up (made due to a request, probably obsolete)
-if [ ! -d "baseListCSVs" ]; then
-    mkdir baseListCSVs
-fi
+#if [ ! -d "baseListCSVs" ]; then
+#    mkdir baseListCSVs
+#fi
 
-cp base_list-restricted-A3.csv.* base_list-restricted-A4.csv.* baseListCSVs
-tar -zcf baseListCSVs.tar.gz baseListCSVs
+#cp base_list-restricted-A3.csv.* base_list-restricted-A4.csv.* baseListCSVs
+#tar -zcf baseListCSVs.tar.gz baseListCSVs
 
 echo "--------"
 
@@ -121,25 +130,30 @@ root -b -l <<EOF
    .X basesCampsRootifier.cxx
    .X antarcticTreatyRootifier.cxx
    .X fixedWingRootifier.cxx
-   .X fixedWingRestrictedRootifier.cxx
    .X awsRootifier.cxx
    .X basInstrumentsRootifier.cxx
+   .X fixedWingRestrictedRootifier.cxx
    .! echo "--------"
    .! echo "Making ANITA-3 trees..." 
    .X basesCampsRootifierA3.cxx
    .X antarcticTreatyRootifierA3.cxx
    .X fixedWingRootifierA3.cxx	
-   .X fixedWingRestrictedRootifierA3.cxx	
    .X awsRootifierA3.cxx
    .X basInstrumentsRootifierA3.cxx
+   .X fixedWingRestrictedRootifierA3.cxx	
 EOF
 
-mv baseList.root baseListRestrictedA4.root ## Make a copy of base list to suit naming convention
-mv baseListA3.root baseListRestrictedA3.root
+#mv baseList.root baseListRestrictedA4.root ## Rename base lists to suit naming convention
+#mv baseListA3.root baseListRestrictedA3.root
 
-mv baseListRestrictedA3.root baseListRestrictedA4.root  $BUILD_TOOL/components/anitaEventCorrelator/data  ## Send to build tool dir
-rm baseList*.root
+mv baseList.root $ANITA_UTIL_INSTALL_DIR/share/anitaCalib/baseListRestrictedA4.root ## Send directly to $ANITA_UTIL_INSTALL_DIR
 
-rm -rf  ./data
+mv baseListA3.root $ANITA_UTIL_INSTALL_DIR/share/anitaCalib/baseListRestrictedA3.root
+
+#mv baseListRestrictedA3.root baseListRestrictedA4.root  $BUILD_TOOL/components/anitaEventCorrelator/data  ## Send to build tool dir
+
+#rm baseList*.root
+
+#rm -rf ./data
 
 echo "Done!"
